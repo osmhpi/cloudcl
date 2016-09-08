@@ -1,24 +1,20 @@
 import com.amd.aparapi.Kernel;
+import com.amd.aparapi.Range;
 
 public abstract class TileKernel extends Kernel{
 
-  protected int tile_$constant$;
-  protected int rangeLength_$constant$;
+  private Range range;
 
-  public TileKernel() {
+  public TileKernel(Range range) {
     super();
+    this.range = range;
   }
 
-  public void setRangeLength(int rangeLength) {
-    this.rangeLength_$constant$ = rangeLength;
-  }
+  public void execute(){
+    System.out.println(range);
+    Range deviceSpecificRange = getTargetDevice().createRange2D(range.getGlobalSize_0(), range.getGlobalSize_1());
+    System.out.println("Execute on " + getTargetDevice().getShortDescription() + " " + getTargetDevice().getDeviceId() + " " + deviceSpecificRange);
 
-  public void setTile(int tile) {
-    this.tile_$constant$ = tile;
+    execute(deviceSpecificRange);
   }
-
-  public int getTile() {
-    return tile_$constant$;
-  }
-  
 }
