@@ -3,6 +3,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 
 import com.amd.aparapi.device.Device;
+import com.amd.aparapi.device.Device.TYPE;
 import com.amd.aparapi.device.OpenCLDevice;
 import com.amd.aparapi.internal.kernel.KernelManager;
 
@@ -33,10 +34,14 @@ public class KernelExecutor<T extends TileKernel> {
   }
 
   private void assignDevice(){
-    List<OpenCLDevice> devices = OpenCLDevice.listDevices(null);
+    List<OpenCLDevice> devices = OpenCLDevice.listDevices(TYPE.CPU);
+    devices.addAll(OpenCLDevice.listDevices(TYPE.GPU));
+
+    System.out.println(devices.size() + " devices available for disposition.");
     for(int i=0; i<kernels.size();i++){
       TileKernel kernel = kernels.get(i);
       Device device = devices.get(i % devices.size());
+
       LinkedHashSet<Device> preferences = new LinkedHashSet<Device>();
 
       preferences.add(device);
@@ -57,6 +62,19 @@ public class KernelExecutor<T extends TileKernel> {
       });
       threads.add(t);
       t.start();
+      awaitConversion(t, finalKernel);
+    }
+  }
+
+  private void awaitConversion(Thread t, TileKernel k){
+    while(true && t.isAlive()){
+      boolean converted = !String.valueOf(k.getConversionTime()).equals("NaN");
+      try {
+        Thread.sleep(100);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+      if(converted) break;
     }
   }
 
