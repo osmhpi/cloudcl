@@ -11,10 +11,7 @@ public abstract class TileKernel extends Kernel{
   }
 
   public void execute(){
-    System.out.println(range);
     Range deviceSpecificRange = getTargetDevice().createRange2D(range.getGlobalSize_0(), range.getGlobalSize_1());
-    System.out.println("Execute on " + getTargetDevice().getShortDescription() + " " + getTargetDevice().getDeviceId() + " " + deviceSpecificRange);
-
     execute(deviceSpecificRange);
   }
 }

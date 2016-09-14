@@ -1,29 +1,53 @@
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.Stack;
 
-import com.amd.aparapi.device.Device;
 import com.amd.aparapi.device.Device.TYPE;
 import com.amd.aparapi.device.OpenCLDevice;
-import com.amd.aparapi.internal.kernel.KernelManager;
+import com.amd.aparapi.internal.kernel.KernelRunner;
 
 public class KernelExecutor<T extends TileKernel> {
-  List<T> kernels;
-  List<Thread> threads = new ArrayList<Thread>();
+  Stack<T> kernelsToRun;
+  List<DynamoThread> threads = new ArrayList<DynamoThread>();
+
+  Set<TYPE> usableTypes;
 
   long startTime = -1;
   long endTime = -1;
 
-  public KernelExecutor(List<T> kernels) {
+  public KernelExecutor(List<T> kernels, Set<TYPE> deviceTypesToUse) {
     super();
-    this.kernels = kernels;
+    KernelRunner.BINARY_CACHING_DISABLED = true;
+
+    this.kernelsToRun = new Stack<T>();
+    kernelsToRun.addAll(kernels);
+
+    usableTypes = deviceTypesToUse;
   }
 
   public void execute(){
-    assignDevice();
-    start();
-    await();
-    dispose();
+    startTime = System.currentTimeMillis();
+
+    while(!(kernelsToRun.isEmpty() && threads.isEmpty())){
+      try {
+        Thread.sleep(500);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+
+      List<DynamoThread> finishedThreads = getFinishedThreads();
+      if(!threads.isEmpty() && finishedThreads.isEmpty()) continue;
+
+      removeThreads(finishedThreads);
+      if(kernelsToRun.isEmpty()) continue;
+
+      List<DynamoThread> builtThreads = buildThreads();
+      start(builtThreads);
+    }
+
+    endTime = System.currentTimeMillis();
   }
 
   public long executionTime(){
@@ -33,42 +57,32 @@ public class KernelExecutor<T extends TileKernel> {
     return endTime - startTime;
   }
 
-  private void assignDevice(){
-    List<OpenCLDevice> devices = OpenCLDevice.listDevices(TYPE.CPU);
-    devices.addAll(OpenCLDevice.listDevices(TYPE.GPU));
-
+  private List<DynamoThread> buildThreads(){
+    List<DynamoThread> newThreads = new ArrayList<DynamoThread>();
+    Set<OpenCLDevice> devices = unusedDevices();
     System.out.println(devices.size() + " devices available for disposition.");
-    for(int i=0; i<kernels.size();i++){
-      TileKernel kernel = kernels.get(i);
-      Device device = devices.get(i % devices.size());
 
-      LinkedHashSet<Device> preferences = new LinkedHashSet<Device>();
+    for(OpenCLDevice device:unusedDevices()){
+      if(kernelsToRun.isEmpty()) return newThreads;
 
-      preferences.add(device);
-      KernelManager.instance().setPreferredDevices(kernel, preferences);
+      TileKernel kernel = kernelsToRun.pop();
+      DynamoThread thread = new DynamoThread(kernel, device);
+      threads.add(thread);
+      newThreads.add(thread);
     }
+    return newThreads;
   }
 
-  private void start(){
-    startTime = System.currentTimeMillis();
-    for(TileKernel k : kernels){
-      final TileKernel finalKernel = k;
-      Thread t = new Thread(new Runnable() {
-
-        @Override
-        public void run() {
-          finalKernel.execute();
-        }
-      });
-      threads.add(t);
+  private void start(List<DynamoThread> threads){
+    for(DynamoThread t:threads){
       t.start();
-      awaitConversion(t, finalKernel);
+      awaitConversion(t);
     }
   }
 
-  private void awaitConversion(Thread t, TileKernel k){
+  private void awaitConversion(DynamoThread t){
     while(true && t.isAlive()){
-      boolean converted = !String.valueOf(k.getConversionTime()).equals("NaN");
+      boolean converted = !String.valueOf(t.getKernel().getConversionTime()).equals("NaN");
       try {
         Thread.sleep(100);
       } catch (InterruptedException e) {
@@ -78,20 +92,47 @@ public class KernelExecutor<T extends TileKernel> {
     }
   }
 
-  private void await(){
-    for(Thread t:threads){
-      try {
-        t.join();
-      } catch (InterruptedException e) {
-        e.printStackTrace();
+  private List<DynamoThread> getFinishedThreads(){
+    List<DynamoThread> finishedThreads = new ArrayList<DynamoThread>();
+    for(DynamoThread t:threads){
+      if(!t.isAlive()){
+        finishedThreads.add(t);
       }
     }
-    endTime = System.currentTimeMillis();
+    return finishedThreads;
   }
 
-  private void dispose(){
-    for(TileKernel k : kernels){
-      k.dispose();
+  private void removeThreads(List<DynamoThread> removableThreads){
+    for(DynamoThread t:removableThreads){
+      threads.remove(t);
     }
+  }
+
+  private Set<OpenCLDevice> getDevices(){
+    Set<OpenCLDevice> devices = new HashSet<OpenCLDevice>();
+    for(TYPE type:usableTypes){
+      devices.addAll(OpenCLDevice.listDevices(type));
+    }
+    return devices;
+  }
+
+  private Set<OpenCLDevice> unusedDevices(){
+    Set<OpenCLDevice> unusedDevices = new HashSet<OpenCLDevice>();
+    Set<OpenCLDevice> devices = getDevices();
+    Set<Long> usedDeviceIds = getUsedDeviceIds();
+    for(OpenCLDevice device:devices){
+      if(!usedDeviceIds.contains(device.getDeviceId())){
+        unusedDevices.add(device);
+      }
+    }
+    return unusedDevices;
+  }
+
+  private Set<Long> getUsedDeviceIds(){
+    Set<Long> usedDeviceIds = new HashSet<Long>();
+    for(DynamoThread t:threads){
+      usedDeviceIds.add(t.device.getDeviceId());
+    }
+    return usedDeviceIds;
   }
 }
