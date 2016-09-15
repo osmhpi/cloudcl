@@ -8,11 +8,12 @@ public class DynamoThread extends Thread{
 
   TileKernel kernel;
   OpenCLDevice device;
-
-  public DynamoThread(TileKernel kernel, OpenCLDevice device) {
+  Notifyable notifyable;
+  public DynamoThread(TileKernel kernel, OpenCLDevice device, Notifyable notifyable) {
     super();
     this.kernel = kernel;
     this.device = device;
+    this.notifyable = notifyable;
   }
 
   @Override
@@ -23,6 +24,8 @@ public class DynamoThread extends Thread{
     System.out.println("Execute Thread" + this.getId() + " on " + device.getShortDescription() + " " + device.getDeviceId());
 
     kernel.execute();
+    dispose();
+    notifyable.notifyListener(this);
   }
 
   public TileKernel getKernel() {

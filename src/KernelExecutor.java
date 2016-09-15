@@ -8,7 +8,7 @@ import com.amd.aparapi.device.Device.TYPE;
 import com.amd.aparapi.device.OpenCLDevice;
 import com.amd.aparapi.internal.kernel.KernelRunner;
 
-public class KernelExecutor<T extends TileKernel> {
+public class KernelExecutor<T extends TileKernel> implements Notifyable{
   Stack<T> kernelsToRun;
   List<DynamoThread> threads = new ArrayList<DynamoThread>();
 
@@ -29,22 +29,13 @@ public class KernelExecutor<T extends TileKernel> {
 
   public void execute(){
     startTime = System.currentTimeMillis();
-
-    while(!(kernelsToRun.isEmpty() && threads.isEmpty())){
+    assignKernels();
+    while(hasWork()){
       try {
         Thread.sleep(500);
       } catch (InterruptedException e) {
         e.printStackTrace();
       }
-
-      List<DynamoThread> finishedThreads = getFinishedThreads();
-      if(!threads.isEmpty() && finishedThreads.isEmpty()) continue;
-
-      removeThreads(finishedThreads);
-      if(kernelsToRun.isEmpty()) continue;
-
-      List<DynamoThread> builtThreads = buildThreads();
-      start(builtThreads);
     }
 
     endTime = System.currentTimeMillis();
@@ -57,7 +48,12 @@ public class KernelExecutor<T extends TileKernel> {
     return endTime - startTime;
   }
 
-  private List<DynamoThread> buildThreads(){
+  private synchronized void assignKernels(){
+    List<DynamoThread> builtThreads = buildThreads();
+    start(builtThreads);
+  }
+
+  private synchronized List<DynamoThread> buildThreads(){
     List<DynamoThread> newThreads = new ArrayList<DynamoThread>();
     Set<OpenCLDevice> devices = unusedDevices();
     System.out.println(devices.size() + " devices available for disposition.");
@@ -66,14 +62,14 @@ public class KernelExecutor<T extends TileKernel> {
       if(kernelsToRun.isEmpty()) return newThreads;
 
       TileKernel kernel = kernelsToRun.pop();
-      DynamoThread thread = new DynamoThread(kernel, device);
+      DynamoThread thread = new DynamoThread(kernel, device, this);
       threads.add(thread);
       newThreads.add(thread);
     }
     return newThreads;
   }
 
-  private void start(List<DynamoThread> threads){
+  private synchronized void start(List<DynamoThread> threads){
     for(DynamoThread t:threads){
       t.start();
       awaitConversion(t);
@@ -102,12 +98,6 @@ public class KernelExecutor<T extends TileKernel> {
     return finishedThreads;
   }
 
-  private void removeThreads(List<DynamoThread> removableThreads){
-    for(DynamoThread t:removableThreads){
-      threads.remove(t);
-    }
-  }
-
   private Set<OpenCLDevice> getDevices(){
     Set<OpenCLDevice> devices = new HashSet<OpenCLDevice>();
     for(TYPE type:usableTypes){
@@ -134,5 +124,16 @@ public class KernelExecutor<T extends TileKernel> {
       usedDeviceIds.add(t.device.getDeviceId());
     }
     return usedDeviceIds;
+  }
+
+  private boolean hasWork(){
+    return !(kernelsToRun.isEmpty() && threads.isEmpty());
+  }
+
+  @Override
+  public synchronized void notifyListener(Object notifier) {
+    DynamoThread thread = (DynamoThread) notifier;
+    threads.remove(thread);
+    assignKernels();
   }
 }
