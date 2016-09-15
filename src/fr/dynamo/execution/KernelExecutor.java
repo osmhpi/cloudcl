@@ -39,6 +39,7 @@ public class KernelExecutor<T extends TileKernel> implements Notifyable{
           try {
             Thread.sleep(500);
           } catch (InterruptedException e) {
+            return;
           }
 
           processDeadThreads();

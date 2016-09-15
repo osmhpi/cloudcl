@@ -1,6 +1,7 @@
 package fr.dynamo.threading;
 import com.amd.aparapi.Kernel;
 import com.amd.aparapi.Range;
+import com.amd.aparapi.device.Device;
 
 public abstract class TileKernel extends Kernel{
 
@@ -12,7 +13,11 @@ public abstract class TileKernel extends Kernel{
   }
 
   public void execute(){
-    Range deviceSpecificRange = getTargetDevice().createRange2D(range.getGlobalSize_0(), range.getGlobalSize_1());
+    Device device = getTargetDevice();
+
+    Range deviceSpecificRange = device.createRange2D(range.getGlobalSize_0(), range.getGlobalSize_1());
+
     execute(deviceSpecificRange);
   }
+
 }

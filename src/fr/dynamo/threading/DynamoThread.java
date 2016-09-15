@@ -22,14 +22,17 @@ public class DynamoThread extends Thread{
 
   @Override
   public void run() {
-    LinkedHashSet<Device> preferences = new LinkedHashSet<Device>();
-    preferences.add(device);
-    KernelManager.instance().setPreferredDevices(kernel, preferences);
-    System.out.println("Execute Thread " + this.getId() + " on " + device.getShortDescription() + " " + device.getDeviceId());
+    try{
+      LinkedHashSet<Device> preferences = new LinkedHashSet<Device>();
+      preferences.add(device);
+      KernelManager.instance().setPreferredDevices(kernel, preferences);
+      System.out.println("Execute Thread " + this.getId() + " on " + device.getShortDescription() + " " + device.getDeviceId());
 
-    kernel.execute();
-    dispose();
-    notifyable.notifyListener(this);
+      kernel.execute();
+      dispose();
+    }finally{
+      notifyable.notifyListener(this);
+    }
   }
 
   public TileKernel getKernel() {
