@@ -4,18 +4,16 @@ import java.util.List;
 import java.util.Set;
 
 import com.amd.aparapi.device.Device.TYPE;
+import com.amd.aparapi.device.OpenCLDevice;
 
 import fr.dynamo.threading.DynamoThread;
 
-import com.amd.aparapi.device.OpenCLDevice;
-
 public class DeviceManager {
 
-  private Set<TYPE> usableTypes = new HashSet<TYPE>();
+  private TYPE[] usableTypes = new TYPE[]{TYPE.CPU, TYPE.GPU};
 
-  public DeviceManager(Set<TYPE> usableTypes) {
+  public DeviceManager() {
     super();
-    this.usableTypes = usableTypes;
   }
 
   public Set<OpenCLDevice> getUnusedDevices(List<DynamoThread> threads){

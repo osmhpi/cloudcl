@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import com.amd.aparapi.device.Device.TYPE;
 import com.amd.aparapi.device.OpenCLDevice;
 import com.amd.aparapi.internal.kernel.KernelRunner;
 
@@ -14,30 +13,39 @@ import fr.dynamo.threading.DynamoThread;
 import fr.dynamo.threading.TileKernel;
 
 public class KernelExecutor<T extends TileKernel> implements Notifyable{
-  private ConcurrentLinkedQueue<T> kernelsToRun = new ConcurrentLinkedQueue<T>();
-  private List<DynamoThread> threads = Collections.synchronizedList(new ArrayList<DynamoThread>());
+  private final ConcurrentLinkedQueue<T> kernelsToRun = new ConcurrentLinkedQueue<T>();
+  private final List<DynamoThread> threads = Collections.synchronizedList(new ArrayList<DynamoThread>());
+  private Thread monitorThread;
+  private DeviceManager deviceManager = new DeviceManager();
 
-  private DeviceManager deviceManager;
 
-
-  public KernelExecutor(List<T> kernels, Set<TYPE> deviceTypesToUse) {
+  public KernelExecutor() {
     super();
     KernelRunner.BINARY_CACHING_DISABLED = true;
-    deviceManager = new DeviceManager(deviceTypesToUse);
-    kernelsToRun.addAll(kernels);
+    startDeadThreadMonitor();
   }
 
-  public void execute(){
+  public void execute(T kernel){
+    System.out.println("Enqueueing Kernel " + kernel.getClass().getName() + " " +kernel.hashCode() + ".");
+    kernelsToRun.add(kernel);
     assignKernels();
-    while(hasWork()){
-      try {
-        Thread.sleep(500);
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-      }
+  }
 
-      processDiedThreads();
-    }
+  private void startDeadThreadMonitor(){
+    monitorThread = new Thread(new Runnable() {
+      @Override
+      public void run() {
+        while(true){
+          try {
+            Thread.sleep(500);
+          } catch (InterruptedException e) {
+          }
+
+          processDeadThreads();
+        }
+      }
+    });
+    monitorThread.start();
   }
 
   private synchronized void assignKernels(){
@@ -82,7 +90,7 @@ public class KernelExecutor<T extends TileKernel> implements Notifyable{
     }
   }
 
-  private void processDiedThreads(){
+  private synchronized void processDeadThreads(){
     for(DynamoThread t:threads){
       if(!t.isAlive()){
         notifyListener(t);
@@ -90,8 +98,18 @@ public class KernelExecutor<T extends TileKernel> implements Notifyable{
     }
   }
 
-  private boolean hasWork(){
-    return !(kernelsToRun.isEmpty() && threads.isEmpty());
+  private boolean isDone(){
+    return kernelsToRun.isEmpty() && threads.isEmpty();
+  }
+
+  public void await(){
+    while(!isDone()){
+      try {
+        Thread.sleep(250);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+    }
   }
 
   @Override
@@ -99,5 +117,9 @@ public class KernelExecutor<T extends TileKernel> implements Notifyable{
     DynamoThread thread = (DynamoThread) notifier;
     threads.remove(thread);
     assignKernels();
+  }
+
+  public void dispose() {
+    monitorThread.interrupt();
   }
 }
