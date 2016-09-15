@@ -1,20 +1,21 @@
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.Stack;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import com.amd.aparapi.device.Device.TYPE;
 import com.amd.aparapi.device.OpenCLDevice;
 import com.amd.aparapi.internal.kernel.KernelRunner;
 
 public class KernelExecutor<T extends TileKernel> implements Notifyable{
-  Stack<T> kernelsToRun = new Stack<T>();
-  List<DynamoThread> threads = new ArrayList<DynamoThread>();
+  private ConcurrentLinkedQueue<T> kernelsToRun = new ConcurrentLinkedQueue<T>();
+  private List<DynamoThread> threads = Collections.synchronizedList(new ArrayList<DynamoThread>());
 
-  DeviceManager deviceManager;
+  private DeviceManager deviceManager;
 
-  long startTime = -1;
-  long endTime = -1;
+  private long startTime = -1;
+  private long endTime = -1;
 
   public KernelExecutor(List<T> kernels, Set<TYPE> deviceTypesToUse) {
     super();
@@ -32,6 +33,8 @@ public class KernelExecutor<T extends TileKernel> implements Notifyable{
       } catch (InterruptedException e) {
         e.printStackTrace();
       }
+
+      processDiedThreads();
     }
 
     endTime = System.currentTimeMillis();
@@ -55,9 +58,8 @@ public class KernelExecutor<T extends TileKernel> implements Notifyable{
     System.out.println(unusedDevices.size() + " devices available for disposition.");
 
     for(OpenCLDevice device:unusedDevices){
-      if(kernelsToRun.isEmpty()) return newThreads;
-
-      TileKernel kernel = kernelsToRun.pop();
+      TileKernel kernel = kernelsToRun.poll();
+      if(kernel == null) return newThreads;
       DynamoThread thread = new DynamoThread(kernel, device, this);
       threads.add(thread);
       newThreads.add(thread);
@@ -84,16 +86,13 @@ public class KernelExecutor<T extends TileKernel> implements Notifyable{
     }
   }
 
-  private List<DynamoThread> getFinishedThreads(){
-    List<DynamoThread> finishedThreads = new ArrayList<DynamoThread>();
+  private void processDiedThreads(){
     for(DynamoThread t:threads){
       if(!t.isAlive()){
-        finishedThreads.add(t);
+        notifyListener(t);
       }
     }
-    return finishedThreads;
   }
-
 
   private boolean hasWork(){
     return !(kernelsToRun.isEmpty() && threads.isEmpty());

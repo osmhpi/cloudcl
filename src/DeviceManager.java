@@ -7,19 +7,11 @@ import com.amd.aparapi.device.OpenCLDevice;
 
 public class DeviceManager {
 
-  Set<TYPE> usableTypes = new HashSet<TYPE>();
+  private Set<TYPE> usableTypes = new HashSet<TYPE>();
 
   public DeviceManager(Set<TYPE> usableTypes) {
     super();
     this.usableTypes = usableTypes;
-  }
-
-  public Set<OpenCLDevice> getDevices(){
-    Set<OpenCLDevice> devices = new HashSet<OpenCLDevice>();
-    for(TYPE type:usableTypes){
-      devices.addAll(OpenCLDevice.listDevices(type));
-    }
-    return devices;
   }
 
   public Set<OpenCLDevice> getUnusedDevices(List<DynamoThread> threads){
@@ -37,9 +29,16 @@ public class DeviceManager {
   public Set<Long> getUsedDeviceIds(List<DynamoThread> threads){
     Set<Long> usedDeviceIds = new HashSet<Long>();
     for(DynamoThread t:threads){
-      usedDeviceIds.add(t.device.getDeviceId());
+      usedDeviceIds.add(t.getDevice().getDeviceId());
     }
     return usedDeviceIds;
   }
 
+  public Set<OpenCLDevice> getDevices(){
+    Set<OpenCLDevice> devices = new HashSet<OpenCLDevice>();
+    for(TYPE type:usableTypes){
+      devices.addAll(OpenCLDevice.listDevices(type));
+    }
+    return devices;
+  }
 }

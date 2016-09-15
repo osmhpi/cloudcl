@@ -6,9 +6,10 @@ import com.amd.aparapi.internal.kernel.KernelManager;
 
 public class DynamoThread extends Thread{
 
-  TileKernel kernel;
-  OpenCLDevice device;
-  Notifyable notifyable;
+  private TileKernel kernel;
+  private OpenCLDevice device;
+  private Notifyable notifyable;
+
   public DynamoThread(TileKernel kernel, OpenCLDevice device, Notifyable notifyable) {
     super();
     this.kernel = kernel;
