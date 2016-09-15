@@ -15,7 +15,28 @@ public abstract class TileKernel extends Kernel{
   public void execute(){
     Device device = getTargetDevice();
 
-    Range deviceSpecificRange = device.createRange2D(range.getGlobalSize_0(), range.getGlobalSize_1());
+    Range deviceSpecificRange = range;
+
+    switch(range.getDims()){
+      case 0:
+        deviceSpecificRange = device.createRange(range.getGlobalSize_0(), range.getLocalSize_0());
+        if(!deviceSpecificRange.isValid()){
+          deviceSpecificRange = device.createRange(range.getGlobalSize_0());
+        }
+        break;
+      case 1:
+        deviceSpecificRange = device.createRange2D(range.getGlobalSize_0(), range.getGlobalSize_1(), range.getLocalSize_0(), range.getLocalSize_1());
+        if(!deviceSpecificRange.isValid()){
+          deviceSpecificRange = device.createRange2D(range.getGlobalSize_0(), range.getGlobalSize_1());
+        }
+        break;
+      case 2:
+        deviceSpecificRange = device.createRange3D(range.getGlobalSize_0(), range.getGlobalSize_1(), range.getGlobalSize_2(), range.getLocalSize_0(), range.getLocalSize_1(), range.getLocalSize_2());
+        if(!deviceSpecificRange.isValid()){
+          deviceSpecificRange = device.createRange3D(range.getGlobalSize_0(), range.getGlobalSize_1(), range.getGlobalSize_2());
+        }
+        break;
+    }
 
     execute(deviceSpecificRange);
   }
