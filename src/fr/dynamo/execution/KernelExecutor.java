@@ -1,3 +1,4 @@
+package fr.dynamo.execution;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -8,14 +9,16 @@ import com.amd.aparapi.device.Device.TYPE;
 import com.amd.aparapi.device.OpenCLDevice;
 import com.amd.aparapi.internal.kernel.KernelRunner;
 
+import fr.dynamo.Notifyable;
+import fr.dynamo.threading.DynamoThread;
+import fr.dynamo.threading.TileKernel;
+
 public class KernelExecutor<T extends TileKernel> implements Notifyable{
   private ConcurrentLinkedQueue<T> kernelsToRun = new ConcurrentLinkedQueue<T>();
   private List<DynamoThread> threads = Collections.synchronizedList(new ArrayList<DynamoThread>());
 
   private DeviceManager deviceManager;
 
-  private long startTime = -1;
-  private long endTime = -1;
 
   public KernelExecutor(List<T> kernels, Set<TYPE> deviceTypesToUse) {
     super();
@@ -25,7 +28,6 @@ public class KernelExecutor<T extends TileKernel> implements Notifyable{
   }
 
   public void execute(){
-    startTime = System.currentTimeMillis();
     assignKernels();
     while(hasWork()){
       try {
@@ -36,19 +38,11 @@ public class KernelExecutor<T extends TileKernel> implements Notifyable{
 
       processDiedThreads();
     }
-
-    endTime = System.currentTimeMillis();
-  }
-
-  public long executionTime(){
-    if(startTime == -1 || endTime == -1){
-      return -1;
-    }
-    return endTime - startTime;
   }
 
   private synchronized void assignKernels(){
     List<DynamoThread> builtThreads = buildThreads();
+    threads.addAll(builtThreads);
     start(builtThreads);
   }
 
@@ -61,13 +55,14 @@ public class KernelExecutor<T extends TileKernel> implements Notifyable{
       TileKernel kernel = kernelsToRun.poll();
       if(kernel == null) return newThreads;
       DynamoThread thread = new DynamoThread(kernel, device, this);
-      threads.add(thread);
       newThreads.add(thread);
     }
     return newThreads;
   }
 
   private synchronized void start(List<DynamoThread> threads){
+    /* Threads have to be started in succession and await their conversion because
+       Aparapi doesn't allow parallel conversions by Kernels of the same class. */
     for(DynamoThread t:threads){
       t.start();
       awaitConversion(t);
@@ -75,6 +70,7 @@ public class KernelExecutor<T extends TileKernel> implements Notifyable{
   }
 
   private void awaitConversion(DynamoThread t){
+    // The only way to know if a Kernel has been converted is by identifying whether the respective ConversionTime value has been set.
     while(true && t.isAlive()){
       boolean converted = !String.valueOf(t.getKernel().getConversionTime()).equals("NaN");
       try {

@@ -1,3 +1,4 @@
+package fr.dynamo.threading;
 import com.amd.aparapi.Kernel;
 import com.amd.aparapi.Range;
 

@@ -1,8 +1,11 @@
+package fr.dynamo.threading;
 import java.util.LinkedHashSet;
 
 import com.amd.aparapi.device.Device;
 import com.amd.aparapi.device.OpenCLDevice;
 import com.amd.aparapi.internal.kernel.KernelManager;
+
+import fr.dynamo.Notifyable;
 
 public class DynamoThread extends Thread{
 
@@ -22,7 +25,7 @@ public class DynamoThread extends Thread{
     LinkedHashSet<Device> preferences = new LinkedHashSet<Device>();
     preferences.add(device);
     KernelManager.instance().setPreferredDevices(kernel, preferences);
-    System.out.println("Execute Thread" + this.getId() + " on " + device.getShortDescription() + " " + device.getDeviceId());
+    System.out.println("Execute Thread " + this.getId() + " on " + device.getShortDescription() + " " + device.getDeviceId());
 
     kernel.execute();
     dispose();
@@ -41,6 +44,5 @@ public class DynamoThread extends Thread{
     System.out.println("Thread " + this.getId() + " being disposed.");
     kernel.dispose();
   }
-
 
 }

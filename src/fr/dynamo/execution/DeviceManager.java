@@ -1,8 +1,12 @@
+package fr.dynamo.execution;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import com.amd.aparapi.device.Device.TYPE;
+
+import fr.dynamo.threading.DynamoThread;
+
 import com.amd.aparapi.device.OpenCLDevice;
 
 public class DeviceManager {
