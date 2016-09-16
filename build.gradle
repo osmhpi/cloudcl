@@ -3,23 +3,23 @@ apply plugin: 'eclipse'
 
 version = '0.0.1'
 
-jar {
-    manifest {
-        attributes 'Implementation-Title': 'DynamOpenCL',
-                   'Implementation-Version': version
-    }
-}
-
 repositories {
     mavenCentral()
 }
 
 buildDependents.dependsOn { subprojects.build }
+build.dependsOn { copyRuntimeLibs }
 
+sourceSets {
+    main {
+        java {
+            srcDirs 'src'
+        }
+    }
+}
 dependencies {
 	compile group: 'com.amazonaws', name: 'aws-java-sdk-ec2', version: '1.11.34'
 	compile files('aparapi/com.amd.aparapi/dist/aparapi.jar')
-	
 }
 
 uploadArchives {
@@ -31,6 +31,15 @@ uploadArchives {
 }
 
 jar {
-	into ('/')
-	from configurations.compile 
+    manifest {
+        attributes 'Implementation-Title': 'DynamOpenCL',
+                   'Implementation-Version': version
+    }
+}
+
+task copyRuntimeLibs(type: Copy) {
+	into new File(project.buildDir, "/libs/dependencies/")
+	
+	from configurations.runtime
+
 }
