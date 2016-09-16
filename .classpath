@@ -3,85 +3,17 @@
 	<classpathentry path="src" kind="src"/>
 	<classpathentry path="bin" kind="output"/>
 	<classpathentry path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8/" kind="con"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk/1.11.34/aws-java-sdk-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-support/1.11.34/aws-java-sdk-support-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-simpledb/1.11.34/aws-java-sdk-simpledb-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-servicecatalog/1.11.34/aws-java-sdk-servicecatalog-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-simpleworkflow/1.11.34/aws-java-sdk-simpleworkflow-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-storagegateway/1.11.34/aws-java-sdk-storagegateway-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-route53/1.11.34/aws-java-sdk-route53-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-s3/1.11.34/aws-java-sdk-s3-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-importexport/1.11.34/aws-java-sdk-importexport-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-sts/1.11.34/aws-java-sdk-sts-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-sqs/1.11.34/aws-java-sdk-sqs-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-rds/1.11.34/aws-java-sdk-rds-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-redshift/1.11.34/aws-java-sdk-redshift-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-elasticbeanstalk/1.11.34/aws-java-sdk-elasticbeanstalk-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-glacier/1.11.34/aws-java-sdk-glacier-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-iam/1.11.34/aws-java-sdk-iam-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-datapipeline/1.11.34/aws-java-sdk-datapipeline-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-elasticloadbalancing/1.11.34/aws-java-sdk-elasticloadbalancing-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-elasticloadbalancingv2/1.11.34/aws-java-sdk-elasticloadbalancingv2-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-emr/1.11.34/aws-java-sdk-emr-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-elasticache/1.11.34/aws-java-sdk-elasticache-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-elastictranscoder/1.11.34/aws-java-sdk-elastictranscoder-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-ec2/1.11.34/aws-java-sdk-ec2-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-dynamodb/1.11.34/aws-java-sdk-dynamodb-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-sns/1.11.34/aws-java-sdk-sns-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-cloudtrail/1.11.34/aws-java-sdk-cloudtrail-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-cloudwatch/1.11.34/aws-java-sdk-cloudwatch-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-logs/1.11.34/aws-java-sdk-logs-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-events/1.11.34/aws-java-sdk-events-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-cognitoidentity/1.11.34/aws-java-sdk-cognitoidentity-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-cognitosync/1.11.34/aws-java-sdk-cognitosync-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-directconnect/1.11.34/aws-java-sdk-directconnect-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-cloudformation/1.11.34/aws-java-sdk-cloudformation-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-cloudfront/1.11.34/aws-java-sdk-cloudfront-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-kinesis/1.11.34/aws-java-sdk-kinesis-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-opsworks/1.11.34/aws-java-sdk-opsworks-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-ses/1.11.34/aws-java-sdk-ses-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-autoscaling/1.11.34/aws-java-sdk-autoscaling-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-cloudsearch/1.11.34/aws-java-sdk-cloudsearch-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-cloudwatchmetrics/1.11.34/aws-java-sdk-cloudwatchmetrics-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-codedeploy/1.11.34/aws-java-sdk-codedeploy-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-codepipeline/1.11.34/aws-java-sdk-codepipeline-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-kms/1.11.34/aws-java-sdk-kms-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-config/1.11.34/aws-java-sdk-config-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-lambda/1.11.34/aws-java-sdk-lambda-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-ecs/1.11.34/aws-java-sdk-ecs-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-ecr/1.11.34/aws-java-sdk-ecr-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-cloudhsm/1.11.34/aws-java-sdk-cloudhsm-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-ssm/1.11.34/aws-java-sdk-ssm-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-workspaces/1.11.34/aws-java-sdk-workspaces-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-machinelearning/1.11.34/aws-java-sdk-machinelearning-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-directory/1.11.34/aws-java-sdk-directory-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-efs/1.11.34/aws-java-sdk-efs-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-codecommit/1.11.34/aws-java-sdk-codecommit-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-devicefarm/1.11.34/aws-java-sdk-devicefarm-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-elasticsearch/1.11.34/aws-java-sdk-elasticsearch-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-waf/1.11.34/aws-java-sdk-waf-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-marketplacecommerceanalytics/1.11.34/aws-java-sdk-marketplacecommerceanalytics-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-inspector/1.11.34/aws-java-sdk-inspector-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-iot/1.11.34/aws-java-sdk-iot-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-api-gateway/1.11.34/aws-java-sdk-api-gateway-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-acm/1.11.34/aws-java-sdk-acm-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-gamelift/1.11.34/aws-java-sdk-gamelift-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-dms/1.11.34/aws-java-sdk-dms-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-marketplacemeteringservice/1.11.34/aws-java-sdk-marketplacemeteringservice-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-cognitoidp/1.11.34/aws-java-sdk-cognitoidp-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-discovery/1.11.34/aws-java-sdk-discovery-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-applicationautoscaling/1.11.34/aws-java-sdk-applicationautoscaling-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-snowball/1.11.34/aws-java-sdk-snowball-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-core/1.11.34/aws-java-sdk-core-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-models/1.11.34/aws-java-sdk-models-1.11.34.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/aws-java-sdk-swf-libraries/1.11.22/aws-java-sdk-swf-libraries-1.11.22.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/amazonaws/jmespath-java/1.0/jmespath-java-1.0.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/org/apache/httpcomponents/httpclient/4.5.2/httpclient-4.5.2.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.6.6/jackson-databind-2.6.6.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/fasterxml/jackson/dataformat/jackson-dataformat-cbor/2.6.6/jackson-dataformat-cbor-2.6.6.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/joda-time/joda-time/2.8.1/joda-time-2.8.1.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/org/apache/httpcomponents/httpcore/4.4.4/httpcore-4.4.4.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/commons-codec/commons-codec/1.9/commons-codec-1.9.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.6.0/jackson-annotations-2.6.0.jar" kind="lib"/>
-	<classpathentry path="/Users/florianrosler/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.6.6/jackson-core-2.6.6.jar" kind="lib"/>
+	<classpathentry path="/Users/florianrosler/.gradle/caches/modules-2/files-2.1/com.amazonaws/aws-java-sdk-ec2/1.11.34/26b13cb82c26c552975820f99a12825a72520b0a/aws-java-sdk-ec2-1.11.34.jar" kind="lib" sourcepath="/Users/florianrosler/.gradle/caches/modules-2/files-2.1/com.amazonaws/aws-java-sdk-ec2/1.11.34/c0b929796957f685d851e4553745f0f2e93ec344/aws-java-sdk-ec2-1.11.34-sources.jar"/>
+	<classpathentry path="/Users/florianrosler/.gradle/caches/modules-2/files-2.1/com.amazonaws/aws-java-sdk-core/1.11.34/2ebcb9e78cf88d76e1073e4f14419c0460e983f7/aws-java-sdk-core-1.11.34.jar" kind="lib" sourcepath="/Users/florianrosler/.gradle/caches/modules-2/files-2.1/com.amazonaws/aws-java-sdk-core/1.11.34/b3446de75ca98699643e34c7eae25bd38f7f636c/aws-java-sdk-core-1.11.34-sources.jar"/>
+	<classpathentry path="/Users/florianrosler/.gradle/caches/modules-2/files-2.1/com.amazonaws/jmespath-java/1.0/179bd97646b82151f87e9c089eafe4dbc9ead31f/jmespath-java-1.0.jar" kind="lib" sourcepath="/Users/florianrosler/.gradle/caches/modules-2/files-2.1/com.amazonaws/jmespath-java/1.0/74286862f1972fe00f66b5b5e35dabfff77794b2/jmespath-java-1.0-sources.jar"/>
+	<classpathentry path="/Users/florianrosler/.gradle/caches/modules-2/files-2.1/org.apache.httpcomponents/httpclient/4.5.2/733db77aa8d9b2d68015189df76ab06304406e50/httpclient-4.5.2.jar" kind="lib" sourcepath="/Users/florianrosler/.gradle/caches/modules-2/files-2.1/org.apache.httpcomponents/httpclient/4.5.2/b9f9e3e5255b6ddc3bf21be05428c7a60d00e042/httpclient-4.5.2-sources.jar"/>
+	<classpathentry path="/Users/florianrosler/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-databind/2.6.6/5108dde6049374ba980b360e1ecff49847baba4a/jackson-databind-2.6.6.jar" kind="lib" sourcepath="/Users/florianrosler/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-databind/2.6.6/ca843a8233bdac6e7bb0aeb57473c622b9fdee8b/jackson-databind-2.6.6-sources.jar"/>
+	<classpathentry path="/Users/florianrosler/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.dataformat/jackson-dataformat-cbor/2.6.6/34c7b7ff495fc6b049612bdc9db0900a68e112f8/jackson-dataformat-cbor-2.6.6.jar" kind="lib" sourcepath="/Users/florianrosler/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.dataformat/jackson-dataformat-cbor/2.6.6/c9553dec78895e09e133bcd340fe5b1300f1e72b/jackson-dataformat-cbor-2.6.6-sources.jar"/>
+	<classpathentry path="/Users/florianrosler/.gradle/caches/modules-2/files-2.1/joda-time/joda-time/2.8.1/f5bfc718c95a7b1d3c371bb02a188a4df18361a9/joda-time-2.8.1.jar" kind="lib" sourcepath="/Users/florianrosler/.gradle/caches/modules-2/files-2.1/joda-time/joda-time/2.8.1/bf0996237b66ce00cd3132af179612df02ff9771/joda-time-2.8.1-sources.jar"/>
+	<classpathentry path="/Users/florianrosler/.gradle/caches/modules-2/files-2.1/org.apache.httpcomponents/httpcore/4.4.4/b31526a230871fbe285fbcbe2813f9c0839ae9b0/httpcore-4.4.4.jar" kind="lib" sourcepath="/Users/florianrosler/.gradle/caches/modules-2/files-2.1/org.apache.httpcomponents/httpcore/4.4.4/c5c19e3e6af6b452def290cde12a3ee4c35c893c/httpcore-4.4.4-sources.jar"/>
+	<classpathentry path="/Users/florianrosler/.gradle/caches/modules-2/files-2.1/commons-codec/commons-codec/1.9/9ce04e34240f674bc72680f8b843b1457383161a/commons-codec-1.9.jar" kind="lib" sourcepath="/Users/florianrosler/.gradle/caches/modules-2/files-2.1/commons-codec/commons-codec/1.9/3f15fff45d57656685abfee9e8302bf14580044c/commons-codec-1.9-sources.jar"/>
+	<classpathentry path="/Users/florianrosler/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-annotations/2.6.0/a0990e2e812ac6639b6ce955c91b13228500476e/jackson-annotations-2.6.0.jar" kind="lib" sourcepath="/Users/florianrosler/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-annotations/2.6.0/7bcb615d523d88acbc121c92aafeba8d37a83792/jackson-annotations-2.6.0-sources.jar"/>
+	<classpathentry path="/Users/florianrosler/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-core/2.6.6/2eb801df67aacaf5b1deb4ac626e1964508e47b/jackson-core-2.6.6.jar" kind="lib" sourcepath="/Users/florianrosler/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-core/2.6.6/8ee54db2ad9ea0e244c38d584150b3d524b13d80/jackson-core-2.6.6-sources.jar"/>
+	<classpathentry path="/Users/florianrosler/.gradle/caches/modules-2/files-2.1/commons-logging/commons-logging/1.2/4bfc12adfe4842bf07b657f0369c4cb522955686/commons-logging-1.2.jar" kind="lib" sourcepath="/Users/florianrosler/.gradle/caches/modules-2/files-2.1/commons-logging/commons-logging/1.2/ecf26c7507d67782a3bbd148d170b31dfad001aa/commons-logging-1.2-sources.jar"/>
+	<classpathentry path="/Users/florianrosler/Documents/workspace/DynamOpencl/aparapi/com.amd.aparapi/dist/aparapi.jar" kind="lib"/>
 </classpath>

@@ -1,0 +1,3 @@
+[submodule "aparapi"]
+	path = aparapi
+	url = https://github.com/florianroesler/aparapi
