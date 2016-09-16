@@ -24,6 +24,18 @@ sourceSets {
     }
 }
 
+test {
+   testLogging.showStandardStreams = true
+ 
+  beforeTest { descriptor ->
+     logger.lifecycle("Running test: " + descriptor)
+  }
+
+  onOutput { descriptor, event ->
+     logger.lifecycle("Test: " + descriptor + " produced standard out/err: " + event.message )
+  }
+}
+
 dependencies {
 	compile group: 'com.amazonaws', name: 'aws-java-sdk-ec2', version: '1.11.34'
 	compile files('aparapi/com.amd.aparapi/dist/aparapi.jar')

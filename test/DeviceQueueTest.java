@@ -66,8 +66,15 @@ public class DeviceQueueTest {
     device = deviceQueue.findFittingDevice(DevicePreference.CPU_ONLY);
     assertEquals(TYPE.CPU, device.getType());
 
+    device = deviceQueue.findFittingDevice(DevicePreference.CPU_ONLY);
+    assertEquals(null, device);
+
     device = deviceQueue.findFittingDevice(DevicePreference.GPU_ONLY);
     assertEquals(TYPE.GPU, device.getType());
+
+    device = deviceQueue.findFittingDevice(DevicePreference.GPU_ONLY);
+    assertEquals(null, device);
+
   }
 
   @Test
