@@ -3,13 +3,23 @@ import com.amd.aparapi.Kernel;
 import com.amd.aparapi.Range;
 import com.amd.aparapi.device.Device;
 
+import fr.dynamo.DevicePreference;
+
 public abstract class TileKernel extends Kernel{
 
   private Range range;
+  private DevicePreference devicePreference;
 
   public TileKernel(Range range) {
     super();
     this.range = range;
+    this.devicePreference = DevicePreference.NONE;
+  }
+
+  public TileKernel(Range range, DevicePreference devicePreference) {
+    super();
+    this.range = range;
+    this.devicePreference = devicePreference;
   }
 
   public void execute(){
@@ -39,6 +49,14 @@ public abstract class TileKernel extends Kernel{
     }
 
     execute(deviceSpecificRange);
+  }
+
+  public DevicePreference getDevicePreference() {
+    return devicePreference;
+  }
+
+  public void setDevicePreference(DevicePreference devicePreference) {
+    this.devicePreference = devicePreference;
   }
 
 }

@@ -2,8 +2,6 @@ package fr.dynamo.execution;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 import com.amd.aparapi.device.OpenCLDevice;
 import com.amd.aparapi.internal.kernel.KernelRunner;
@@ -13,7 +11,7 @@ import fr.dynamo.threading.DynamoThread;
 import fr.dynamo.threading.TileKernel;
 
 public class KernelExecutor<T extends TileKernel> implements Notifyable{
-  private final ConcurrentLinkedQueue<T> kernelsToRun = new ConcurrentLinkedQueue<T>();
+  private final List<T> kernelsToRun = Collections.synchronizedList(new ArrayList<T>());
   private final List<DynamoThread> threads = Collections.synchronizedList(new ArrayList<DynamoThread>());
   private Thread monitorThread;
   private DeviceManager deviceManager = new DeviceManager();
@@ -57,14 +55,17 @@ public class KernelExecutor<T extends TileKernel> implements Notifyable{
 
   private synchronized List<DynamoThread> buildThreads(){
     List<DynamoThread> newThreads = new ArrayList<DynamoThread>();
-    Set<OpenCLDevice> unusedDevices = deviceManager.getUnusedDevices(threads);
+    DeviceQueue unusedDevices = deviceManager.getUnusedDevices(threads);
     System.out.println(unusedDevices.size() + " devices available for disposition.");
 
-    for(OpenCLDevice device:unusedDevices){
-      TileKernel kernel = kernelsToRun.poll();
-      if(kernel == null) return newThreads;
+    for(int i = 0; i< kernelsToRun.size(); i++){
+      TileKernel kernel = kernelsToRun.get(i);
+      OpenCLDevice device = unusedDevices.findFittingDevice(kernel.getDevicePreference());
+      if(device == null) continue;
+
       DynamoThread thread = new DynamoThread(kernel, device, this);
       newThreads.add(thread);
+      kernelsToRun.remove(i);
     }
     return newThreads;
   }

@@ -16,8 +16,8 @@ public class DeviceManager {
     super();
   }
 
-  public Set<OpenCLDevice> getUnusedDevices(List<DynamoThread> threads){
-    Set<OpenCLDevice> unusedDevices = new HashSet<OpenCLDevice>();
+  public DeviceQueue getUnusedDevices(List<DynamoThread> threads){
+    DeviceQueue unusedDevices = new DeviceQueue();
     Set<OpenCLDevice> devices = getDevices();
     Set<Long> usedDeviceIds = getUsedDeviceIds(threads);
     for(OpenCLDevice device:devices){
