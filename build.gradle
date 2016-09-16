@@ -1,0 +1,28 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: "maven"
+
+version = '0.0.1'
+
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'DynamOpenCL',
+                   'Implementation-Version': version
+    }
+}
+
+repositories {
+    mavenLocal()
+}
+
+dependencies {
+	compile group: 'com.amazonaws', name: 'aws-java-sdk', version: '1.11.34'
+}
+
+uploadArchives {
+    repositories {
+       flatDir {
+           dirs 'repos'
+       }
+    }
+}

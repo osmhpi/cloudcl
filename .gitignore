@@ -1,2 +1,7 @@
 bin
+.gradle
+build
 *.log
+target
+.DS_STORE
+.settings
