@@ -1,7 +1,11 @@
 package fr.dynamo.threading;
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+
 import com.amd.aparapi.Kernel;
 import com.amd.aparapi.Range;
 import com.amd.aparapi.device.Device;
+import com.amd.aparapi.internal.instruction.InstructionSet.TypeSpec;
 
 import fr.dynamo.DevicePreference;
 
@@ -57,6 +61,56 @@ public abstract class TileKernel extends Kernel{
 
   public void setDevicePreference(DevicePreference devicePreference) {
     this.devicePreference = devicePreference;
+  }
+
+  public double getTransferrableGigabytes(){
+    return getSize() / 1024.0 / 1024 / 1024;
+  }
+
+  public long getSize(){
+    long byteSum = 0;
+    Field[] allFields = getClass().getDeclaredFields();
+    for(Field f:allFields){
+      if(f.getType().isArray()){
+        Class<?> type = f.getType();
+        String typeString = f.getType().toString().replace("class [", "");
+
+        int length = 0;
+        try {
+          f.setAccessible(true);
+          length = Array.getLength(f.get(this));
+          f.setAccessible(false);
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+
+        typeString = typeString.replace("[", "");
+
+        if(typeString.length() == 1){
+          TypeSpec spec = TypeSpec.valueOf(typeString);
+          byteSum += spec.getSize() * length;
+        }else{
+          long bytes = 0;
+          for(Field nestedField:type.getComponentType().getDeclaredFields()){
+            if(nestedField.getType().isPrimitive()){
+              for(TypeSpec typeSpec:TypeSpec.values()){
+                if(typeSpec.getLongName().equals(nestedField.getType().toString())){
+                  byteSum += typeSpec.getSize() * length;
+                  break;
+                }
+              }
+            }
+
+          }
+          byteSum += bytes;
+        }
+
+      }
+
+    }
+
+
+    return byteSum;
   }
 
 }
