@@ -8,6 +8,8 @@ import com.amd.aparapi.device.Device;
 import com.amd.aparapi.internal.instruction.InstructionSet.TypeSpec;
 
 import fr.dynamo.DevicePreference;
+import fr.dynamo.ec2.NetworkEstimator;
+import fr.dynamo.ec2.NetworkSpeed;
 
 public abstract class TileKernel extends Kernel implements Runnable{
 
@@ -65,6 +67,10 @@ public abstract class TileKernel extends Kernel implements Runnable{
 
   public double getTransferrableGigabytes(){
     return getSize() / 1024.0 / 1024 / 1024;
+  }
+
+  public long getExpectedTransferTime(NetworkSpeed speed){
+    return NetworkEstimator.calculateTranferTime(this, speed);
   }
 
   public long getSize(){
