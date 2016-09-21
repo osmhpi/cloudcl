@@ -9,7 +9,7 @@ import com.amd.aparapi.internal.instruction.InstructionSet.TypeSpec;
 
 import fr.dynamo.DevicePreference;
 
-public abstract class TileKernel extends Kernel{
+public abstract class TileKernel extends Kernel implements Runnable{
 
   private Range range;
   private DevicePreference devicePreference;

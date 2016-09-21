@@ -2,6 +2,7 @@ package fr.dynamo.execution;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 import com.amd.aparapi.device.OpenCLDevice;
 import com.amd.aparapi.internal.kernel.KernelRunner;
@@ -10,12 +11,11 @@ import fr.dynamo.Notifyable;
 import fr.dynamo.threading.DynamoThread;
 import fr.dynamo.threading.TileKernel;
 
-public class KernelExecutor<T extends TileKernel> implements Notifyable{
-  private final List<T> kernelsToRun = Collections.synchronizedList(new ArrayList<T>());
+public class KernelExecutor implements Executor, Notifyable{
+  private final List<TileKernel> kernelsToRun = Collections.synchronizedList(new ArrayList<TileKernel>());
   private final List<DynamoThread> threads = Collections.synchronizedList(new ArrayList<DynamoThread>());
   private Thread monitorThread;
   private DeviceManager deviceManager = new DeviceManager();
-
 
   public KernelExecutor() {
     super();
@@ -23,11 +23,17 @@ public class KernelExecutor<T extends TileKernel> implements Notifyable{
     startDeadThreadMonitor();
   }
 
-  public void execute(T kernel){
-    System.out.println("Enqueueing Kernel " + kernel.getClass().getName() + " " +kernel.hashCode() + ".");
-    kernelsToRun.add(kernel);
-    assignKernels();
-  }
+    @Override
+    public void execute(Runnable kernel){
+      if(kernel instanceof TileKernel){
+        System.out.println("Enqueueing Kernel " + kernel.getClass().getName() + " " +kernel.hashCode() + ".");
+        kernelsToRun.add((TileKernel)kernel);
+        assignKernels();
+      }else{
+        throw new IllegalArgumentException("KernelExecutor can only process Runnables of class TileKernel!");
+      }
+    }
+
 
   private void startDeadThreadMonitor(){
     monitorThread = new Thread(new Runnable() {
@@ -124,4 +130,6 @@ public class KernelExecutor<T extends TileKernel> implements Notifyable{
   public void dispose() {
     monitorThread.interrupt();
   }
+
+
 }
