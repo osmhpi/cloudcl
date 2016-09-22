@@ -71,14 +71,6 @@ public class KernelExecutor implements Executor, Notifyable{
     }
   }
 
-  private synchronized void processDeadThreads(){
-    for(DynamoThread t:threads){
-      if(!t.isAlive()){
-        notifyListener(t);
-      }
-    }
-  }
-
   private boolean hasFinishedWork(){
     return kernelsToRun.isEmpty() && threads.isEmpty();
   }
