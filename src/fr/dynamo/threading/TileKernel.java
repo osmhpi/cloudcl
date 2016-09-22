@@ -15,6 +15,7 @@ public abstract class TileKernel extends Kernel implements Runnable{
 
   private Range range;
   private DevicePreference devicePreference;
+  private long executionTime = -1;
 
   public TileKernel(Range range) {
     super();
@@ -53,8 +54,15 @@ public abstract class TileKernel extends Kernel implements Runnable{
         }
         break;
     }
-
+    long before = System.currentTimeMillis();
     execute(deviceSpecificRange);
+    long after = System.currentTimeMillis();
+    executionTime = after - before;
+  }
+
+  @Override
+  public double getExecutionTime() {
+    return executionTime;
   }
 
   public DevicePreference getDevicePreference() {
@@ -66,14 +74,14 @@ public abstract class TileKernel extends Kernel implements Runnable{
   }
 
   public double getTransferrableGigabytes(){
-    return getSize() / 1024.0 / 1024 / 1024;
+    return getTransferSize() / 1024.0 / 1024 / 1024;
   }
 
   public long getExpectedTransferTime(NetworkSpeed speed){
     return NetworkEstimator.calculateTranferTime(this, speed);
   }
 
-  public long getSize(){
+  public long getTransferSize(){
     long byteSum = 0;
     Field[] allFields = getClass().getDeclaredFields();
     for(Field f:allFields){

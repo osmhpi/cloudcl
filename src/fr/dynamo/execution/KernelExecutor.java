@@ -3,6 +3,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executor;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import com.amd.aparapi.device.OpenCLDevice;
 import com.amd.aparapi.internal.kernel.KernelRunner;
@@ -12,45 +14,16 @@ import fr.dynamo.threading.DynamoThread;
 import fr.dynamo.threading.TileKernel;
 
 public class KernelExecutor implements Executor, Notifyable{
+
   private final List<TileKernel> kernelsToRun = Collections.synchronizedList(new ArrayList<TileKernel>());
   private final List<DynamoThread> threads = Collections.synchronizedList(new ArrayList<DynamoThread>());
-  private Thread monitorThread;
   private DeviceManager deviceManager = new DeviceManager();
+  private boolean isShutdown = false;
+
 
   public KernelExecutor() {
     super();
     KernelRunner.BINARY_CACHING_DISABLED = true;
-    startDeadThreadMonitor();
-  }
-
-    @Override
-    public void execute(Runnable kernel){
-      if(kernel instanceof TileKernel){
-        System.out.println("Enqueueing Kernel " + kernel.getClass().getName() + " " +kernel.hashCode() + ".");
-        kernelsToRun.add((TileKernel)kernel);
-        assignKernels();
-      }else{
-        throw new IllegalArgumentException("KernelExecutor can only process Runnables of class TileKernel!");
-      }
-    }
-
-
-  private void startDeadThreadMonitor(){
-    monitorThread = new Thread(new Runnable() {
-      @Override
-      public void run() {
-        while(true){
-          try {
-            Thread.sleep(500);
-          } catch (InterruptedException e) {
-            return;
-          }
-
-          processDeadThreads();
-        }
-      }
-    });
-    monitorThread.start();
   }
 
   private synchronized void assignKernels(){
@@ -106,18 +79,8 @@ public class KernelExecutor implements Executor, Notifyable{
     }
   }
 
-  private boolean isDone(){
+  private boolean hasFinishedWork(){
     return kernelsToRun.isEmpty() && threads.isEmpty();
-  }
-
-  public void await(){
-    while(!isDone()){
-      try {
-        Thread.sleep(250);
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-      }
-    }
   }
 
   @Override
@@ -127,9 +90,62 @@ public class KernelExecutor implements Executor, Notifyable{
     assignKernels();
   }
 
-  public void dispose() {
-    monitorThread.interrupt();
+
+  public void shutdown() {
+    isShutdown = true;
   }
 
+  public List<Runnable> shutdownNow() {
+    for(DynamoThread t:threads){
+      t.interrupt();
+    }
+    threads.clear();
+    List<Runnable> waitingTasks =  new ArrayList<>(kernelsToRun);
+    kernelsToRun.clear();
+    isShutdown = true;
+    return waitingTasks;
+  }
+
+  public boolean isShutdown() {
+    return isShutdown;
+  }
+
+  public boolean isTerminated() {
+    return isShutdown() && hasFinishedWork();
+  }
+
+  public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
+    final int interval = 250;
+    long bound = unit.toMillis(timeout);
+    while(!isTerminated()){
+      bound -= interval;
+      if(bound <= 0) return false;
+      Thread.sleep(interval);
+    }
+
+    return true;
+  }
+
+  @Override
+  public void execute(Runnable kernel){
+    if(!isAcceptedInstance(kernel)) throw new RejectedExecutionException("KernelExecutor only accepts instances of type TileKernel.");
+    TileKernel tileKernel = (TileKernel)kernel;
+    enqueue(tileKernel);
+  }
+
+  private void enqueue(TileKernel kernel){
+    System.out.println("Enqueueing Kernel " + kernel.getClass().getName() + " " +kernel.hashCode() + ".");
+    kernelsToRun.add(kernel);
+    assignKernels();
+  }
+
+  private boolean isAcceptedInstance(Runnable r){
+    return r instanceof TileKernel;
+  }
+
+  @Override
+  protected void finalize() {
+    shutdown();
+  }
 
 }

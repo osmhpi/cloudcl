@@ -29,6 +29,7 @@ public class DynamoThread extends Thread{
       System.out.println("Execute Thread " + this.getId() + " on " + device.getShortDescription() + " " + device.getDeviceId());
 
       kernel.execute();
+      System.out.println("Execution of Thread " + this.getId() + " finished after " + kernel.getExecutionTime() + " ms");
       dispose();
     }finally{
       notifyable.notifyListener(this);

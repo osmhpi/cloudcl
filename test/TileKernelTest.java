@@ -25,7 +25,7 @@ public class TileKernelTest {
       }
     };
 
-    assertEquals(40, kernel.getSize());
+    assertEquals(40, kernel.getTransferSize());
   }
 
 
@@ -44,7 +44,7 @@ public class TileKernelTest {
       }
     };
 
-    assertEquals(160, kernel.getSize());
+    assertEquals(160, kernel.getTransferSize());
 
     assertEquals(0.00000014901161, kernel.getTransferrableGigabytes(), 0.001);
 
@@ -64,7 +64,7 @@ public class TileKernelTest {
       }
     };
 
-    assertEquals(40, kernel.getSize());
+    assertEquals(40, kernel.getTransferSize());
 
   }
 }

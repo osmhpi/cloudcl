@@ -5,7 +5,7 @@ import fr.dynamo.threading.TileKernel;
 public class NetworkEstimator {
 
   public static long calculateTranferTime(TileKernel kernel, NetworkSpeed speed){
-    return Math.round(kernel.getSize() / (double)speed.bytesPerSecond * 1000);
+    return Math.round(kernel.getTransferSize() / (double)speed.bytesPerSecond * 1000);
   }
 
 }

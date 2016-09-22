@@ -27,7 +27,7 @@ public class NetworkEstimatorTest {
       }
     };
 
-    assertEquals(4000000, kernel.getSize());
+    assertEquals(4000000, kernel.getTransferSize());
     assertEquals(3200.0, NetworkEstimator.calculateTranferTime(kernel, NetworkSpeed.MBIT10), 0);
     assertEquals(3.0, NetworkEstimator.calculateTranferTime(kernel, NetworkSpeed.GBIT10), 0);
 
