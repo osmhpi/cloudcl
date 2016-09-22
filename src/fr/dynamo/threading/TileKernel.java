@@ -79,7 +79,7 @@ public abstract class TileKernel extends Kernel implements Runnable{
     for(Field f:allFields){
       if(f.getType().isArray()){
         Class<?> type = f.getType();
-        String typeString = f.getType().toString().replace("class [", "");
+        String typeString = type.toString().replace("class [", "");
 
         int length = 0;
         try {
@@ -89,8 +89,6 @@ public abstract class TileKernel extends Kernel implements Runnable{
         } catch (Exception e) {
           e.printStackTrace();
         }
-
-        typeString = typeString.replace("[", "");
 
         if(typeString.length() == 1){
           TypeSpec spec = TypeSpec.valueOf(typeString);
