@@ -13,7 +13,7 @@ import fr.dynamo.ec2.NetworkSpeed;
 
 public abstract class TileKernel extends Kernel implements Runnable{
 
-  private Range range;
+  protected Range range;
   private DevicePreference devicePreference;
   private long executionTime = -1;
 
@@ -33,27 +33,29 @@ public abstract class TileKernel extends Kernel implements Runnable{
     Device device = getTargetDevice();
 
     Range deviceSpecificRange = range;
-
+    System.out.println(range.getDims());
     switch(range.getDims()){
-      case 0:
+      case 1:
         deviceSpecificRange = device.createRange(range.getGlobalSize_0(), range.getLocalSize_0());
         if(!deviceSpecificRange.isValid()){
           deviceSpecificRange = device.createRange(range.getGlobalSize_0());
         }
         break;
-      case 1:
+      case 2:
         deviceSpecificRange = device.createRange2D(range.getGlobalSize_0(), range.getGlobalSize_1(), range.getLocalSize_0(), range.getLocalSize_1());
         if(!deviceSpecificRange.isValid()){
           deviceSpecificRange = device.createRange2D(range.getGlobalSize_0(), range.getGlobalSize_1());
         }
         break;
-      case 2:
+      case 3:
         deviceSpecificRange = device.createRange3D(range.getGlobalSize_0(), range.getGlobalSize_1(), range.getGlobalSize_2(), range.getLocalSize_0(), range.getLocalSize_1(), range.getLocalSize_2());
         if(!deviceSpecificRange.isValid()){
           deviceSpecificRange = device.createRange3D(range.getGlobalSize_0(), range.getGlobalSize_1(), range.getGlobalSize_2());
         }
         break;
     }
+
+    System.out.println("Kernel " + hashCode() + " executing " + deviceSpecificRange);
     long before = System.currentTimeMillis();
     execute(deviceSpecificRange);
     long after = System.currentTimeMillis();
