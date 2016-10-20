@@ -1,6 +1,8 @@
 package fr.dynamo.samples.kmeans;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -12,80 +14,99 @@ import fr.dynamo.execution.KernelExecutor;
 public class Main {
 
   public static void main(String[] args) throws InterruptedException {
+    KernelExecutor executor = new KernelExecutor();
 
-    int pointCount = Integer.parseInt(args[0]);
+    int pointCountPerKernel = Integer.parseInt(args[0]);
     int clusterCount = Integer.parseInt(args[1]);
-    float maxCoordinate = 1000.0f;
-    float diff = 0.01f;
+    int kernelCount = Integer.parseInt(args[2]);
+
+    double maxCoordinate = 1000.0f;
+    double diff = 0.1f;
 
     Random random = new Random(1000);
 
-    float[] coordinatesX = new float[pointCount];
-    float[] coordinatesY = new float[pointCount];
-    int[] relatedClusterIndex = new int[pointCount];
-
-    for(int i = 0; i<pointCount; i++){
-      coordinatesX[i] = random.nextFloat() * maxCoordinate % maxCoordinate;
-      coordinatesY[i] = random.nextFloat() * maxCoordinate % maxCoordinate;
-    }
-
-    float[] centroidCoordinatesX = new float[clusterCount];
-    float[] centroidCoordinatesY = new float[clusterCount];
+    double[] centroidCoordinatesX = new double[clusterCount];
+    double[] centroidCoordinatesY = new double[clusterCount];
 
     for(int i = 0; i<clusterCount; i++){
       centroidCoordinatesX[i] = random.nextFloat() * maxCoordinate % maxCoordinate;
       centroidCoordinatesY[i] = random.nextFloat() * maxCoordinate % maxCoordinate;
     }
 
-    boolean firstIteration = true;
+    List<KMeansKernel> kernels = new ArrayList<KMeansKernel>();
 
-    outer: while(true){
-      KernelExecutor executor = new KernelExecutor();
-      KMeansKernel kernel = new KMeansKernel(Range.create(pointCount, 100), coordinatesX, coordinatesY, relatedClusterIndex, centroidCoordinatesX, centroidCoordinatesY);
-      kernel.setExplicit(true);
+    for(int i = 0; i<kernelCount; i++){
 
-      if(firstIteration){
-        kernel.put(coordinatesX).put(coordinatesY).put(relatedClusterIndex).put(centroidCoordinatesX).put(centroidCoordinatesY);
-        firstIteration = false;
+      double[] coordinatesX = new double[pointCountPerKernel];
+      double[] coordinatesY = new double[pointCountPerKernel];
+      int[] relatedClusterIndex = new int[pointCountPerKernel];
+
+      for(int j = 0; j<pointCountPerKernel; j++){
+        coordinatesX[j] = random.nextFloat() * maxCoordinate % maxCoordinate;
+        coordinatesY[j] = random.nextFloat() * maxCoordinate % maxCoordinate;
       }
 
-      kernel.setDevicePreference(DevicePreference.CPU_ONLY);
-      executor.execute(kernel);
-      executor.shutdown();
-      executor.awaitTermination(1, TimeUnit.DAYS);
-      kernel.get(centroidCoordinatesX).get(centroidCoordinatesY);
+      KMeansKernel kernel = new KMeansKernel(Range.create(pointCountPerKernel, 100), coordinatesX, coordinatesY, relatedClusterIndex, centroidCoordinatesX, centroidCoordinatesY);
+      kernels.add(kernel);
+    }
 
-      float[] oldCentroidsX = centroidCoordinatesX.clone();
-      float[] oldCentroidsY = centroidCoordinatesY.clone();
+    boolean firstIteration = true;
 
-      System.out.println(Arrays.toString(centroidCoordinatesX) + " " + Arrays.toString(centroidCoordinatesY));
+    long before = System.currentTimeMillis();
+    outer: while(true){
+      for(KMeansKernel kernel:kernels){
+        kernel.setExplicit(true);
 
-      updateCentroids(centroidCoordinatesX, centroidCoordinatesY, kernel);
-      System.out.println(Arrays.toString(centroidCoordinatesX) + " " + Arrays.toString(centroidCoordinatesY));
+        if(firstIteration){
+          kernel.put(kernel.coordinatesX).put(kernel.coordinatesY);
+          firstIteration = false;
+        }
+
+        kernel.put(kernel.relatedClusterIndex).put(centroidCoordinatesX).put(centroidCoordinatesY);
+
+        kernel.setDevicePreference(DevicePreference.CPU_ONLY);
+        executor.execute(kernel);
+        executor.shutdown();
+        executor.awaitTermination(1, TimeUnit.DAYS);
+        kernel.get(kernel.relatedClusterIndex);
+      }
+
+      double[] oldCentroidsX = centroidCoordinatesX.clone();
+      double[] oldCentroidsY = centroidCoordinatesY.clone();
+
+      updateCentroids(centroidCoordinatesX, centroidCoordinatesY, kernels);
+
       for(int i=0; i<clusterCount;i++){
         if(Math.abs(oldCentroidsX[i] - centroidCoordinatesX[i]) > diff) continue outer;
         if(Math.abs(oldCentroidsY[i] - centroidCoordinatesY[i]) > diff) continue outer;
       }
-      break;
+
+      break outer;
+
     }
 
     System.out.println("FINAL");
     System.out.println(Arrays.toString(centroidCoordinatesX) + " " + Arrays.toString(centroidCoordinatesY));
+
+    long after = System.currentTimeMillis();
+    System.out.println(after-before + " ms");
   }
 
-  public static void updateCentroids(float[] clusters_x, float[] clusters_y, KMeansKernel kernel){
+  public static void updateCentroids(double[] clusters_x, double[] clusters_y, List<KMeansKernel> kernels){
 
     HashMap<Integer, Centroid> centroids = new HashMap<Integer, Centroid>();
     for(int i=0;i<clusters_x.length;i++){
       centroids.put(i, new Centroid());
     }
 
-    for(int i = 0; i<kernel.relatedClusterIndex.length;i++){
-      int cluster = kernel.relatedClusterIndex[i];
-      float x = kernel.coordinatesX[i];
-      float y = kernel.coordinatesY[i];
+    for(KMeansKernel kernel:kernels){
+      for(int i = 0; i<kernel.relatedClusterIndex.length;i++){
+        int cluster = kernel.relatedClusterIndex[i];
+        double x = kernel.coordinatesX[i];
+        double y = kernel.coordinatesY[i];
 
-      centroids.get(cluster).add(x, y);
+        centroids.get(cluster).add(x, y);
+      }
     }
 
     for(int i = 0; i<centroids.size();i++){
