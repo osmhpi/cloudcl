@@ -63,7 +63,7 @@ public class KernelExecutor implements Executor, Notifyable{
     while(true && t.isAlive()){
       boolean converted = !String.valueOf(t.getKernel().getConversionTime()).equals("NaN");
       try {
-        Thread.sleep(100);
+        Thread.sleep(10);
       } catch (InterruptedException e) {
         e.printStackTrace();
       }
@@ -107,7 +107,7 @@ public class KernelExecutor implements Executor, Notifyable{
   }
 
   public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
-    final int interval = 250;
+    final int interval = 10;
     long bound = unit.toMillis(timeout);
     while(!isTerminated()){
       bound -= interval;
