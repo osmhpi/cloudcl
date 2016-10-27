@@ -3,14 +3,10 @@ package fr.dynamo.ec2;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 import com.amazonaws.auth.AWSCredentialsProvider;
@@ -19,12 +15,7 @@ import com.amazonaws.auth.profile.ProfilesConfigFile;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
-import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
-import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.Instance;
-import com.amazonaws.services.ec2.model.InstanceState;
-import com.amazonaws.services.ec2.model.InstanceStateName;
-import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.ec2.model.RunInstancesRequest;
 import com.amazonaws.services.ec2.model.RunInstancesResult;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
@@ -37,6 +28,8 @@ public class MachineManager {
   private String gpuInstanceType;
   private String keyName;
   private String securityGroup;
+
+  private NodeList nodeList = new NodeList();
 
   public MachineManager(String propertiesPath){
     AWSCredentialsProvider credentials = new ProfileCredentialsProvider(new ProfilesConfigFile(propertiesPath), "default");
@@ -54,7 +47,6 @@ public class MachineManager {
     gpuInstanceType = prop.getProperty("gpu_instance_type");
     keyName = prop.getProperty("key_name");
     securityGroup = prop.getProperty("security_group");
-
   }
 
 
@@ -62,8 +54,7 @@ public class MachineManager {
     return client;
   }
 
-  public List<String> bookInstance(){
-    List<String> instanceIds = new ArrayList<String>();
+  public List<DynamoInstance> bookInstance(){
 
     RunInstancesRequest runInstancesRequest = new RunInstancesRequest();
 
@@ -82,87 +73,54 @@ public class MachineManager {
 
 
     List<Instance> bookedInstances = runInstancesResult.getReservation().getInstances();
+    List<DynamoInstance> dynamoInstances = new ArrayList<DynamoInstance>();
 
-    blockUntilRunning(bookedInstances, 60000);
+    for(Instance instance:bookedInstances){
+      dynamoInstances.add(new DynamoInstance(instance.getInstanceId()));
+    }
+
+    blockUntilRunning(dynamoInstances, 60000);
+
+    collectInstanceInformation(dynamoInstances);
 
     Date after = new Date();
     System.out.println(after.getTime() - before.getTime() + " ms launch time.");
 
-    for(Instance instance:bookedInstances){
-      instanceIds.add(instance.getInstanceId());
-    }
-
-    return instanceIds;
+    return dynamoInstances;
   }
 
-  public Map<String, String> getPublicIps(Collection<String> instanceIds){
-    Map<String, String> publicIps = new HashMap<String, String>();
-
-    DescribeInstancesRequest request =  new DescribeInstancesRequest();
-    request.setInstanceIds(instanceIds);
-
-    DescribeInstancesResult result = client.describeInstances(request);
-    List<Reservation> reservations = result.getReservations();
-
-    List<Instance> instances;
-    for(Reservation res : reservations){
-      instances = res.getInstances();
-      for(Instance ins : instances){
-        publicIps.put(ins.getInstanceId(),ins.getPublicIpAddress());
-      }
+  public void collectInstanceInformation(List<DynamoInstance> instances){
+    for(DynamoInstance instance:instances){
+      instance.collectInformation(client);
     }
-
-    return publicIps;
   }
 
-
-  public void terminateInstances(List<String> instanceIds){
+  public void terminateInstances(List<DynamoInstance> instances){
     System.out.println("Terminating instances.");
+    List<String> instanceIds = new ArrayList<String>();
+    for(DynamoInstance instance:instances){
+      instanceIds.add(instance.getInstanceId());
+      nodeList.removeNode(instance.getPublicIp());
+    }
+
     TerminateInstancesRequest request = new TerminateInstancesRequest(instanceIds);
     client.terminateInstances(request);
     System.out.println("Instances terminated.");
   }
 
 
-  private boolean blockUntilRunning(List<Instance> bookedInstances, long timeout){
-    long start = System.currentTimeMillis();
-    final InstanceState pendingState = new InstanceState().withName(InstanceStateName.Pending.name());
-
-    for(Instance instance:bookedInstances){
-      boolean pending = true;
-      while(pending){
-        if(System.currentTimeMillis() - start > timeout) return false;
-
-        try {
-          Thread.sleep(500);
-        } catch (InterruptedException e) {
-          e.printStackTrace();
-        }
-        DescribeInstancesRequest request = new DescribeInstancesRequest().withInstanceIds(instance.getInstanceId());
-        DescribeInstancesResult describeInstanceResult = client.describeInstances(request);
-
-        if(describeInstanceResult.getReservations().get(0).getInstances().get(0).getState().getCode() != pendingState.getCode()){
-          pending = false;
-        }
-      }
+  private boolean blockUntilRunning(List<DynamoInstance> bookedInstances, long timeout){
+    for(DynamoInstance instance:bookedInstances){
+      if(!instance.blockUntilRunning(client, timeout)) return false;
     }
     return true;
   }
 
-  public boolean blockUntilReachable(Collection<String> instanceIps, long timeout) {
+  public boolean blockUntilReachable(Collection<DynamoInstance> instances, long timeout) {
     System.out.println("Waiting for Instances to be reachable via SSH.");
-    long start = System.currentTimeMillis();
-    outer:for(String ip:instanceIps){
-      while(true){
-        if(System.currentTimeMillis() - start > timeout) return false;
-        try {
-          try (Socket soc = new Socket()) {
-            soc.connect(new InetSocketAddress(ip, 22), 500);
-          }
-          continue outer;
-        } catch (IOException ex) {
-        }
-      }
+    for(DynamoInstance instance:instances){
+      if(!instance.blockUntilReachable(120000)) return false;
+      nodeList.addNode(instance.getPublicIp());
     }
     System.out.println("Instances are reachable via SSH.");
     return true;
