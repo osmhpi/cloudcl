@@ -55,7 +55,7 @@ public class Main {
     long before = System.currentTimeMillis();
     outer: while(true){
       for(KMeansKernel kernel:kernels){
-        kernel.setExplicit(true);
+        //kernel.setExplicit(true);
 
         if(firstIteration){
           kernel.put(kernel.coordinatesX).put(kernel.coordinatesY);
@@ -96,7 +96,7 @@ public class Main {
 
     HashMap<Integer, Centroid> centroids = new HashMap<Integer, Centroid>();
     for(int i=0;i<clusters_x.length;i++){
-      centroids.put(i, new Centroid());
+      centroids.put(i, new Centroid(clusters_x[i], clusters_y[i]));
     }
 
     for(KMeansKernel kernel:kernels){
