@@ -86,6 +86,7 @@ public class DynamoInstance {
 
   public void collectInformation(AmazonEC2 client){
     List<String> instanceId = new ArrayList<String>();
+    instanceId.add(getInstanceId());
     DescribeInstancesRequest request = new DescribeInstancesRequest();
     request.setInstanceIds(instanceId);
 
@@ -93,5 +94,6 @@ public class DynamoInstance {
     List<Reservation> reservations = result.getReservations();
 
     publicIp = reservations.get(0).getInstances().get(0).getPublicIpAddress();
+    System.out.println(publicIp);
   }
 }

@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
@@ -29,9 +28,11 @@ public class MachineManager {
   private String keyName;
   private String securityGroup;
 
-  private NodeList nodeList = new NodeList();
+  private NodeList nodeList;
 
-  public MachineManager(String propertiesPath){
+  public MachineManager(String propertiesPath) throws IOException{
+    nodeList = new NodeList();
+
     AWSCredentialsProvider credentials = new ProfileCredentialsProvider(new ProfilesConfigFile(propertiesPath), "default");
     this.client = AmazonEC2ClientBuilder.standard().withCredentials(credentials).withRegion(Regions.EU_CENTRAL_1).build();
 
@@ -49,19 +50,18 @@ public class MachineManager {
     securityGroup = prop.getProperty("security_group");
   }
 
-
   public AmazonEC2 getClient() {
     return client;
   }
 
-  public List<DynamoInstance> bookInstance(){
+  public List<DynamoInstance> bookInstance(int count){
 
     RunInstancesRequest runInstancesRequest = new RunInstancesRequest();
 
     runInstancesRequest.withImageId(imageId)
     .withInstanceType(cpuInstanceType)
-    .withMinCount(1)
-    .withMaxCount(1)
+    .withMinCount(count)
+    .withMaxCount(count)
     .withKeyName(keyName)
     .withSecurityGroups(securityGroup);
 
@@ -116,7 +116,7 @@ public class MachineManager {
     return true;
   }
 
-  public boolean blockUntilReachable(Collection<DynamoInstance> instances, long timeout) {
+  public boolean blockUntilReachable(List<DynamoInstance> instances, long timeout) {
     System.out.println("Waiting for Instances to be reachable via SSH.");
     for(DynamoInstance instance:instances){
       if(!instance.blockUntilReachable(120000)) return false;

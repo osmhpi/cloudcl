@@ -8,10 +8,15 @@ import java.util.Set;
 
 public class NodeList {
 
-  private final String nodeFilePath = "./dcl.nodes";
+  private final String nodeFilePath;
   private Set<String> nodes = new HashSet<String>();
 
-  public NodeList(){
+  public NodeList() throws IOException{
+    if(System.getenv().containsKey("DCL_NODE_FILE")){
+      nodeFilePath = System.getenv().get("DCL_NODE_FILE");
+    }else{
+      throw new IOException("Environment Variable for DCL_NODE_FILE not defined.");
+    }
     serialize();
   }
 
