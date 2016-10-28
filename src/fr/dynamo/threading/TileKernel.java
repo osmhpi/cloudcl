@@ -16,6 +16,8 @@ public abstract class TileKernel extends Kernel implements Runnable{
   protected Range range;
   private DevicePreference devicePreference;
   private long executionTime = -1;
+  private int remainingTries = 1;
+
 
   public TileKernel(Range range) {
     super();
@@ -33,7 +35,6 @@ public abstract class TileKernel extends Kernel implements Runnable{
     Device device = getTargetDevice();
 
     Range deviceSpecificRange = range;
-    System.out.println(range.getDims());
     switch(range.getDims()){
       case 1:
         deviceSpecificRange = device.createRange(range.getGlobalSize_0(), range.getLocalSize_0());
@@ -57,6 +58,7 @@ public abstract class TileKernel extends Kernel implements Runnable{
 
     System.out.println("Kernel " + hashCode() + " executing " + deviceSpecificRange);
     long before = System.currentTimeMillis();
+
     execute(deviceSpecificRange);
     long after = System.currentTimeMillis();
     executionTime = after - before;
@@ -127,4 +129,15 @@ public abstract class TileKernel extends Kernel implements Runnable{
     return byteSum;
   }
 
+  public int getRemainingTries() {
+    return remainingTries;
+  }
+
+  public void setRemainingTries(int remainingTries) {
+    this.remainingTries = remainingTries;
+  }
+
+  public void reduceRemainingTries(){
+    this.remainingTries--;
+  }
 }

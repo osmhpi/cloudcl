@@ -78,6 +78,11 @@ public class KernelExecutor implements Executor, Notifyable{
   @Override
   public synchronized void notifyListener(Object notifier) {
     DynamoThread thread = (DynamoThread) notifier;
+
+    if(thread.getKernel().getRemainingTries() != 0){
+      kernelsToRun.add(thread.getKernel());
+    }
+
     threads.remove(thread);
     assignKernels();
   }

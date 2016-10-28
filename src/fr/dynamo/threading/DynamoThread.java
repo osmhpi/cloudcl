@@ -1,7 +1,9 @@
 package fr.dynamo.threading;
 import java.util.LinkedHashSet;
 
+import com.amd.aparapi.Kernel.EXECUTION_MODE;
 import com.amd.aparapi.device.Device;
+import com.amd.aparapi.device.Device.TYPE;
 import com.amd.aparapi.device.OpenCLDevice;
 import com.amd.aparapi.internal.kernel.KernelManager;
 
@@ -26,10 +28,24 @@ public class DynamoThread extends Thread{
       LinkedHashSet<Device> preferences = new LinkedHashSet<Device>();
       preferences.add(device);
       KernelManager.instance().setPreferredDevices(kernel, preferences);
-      System.out.println("Execute Thread " + this.getId() + " on " + device.getShortDescription() + " " + device.getDeviceId());
 
-      kernel.execute();
+      if(device.getType() == TYPE.GPU){
+        kernel.setExecutionModeWithoutFallback(EXECUTION_MODE.GPU);
+      }else if(device.getType() == TYPE.CPU){
+        kernel.setExecutionModeWithoutFallback(EXECUTION_MODE.CPU);
+      }
+
+      System.out.println("Execute Thread " + this.getId() + " on " + device.getShortDescription() + " " + device.getDeviceId());
+      try{
+        kernel.execute();
+      }catch(Error e){
+        System.out.println("Thread " + this.getId() + " has failed.");
+        kernel.reduceRemainingTries();
+        throw e;
+      }
+
       System.out.println("Execution of Thread " + this.getId() + " finished after " + kernel.getExecutionTime() + " ms");
+      kernel.setRemainingTries(0);
       dispose();
     }finally{
       notifyable.notifyListener(this);
