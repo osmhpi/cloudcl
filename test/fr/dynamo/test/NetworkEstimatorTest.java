@@ -8,8 +8,8 @@ import com.amd.aparapi.device.Device.TYPE;
 import com.amd.aparapi.device.OpenCLDevice;
 import com.amd.aparapi.internal.opencl.OpenCLPlatform;
 
-import fr.dynamo.ec2.NetworkEstimator;
-import fr.dynamo.ec2.NetworkSpeed;
+import fr.dynamo.performance.NetworkEstimator;
+import fr.dynamo.performance.NetworkSpeed;
 import fr.dynamo.threading.TileKernel;
 
 
