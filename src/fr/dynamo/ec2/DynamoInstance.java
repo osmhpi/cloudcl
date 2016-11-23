@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
@@ -12,37 +14,19 @@ import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.InstanceState;
 import com.amazonaws.services.ec2.model.InstanceStateName;
 import com.amazonaws.services.ec2.model.Reservation;
+import com.amd.aparapi.device.OpenCLDevice;
 
 public class DynamoInstance {
 
+  private static final int DOPENCL_PORT = 25025;
+
   private String instanceId;
   private String publicIp;
+  private Set<OpenCLDevice> devices = new HashSet<OpenCLDevice>();
 
   public DynamoInstance(String instanceId) {
     super();
     this.instanceId = instanceId;
-  }
-
-  public String getInstanceId() {
-    return instanceId;
-  }
-
-  public String getPublicIp() {
-    return publicIp;
-  }
-
-  public void setPublicIp(String publicIp) {
-    this.publicIp = publicIp;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    return ((DynamoInstance)obj).instanceId == instanceId;
-  }
-
-  @Override
-  public String toString(){
-    return instanceId + ": " + publicIp;
   }
 
   public boolean blockUntilRunning(AmazonEC2 client, long timeout){
@@ -76,7 +60,7 @@ public class DynamoInstance {
       if(System.currentTimeMillis() - start > timeout) return false;
       try {
         try (Socket soc = new Socket()) {
-          soc.connect(new InetSocketAddress(getPublicIp(), 22), 500);
+          soc.connect(new InetSocketAddress(getPublicIp(), DOPENCL_PORT), 500);
         }
         return true;
       } catch (IOException ex) {
@@ -95,5 +79,40 @@ public class DynamoInstance {
 
     publicIp = reservations.get(0).getInstances().get(0).getPublicIpAddress();
     System.out.println(publicIp);
+  }
+
+  public String getInstanceId() {
+    return instanceId;
+  }
+
+  public String getPublicIp() {
+    return publicIp;
+  }
+
+  public void setPublicIp(String publicIp) {
+    this.publicIp = publicIp;
+  }
+
+  public Set<OpenCLDevice> getDevices() {
+    return devices;
+  }
+
+  public void setDevices(Set<OpenCLDevice> devices) {
+    this.devices = devices;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    return ((DynamoInstance)obj).instanceId == instanceId;
+  }
+
+  @Override
+  public String toString(){
+    return instanceId + ": " + publicIp;
+  }
+
+  @Override
+  public int hashCode() {
+    return instanceId.hashCode();
   }
 }

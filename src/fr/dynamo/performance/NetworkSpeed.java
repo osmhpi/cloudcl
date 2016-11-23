@@ -1,4 +1,4 @@
-package fr.dynamo.ec2;
+package fr.dynamo.performance;
 
 public enum NetworkSpeed {
   MBIT10  (1250000),

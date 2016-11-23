@@ -100,7 +100,7 @@ public class MachineManager {
     List<String> instanceIds = new ArrayList<String>();
     for(DynamoInstance instance:instances){
       instanceIds.add(instance.getInstanceId());
-      nodeList.removeNode(instance.getPublicIp());
+      nodeList.removeNode(instance);
     }
 
     TerminateInstancesRequest request = new TerminateInstancesRequest(instanceIds);
@@ -120,7 +120,7 @@ public class MachineManager {
     System.out.println("Waiting for Instances to be reachable via SSH.");
     for(DynamoInstance instance:instances){
       if(!instance.blockUntilReachable(120000)) return false;
-      nodeList.addNode(instance.getPublicIp());
+      nodeList.addNode(instance);
     }
     System.out.println("Instances are reachable via SSH.");
     return true;

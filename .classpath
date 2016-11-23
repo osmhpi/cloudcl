@@ -19,7 +19,7 @@
 	<classpathentry kind="lib" path="/Users/florianrosler/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-annotations/2.6.0/a0990e2e812ac6639b6ce955c91b13228500476e/jackson-annotations-2.6.0.jar" sourcepath="/Users/florianrosler/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-annotations/2.6.0/7bcb615d523d88acbc121c92aafeba8d37a83792/jackson-annotations-2.6.0-sources.jar"/>
 	<classpathentry kind="lib" path="/Users/florianrosler/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-core/2.6.6/2eb801df67aacaf5b1deb4ac626e1964508e47b/jackson-core-2.6.6.jar" sourcepath="/Users/florianrosler/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-core/2.6.6/8ee54db2ad9ea0e244c38d584150b3d524b13d80/jackson-core-2.6.6-sources.jar"/>
 	<classpathentry kind="lib" path="/Users/florianrosler/.gradle/caches/modules-2/files-2.1/commons-logging/commons-logging/1.2/4bfc12adfe4842bf07b657f0369c4cb522955686/commons-logging-1.2.jar" sourcepath="/Users/florianrosler/.gradle/caches/modules-2/files-2.1/commons-logging/commons-logging/1.2/ecf26c7507d67782a3bbd148d170b31dfad001aa/commons-logging-1.2-sources.jar"/>
-	<classpathentry kind="lib" path="/Users/florianrosler/Documents/workspace/DynamOpencl/aparapi/com.amd.aparapi/dist/aparapi.jar">
+	<classpathentry combineaccessrules="false" kind="src" path="/com.amd.aparapi">
 		<attributes>
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="/Users/florianrosler/opencl"/>
 		</attributes>

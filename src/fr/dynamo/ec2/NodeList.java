@@ -6,10 +6,13 @@ import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.amd.aparapi.device.OpenCLDevice;
+import com.amd.aparapi.internal.opencl.OpenCLPlatform;
+
 public class NodeList {
 
   private final String nodeFilePath;
-  private Set<String> nodes = new HashSet<String>();
+  private Set<DynamoInstance> nodes = new HashSet<DynamoInstance>();
 
   public NodeList() throws IOException{
     if(System.getenv().containsKey("DCL_NODE_FILE")){
@@ -20,31 +23,45 @@ public class NodeList {
     serialize();
   }
 
-  public void addNode(String ip){
+  public void addNode(DynamoInstance node){
     synchronized(nodes){
-      nodes.add(ip);
+      nodes.add(node);
+      node.setDevices(getDevicesForNode(node));
       serialize();
     }
   }
 
-  public void removeNode(String ip){
+  public void removeNode(DynamoInstance node){
     synchronized(nodes){
-      nodes.remove(ip);
+      nodes.remove(node);
       serialize();
     }
   }
 
-  public String[] getNodes(){
+  public Set<DynamoInstance> getNodes(){
     synchronized(nodes){
-      return (String[]) nodes.toArray();
+      return nodes;
     }
+  }
+
+  private Set<OpenCLDevice> getDevicesForNode(DynamoInstance node){
+    Set<OpenCLDevice> devices = new HashSet<OpenCLDevice>();
+
+    serializeSingleNode(node);
+    for (OpenCLPlatform platform : new OpenCLPlatform().getOpenCLPlatforms()) {
+      for (OpenCLDevice device : platform.getOpenCLDevices()) {
+        devices.add(device);
+      }
+    }
+
+    return devices;
   }
 
   private void serialize(){
     StringBuffer buffer = new StringBuffer();
 
-    for(String node:nodes){
-      buffer.append(node+"\n");
+    for(DynamoInstance node:nodes){
+      buffer.append(node.getPublicIp()+"\n");
     }
 
     try {
@@ -53,6 +70,14 @@ public class NodeList {
       e.printStackTrace();
     }
 
+  }
+
+  private void serializeSingleNode(DynamoInstance node){
+    try {
+      Files.write(Paths.get(nodeFilePath), node.getPublicIp().getBytes());
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
 }

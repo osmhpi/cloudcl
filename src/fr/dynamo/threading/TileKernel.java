@@ -8,8 +8,8 @@ import com.amd.aparapi.device.Device;
 import com.amd.aparapi.internal.instruction.InstructionSet.TypeSpec;
 
 import fr.dynamo.DevicePreference;
-import fr.dynamo.ec2.NetworkEstimator;
-import fr.dynamo.ec2.NetworkSpeed;
+import fr.dynamo.performance.NetworkEstimator;
+import fr.dynamo.performance.NetworkSpeed;
 
 public abstract class TileKernel extends Kernel implements Runnable{
 

@@ -10,6 +10,7 @@ import com.amd.aparapi.device.OpenCLDevice;
 import com.amd.aparapi.internal.kernel.KernelRunner;
 
 import fr.dynamo.Notifyable;
+import fr.dynamo.performance.PerformanceCache;
 import fr.dynamo.threading.DynamoThread;
 import fr.dynamo.threading.TileKernel;
 
@@ -39,7 +40,7 @@ public class KernelExecutor implements Executor, Notifyable{
 
     for(int i = 0; i< kernelsToRun.size(); i++){
       TileKernel kernel = kernelsToRun.get(i);
-      OpenCLDevice device = unusedDevices.findFittingDevice(kernel.getDevicePreference());
+      OpenCLDevice device = unusedDevices.findFittingDevice(kernel, kernel.getDevicePreference());
       if(device == null) continue;
 
       DynamoThread thread = new DynamoThread(kernel, device, this);
@@ -79,7 +80,9 @@ public class KernelExecutor implements Executor, Notifyable{
   public synchronized void notifyListener(Object notifier) {
     DynamoThread thread = (DynamoThread) notifier;
 
-    if(thread.getKernel().getRemainingTries() != 0){
+    if(thread.getKernel().getRemainingTries() == 0){
+      PerformanceCache.getInstance().addPerformanceMeasurement(thread.getKernel(), thread.getDevice(), (long)thread.getKernel().getExecutionTime());
+    }else{
       kernelsToRun.add(thread.getKernel());
     }
 
