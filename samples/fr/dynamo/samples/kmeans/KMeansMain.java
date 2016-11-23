@@ -11,7 +11,7 @@ import com.amd.aparapi.Range;
 import fr.dynamo.DevicePreference;
 import fr.dynamo.execution.KernelExecutor;
 
-public class Main {
+public class KMeansMain {
 
   public static void main(String[] args) throws InterruptedException {
     KernelExecutor executor = new KernelExecutor();

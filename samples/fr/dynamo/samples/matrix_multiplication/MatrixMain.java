@@ -10,8 +10,9 @@ import java.util.concurrent.TimeUnit;
 import com.amd.aparapi.Range;
 
 import fr.dynamo.execution.KernelExecutor;
+import fr.dynamo.performance.PerformanceCache;
 
-public class Main {
+public class MatrixMain {
 
   public static void main(String[] args) throws InterruptedException, FileNotFoundException, IOException {
     final int size = Integer.parseInt(args[0]);
@@ -42,6 +43,7 @@ public class Main {
       Range range = Range.create2D(size, tileWidth, 200, 1);
 
       MatrixKernel kernel = new MatrixKernel(range, a, b, result, tileWidth);
+      //kernel.setDevicePreference(DevicePreference.CPU_ONLY);
       kernels.add(kernel);
     }
 
@@ -68,6 +70,8 @@ public class Main {
     }
 
     System.out.println("Execution took " + (after-before) + " ms.");
+
+    PerformanceCache.getInstance().printStatistics(kernels.get(0));
 
   }
 
