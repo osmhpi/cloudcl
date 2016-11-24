@@ -1,9 +1,9 @@
 package fr.dynamo.samples.mandelbrot;
 import com.amd.aparapi.Range;
 
-import fr.dynamo.threading.TileKernel;
+import fr.dynamo.threading.DynamoKernel;
 
-public class MandelbrotKernel extends TileKernel{
+public class MandelbrotKernel extends DynamoKernel{
 
   final int fullWidth;
   final int fullHeight;
@@ -13,7 +13,7 @@ public class MandelbrotKernel extends TileKernel{
   final boolean[] result;
 
   public MandelbrotKernel(Range range, int fullWidth, int fullHeight, int width, int offsetX, int maxIterations){
-    super(range);
+    super("Mandelbrot", range);
     this.fullHeight = fullHeight;
     this.fullWidth = fullWidth;
     this.width = width;

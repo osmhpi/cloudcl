@@ -11,12 +11,13 @@ import com.amd.aparapi.internal.kernel.KernelRunner;
 
 import fr.dynamo.Notifyable;
 import fr.dynamo.performance.PerformanceCache;
+import fr.dynamo.performance.ProgressMonitor;
+import fr.dynamo.threading.DynamoKernel;
 import fr.dynamo.threading.DynamoThread;
-import fr.dynamo.threading.TileKernel;
 
 public class KernelExecutor implements Executor, Notifyable{
 
-  private final List<TileKernel> kernelsToRun = Collections.synchronizedList(new ArrayList<TileKernel>());
+  private final KernelQueue kernelsToRun = new KernelQueue();
   private final List<DynamoThread> threads = Collections.synchronizedList(new ArrayList<DynamoThread>());
   private DeviceManager deviceManager = new DeviceManager();
   private boolean isShutdown = false;
@@ -34,19 +35,30 @@ public class KernelExecutor implements Executor, Notifyable{
   }
 
   private synchronized List<DynamoThread> buildThreads(){
+    ProgressMonitor.instance().printStatus();
     List<DynamoThread> newThreads = new ArrayList<DynamoThread>();
     DeviceQueue unusedDevices = deviceManager.getUnusedDevices(threads);
-    System.out.println(unusedDevices.size() + " devices available for disposition.");
+    if(unusedDevices.size() == 0){
+      System.out.println("No Devices available at this time. Waiting for another task to finish.");
+      return newThreads;
+    }
 
-    for(int i = 0; i< kernelsToRun.size(); i++){
-      TileKernel kernel = kernelsToRun.get(i);
+    List<DynamoKernel> scheduledKernels = kernelsToRun.buildScheduledList();
+    System.out.println(scheduledKernels.size() + " kernels and " + unusedDevices.size() + " devices available for disposition.");
+
+    for(DynamoKernel kernel:scheduledKernels){
+      if(unusedDevices.size() == 0) kernelsToRun.reject(kernel);
+
       OpenCLDevice device = unusedDevices.findFittingDevice(kernel, kernel.getDevicePreference());
-      if(device == null) continue;
+      if(device == null){
+        kernelsToRun.reject(kernel);
+        continue;
+      }
 
       DynamoThread thread = new DynamoThread(kernel, device, this);
       newThreads.add(thread);
-      kernelsToRun.remove(i);
     }
+
     return newThreads;
   }
 
@@ -87,6 +99,7 @@ public class KernelExecutor implements Executor, Notifyable{
     }
 
     threads.remove(thread);
+    ProgressMonitor.instance().incrementFinished(thread.getKernel().getJobId());
     assignKernels();
   }
 
@@ -100,7 +113,7 @@ public class KernelExecutor implements Executor, Notifyable{
       t.interrupt();
     }
     threads.clear();
-    List<Runnable> waitingTasks =  new ArrayList<>(kernelsToRun);
+    List<Runnable> waitingTasks = new ArrayList<>(kernelsToRun.buildScheduledList());
     kernelsToRun.clear();
     isShutdown = true;
     return waitingTasks;
@@ -129,18 +142,19 @@ public class KernelExecutor implements Executor, Notifyable{
   @Override
   public void execute(Runnable kernel){
     if(!isAcceptedInstance(kernel)) throw new RejectedExecutionException("KernelExecutor only accepts instances of type TileKernel.");
-    TileKernel tileKernel = (TileKernel)kernel;
+    DynamoKernel tileKernel = (DynamoKernel)kernel;
     enqueue(tileKernel);
   }
 
-  private void enqueue(TileKernel kernel){
+  private void enqueue(DynamoKernel kernel){
     System.out.println("Enqueueing Kernel " + kernel.getClass().getName() + " " +kernel.hashCode() + ".");
     kernelsToRun.add(kernel);
+    ProgressMonitor.instance().incrementTotal(kernel.getJobId());
     assignKernels();
   }
 
   private boolean isAcceptedInstance(Runnable r){
-    return r instanceof TileKernel;
+    return r instanceof DynamoKernel;
   }
 
   @Override

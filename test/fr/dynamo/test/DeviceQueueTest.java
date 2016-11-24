@@ -12,7 +12,7 @@ import com.amd.aparapi.internal.opencl.OpenCLPlatform;
 import fr.dynamo.DevicePreference;
 import fr.dynamo.execution.DeviceQueue;
 import fr.dynamo.performance.PerformanceCache;
-import fr.dynamo.threading.TileKernel;
+import fr.dynamo.threading.DynamoKernel;
 
 public class DeviceQueueTest {
 
@@ -39,7 +39,7 @@ public class DeviceQueueTest {
     gpu2.setMaxComputeUnits(2);
   }
 
-  private TileKernel kernel = new TileKernel(Range.create(0)) {
+  private DynamoKernel kernel = new DynamoKernel("Test", Range.create(0)) {
     @Override
     public void run() {
     }

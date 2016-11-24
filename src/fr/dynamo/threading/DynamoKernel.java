@@ -11,22 +11,21 @@ import fr.dynamo.DevicePreference;
 import fr.dynamo.performance.NetworkEstimator;
 import fr.dynamo.performance.NetworkSpeed;
 
-public abstract class TileKernel extends Kernel implements Runnable{
+public abstract class DynamoKernel extends Kernel implements Runnable{
 
   protected Range range;
   private DevicePreference devicePreference;
   private long executionTime = -1;
   private int remainingTries = 1;
+  private String jobId;
 
-
-  public TileKernel(Range range) {
-    super();
-    this.range = range;
-    this.devicePreference = DevicePreference.NONE;
+  public DynamoKernel(String jobId, Range range) {
+    this(jobId, range,DevicePreference.NONE);
   }
 
-  public TileKernel(Range range, DevicePreference devicePreference) {
+  public DynamoKernel(String jobId, Range range, DevicePreference devicePreference) {
     super();
+    this.jobId = jobId;
     this.range = range;
     this.devicePreference = devicePreference;
   }
@@ -140,4 +139,10 @@ public abstract class TileKernel extends Kernel implements Runnable{
   public void reduceRemainingTries(){
     this.remainingTries--;
   }
+
+  public String getJobId() {
+    return jobId;
+  }
+
+
 }

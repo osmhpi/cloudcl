@@ -1,9 +1,9 @@
 package fr.dynamo.samples.matrix_multiplication;
 import com.amd.aparapi.Range;
 
-import fr.dynamo.threading.TileKernel;
+import fr.dynamo.threading.DynamoKernel;
 
-public class MatrixKernel extends TileKernel{
+public class MatrixKernel extends DynamoKernel{
 
   final float[] a;
   final float[] b;
@@ -12,7 +12,7 @@ public class MatrixKernel extends TileKernel{
   final int size_$constant$;
 
   public MatrixKernel(Range range, float[] a, float[] b, float[] result, int size) {
-    super(range);
+    super("Matrix", range);
     this.a = a;
     this.b = b;
     this.result = result;

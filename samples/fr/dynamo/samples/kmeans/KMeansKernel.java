@@ -1,9 +1,9 @@
 package fr.dynamo.samples.kmeans;
 import com.amd.aparapi.Range;
 
-import fr.dynamo.threading.TileKernel;
+import fr.dynamo.threading.DynamoKernel;
 
-public class KMeansKernel extends TileKernel{
+public class KMeansKernel extends DynamoKernel{
 
   public double[] coordinatesX;
   public double[] coordinatesY;
@@ -13,7 +13,7 @@ public class KMeansKernel extends TileKernel{
   private final int centroidsCount_$constant$;
 
   public KMeansKernel(Range range, double[] coordinatesX, double[] coordinatesY, int[] relatedClusterIndex, double[] centroidsX, double[] centroidsY){
-     super(range);
+     super("KMeans", range);
      this.coordinatesX = coordinatesX;
      this.coordinatesY = coordinatesY;
      this.relatedClusterIndex = relatedClusterIndex;

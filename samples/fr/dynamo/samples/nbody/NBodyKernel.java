@@ -1,9 +1,9 @@
 package fr.dynamo.samples.nbody;
 import com.amd.aparapi.Range;
 
-import fr.dynamo.threading.TileKernel;
+import fr.dynamo.threading.DynamoKernel;
 
-public class NBodyKernel extends TileKernel{
+public class NBodyKernel extends DynamoKernel{
 
   public static final float G_$constant$ = 6.673e-11f;   // gravitational constant
   public static final float EPS_$constant$ = 3E4f;
@@ -17,7 +17,7 @@ public class NBodyKernel extends TileKernel{
   public float[] mass;
 
   public NBodyKernel(Range range, float[] x, float[] y, float[] mass) {
-    super(range);
+    super("NBody", range);
     this.x = x;
     this.y = y;
     this.mass = mass;

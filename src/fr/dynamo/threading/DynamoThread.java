@@ -11,11 +11,11 @@ import fr.dynamo.Notifyable;
 
 public class DynamoThread extends Thread{
 
-  private TileKernel kernel;
+  private DynamoKernel kernel;
   private OpenCLDevice device;
   private Notifyable notifyable;
 
-  public DynamoThread(TileKernel kernel, OpenCLDevice device, Notifyable notifyable) {
+  public DynamoThread(DynamoKernel kernel, OpenCLDevice device, Notifyable notifyable) {
     super();
     this.kernel = kernel;
     this.device = device;
@@ -52,7 +52,7 @@ public class DynamoThread extends Thread{
     }
   }
 
-  public TileKernel getKernel() {
+  public DynamoKernel getKernel() {
     return kernel;
   }
 

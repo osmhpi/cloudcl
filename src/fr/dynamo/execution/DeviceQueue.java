@@ -10,7 +10,7 @@ import com.amd.aparapi.device.OpenCLDevice;
 import fr.dynamo.DevicePreference;
 import fr.dynamo.performance.PerformanceCache;
 import fr.dynamo.performance.PerformanceMeasurement;
-import fr.dynamo.threading.TileKernel;
+import fr.dynamo.threading.DynamoKernel;
 
 public class DeviceQueue {
 
@@ -33,7 +33,7 @@ public class DeviceQueue {
     return cpus.size() + gpus.size();
   }
 
-  public OpenCLDevice findFittingDevice(TileKernel kernel, DevicePreference preference){
+  public OpenCLDevice findFittingDevice(DynamoKernel kernel, DevicePreference preference){
     PerformanceMeasurement measurement = PerformanceCache.getInstance().getPerformanceMeasurement(kernel);
     List<String> rankedDeviceNames = new ArrayList<String>();
     for(Entry<String, Long> entry : measurement.getDeviceRanking()){
