@@ -11,14 +11,35 @@ import com.amd.aparapi.internal.opencl.OpenCLPlatform;
 
 import fr.dynamo.DevicePreference;
 import fr.dynamo.execution.DeviceQueue;
+import fr.dynamo.performance.PerformanceCache;
 import fr.dynamo.threading.TileKernel;
 
 public class DeviceQueueTest {
 
   private DeviceQueue deviceQueue = new DeviceQueue();
 
-  private TileKernel kernel = new TileKernel(Range.create(0)) {
+  OpenCLPlatform platform = new OpenCLPlatform();
 
+  OpenCLDevice cpu1 = new OpenCLDevice(platform, 0, TYPE.CPU);
+  OpenCLDevice cpu2 = new OpenCLDevice(platform, 1, TYPE.CPU);
+  OpenCLDevice gpu1 = new OpenCLDevice(platform, 2, TYPE.GPU);
+  OpenCLDevice gpu2 = new OpenCLDevice(platform, 3, TYPE.GPU);
+
+  {
+    cpu1.setName("CPU1");
+    cpu1.setMaxComputeUnits(1);
+
+    cpu2.setName("CPU2");
+    cpu2.setMaxComputeUnits(2);
+
+    gpu1.setName("GPU1");
+    gpu1.setMaxComputeUnits(1);
+
+    gpu2.setName("GPU2");
+    gpu2.setMaxComputeUnits(2);
+  }
+
+  private TileKernel kernel = new TileKernel(Range.create(0)) {
     @Override
     public void run() {
     }
@@ -26,19 +47,11 @@ public class DeviceQueueTest {
 
   @Before
   public void prepare(){
-    OpenCLPlatform platform = new OpenCLPlatform();
-
-    OpenCLDevice device = new OpenCLDevice(platform, 0, TYPE.CPU);
-    deviceQueue.add(device);
-
-    device = new OpenCLDevice(platform, 1, TYPE.CPU);
-    deviceQueue.add(device);
-
-    device = new OpenCLDevice(platform, 2, TYPE.GPU);
-    deviceQueue.add(device);
-
-    device = new OpenCLDevice(platform, 3, TYPE.GPU);
-    deviceQueue.add(device);
+    deviceQueue.add(cpu1);
+    deviceQueue.add(cpu2);
+    deviceQueue.add(gpu1);
+    deviceQueue.add(gpu2);
+    PerformanceCache.getInstance().clear();
   }
 
   @Test
@@ -131,4 +144,34 @@ public class DeviceQueueTest {
     assertEquals(TYPE.GPU, device.getType());
   }
 
+
+  @Test
+  public void testPreferDeviceWithoutMeasurement() {
+    PerformanceCache.getInstance().addPerformanceMeasurement(kernel, cpu1, 10);
+    OpenCLDevice device = deviceQueue.findFittingDevice(kernel, DevicePreference.CPU_PREFERRED);
+    assertEquals(1, device.getDeviceId());
+
+    device = deviceQueue.findFittingDevice(kernel, DevicePreference.CPU_PREFERRED);
+    assertEquals(2, device.getDeviceId());
+  }
+
+  @Test
+  public void testPreferFasterDevice() {
+    PerformanceCache.getInstance().addPerformanceMeasurement(kernel, cpu1, 10);
+    PerformanceCache.getInstance().addPerformanceMeasurement(kernel, cpu2, 20);
+    PerformanceCache.getInstance().addPerformanceMeasurement(kernel, gpu1, 5);
+    PerformanceCache.getInstance().addPerformanceMeasurement(kernel, gpu2, 8);
+
+    OpenCLDevice device = deviceQueue.findFittingDevice(kernel, DevicePreference.NONE);
+    assertEquals(2, device.getDeviceId());
+
+    device = deviceQueue.findFittingDevice(kernel, DevicePreference.NONE);
+    assertEquals(3, device.getDeviceId());
+
+    device = deviceQueue.findFittingDevice(kernel, DevicePreference.NONE);
+    assertEquals(0, device.getDeviceId());
+
+    device = deviceQueue.findFittingDevice(kernel, DevicePreference.NONE);
+    assertEquals(1, device.getDeviceId());
+  }
 }

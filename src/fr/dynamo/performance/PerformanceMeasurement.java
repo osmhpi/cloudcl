@@ -30,30 +30,32 @@ public class PerformanceMeasurement {
   public List<Entry<String, Long>> getDeviceRanking(){
     Map<String, Long> averages = new HashMap<String, Long>();
     for(String key:measurements.keySet()){
-      long sum = 0;
-      long count = 0;
-      for(long l:measurements.get(key)){
-        count++;
-        sum += l;
-      }
-      averages.put(key, sum/count);
+      averages.put(key, average(measurements.get(key)));
     }
-    return entriesSortedByValues(averages);
+    return devicesSortedByPerformance(averages);
   }
 
-  static <K,V extends Comparable<? super V>>
-  List<Entry<K, V>> entriesSortedByValues(Map<K,V> map) {
+  private long average(List<Long> measurements){
+    long sum = 0;
+    long count = 0;
+    for(long l:measurements){
+      count++;
+      sum += l;
+    }
+    return sum/count;
+  }
 
-    List<Entry<K,V>> sortedEntries = new ArrayList<Entry<K,V>>(map.entrySet());
+  private List<Entry<String, Long>> devicesSortedByPerformance(Map<String, Long> map) {
+
+    List<Entry<String, Long>> sortedEntries = new ArrayList<Entry<String, Long>>(map.entrySet());
 
     Collections.sort(sortedEntries,
-        new Comparator<Entry<K,V>>() {
+        new Comparator<Entry<String, Long>>() {
       @Override
-      public int compare(Entry<K,V> e1, Entry<K,V> e2) {
+      public int compare(Entry<String, Long> e1, Entry<String, Long> e2) {
         return e1.getValue().compareTo(e2.getValue());
       }
-    }
-        );
+    });
 
     return sortedEntries;
   }

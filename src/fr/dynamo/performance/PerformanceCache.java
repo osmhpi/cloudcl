@@ -34,7 +34,13 @@ public class PerformanceCache {
 
   public PerformanceMeasurement getPerformanceMeasurement(TileKernel kernel){
     String className = kernel.getClass().getSimpleName();
-    return kernelPerformances.get(className);
+    PerformanceMeasurement performances = kernelPerformances.get(className);
+    if(performances == null) performances = new PerformanceMeasurement();
+    return performances;
+  }
+
+  public void clear(){
+    kernelPerformances.clear();
   }
 
   public void printStatistics(TileKernel kernel){
@@ -43,5 +49,4 @@ public class PerformanceCache {
       System.out.println(entry.getKey() + ": " + entry.getValue() + "ms");
     }
   }
-
 }

@@ -1,10 +1,8 @@
 package fr.dynamo.execution;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.Queue;
 
 import com.amd.aparapi.device.Device.TYPE;
 import com.amd.aparapi.device.OpenCLDevice;
@@ -16,8 +14,8 @@ import fr.dynamo.threading.TileKernel;
 
 public class DeviceQueue {
 
-  private Queue<OpenCLDevice> gpus = new LinkedList<OpenCLDevice>();
-  private Queue<OpenCLDevice> cpus = new LinkedList<OpenCLDevice>();
+  private List<OpenCLDevice> gpus = new ArrayList<OpenCLDevice>();
+  private List<OpenCLDevice> cpus = new ArrayList<OpenCLDevice>();
 
 
   public DeviceQueue(){
@@ -36,46 +34,81 @@ public class DeviceQueue {
   }
 
   public OpenCLDevice findFittingDevice(TileKernel kernel, DevicePreference preference){
-
-    //Choose the device based on previous performance.
     PerformanceMeasurement measurement = PerformanceCache.getInstance().getPerformanceMeasurement(kernel);
-    if(measurement != null){
-      List<OpenCLDevice> devices = new ArrayList<OpenCLDevice>();
-      devices.addAll(cpus);
-      devices.addAll(gpus);
+    List<String> rankedDeviceNames = new ArrayList<String>();
+    for(Entry<String, Long> entry : measurement.getDeviceRanking()){
+      rankedDeviceNames.add(entry.getKey());
+    }
 
-      List<Entry<String, Long>> ranking = measurement.getDeviceRanking();
-      for(Entry<String, Long> entry:ranking){
-        for(OpenCLDevice device:devices){
-          if(entry.getKey().equals(device.getPerformanceIdentifier())){
-            return device;
-          }
-        }
+    List<OpenCLDevice> eligibleDevices = buildEligibleDevices(preference);
+
+    OpenCLDevice device = findDeviceWithoutMeasurements(rankedDeviceNames, eligibleDevices);
+
+    if(device == null){
+      device = findDeviceWithBestRanking(rankedDeviceNames, eligibleDevices);
+    }
+
+    if(device != null){
+      if(device.getType() == TYPE.CPU){
+        cpus.remove(device);
+      }else{
+        gpus.remove(device);
       }
     }
 
-    //If none of the previously used devices is available, choose based on kernel preferences.
+    return device;
+  }
+
+  private List<OpenCLDevice> buildEligibleDevices(DevicePreference preference){
+    List<OpenCLDevice> eligibleDevices = new ArrayList<OpenCLDevice>();
 
     if(preference == DevicePreference.CPU_ONLY){
-      return cpus.poll();
+      eligibleDevices.addAll(cpus);
     }
 
     if(preference == DevicePreference.GPU_ONLY){
-      return gpus.poll();
+      eligibleDevices.addAll(gpus);
     }
 
     if(preference == DevicePreference.CPU_PREFERRED){
-      return cpus.isEmpty() ? gpus.poll() : cpus.poll();
+      eligibleDevices.addAll(cpus);
+      eligibleDevices.addAll(gpus);
     }
 
     if(preference == DevicePreference.GPU_PREFERRED){
-      return gpus.isEmpty() ? cpus.poll() : gpus.poll();
-    }
+      eligibleDevices.addAll(gpus);
+      eligibleDevices.addAll(cpus);
+      }
 
     if(preference == DevicePreference.NONE){
-      return cpus.size() >= gpus.size() ? cpus.poll() : gpus.poll();
+      if(cpus.size() >= gpus.size()){
+        eligibleDevices.addAll(cpus);
+        eligibleDevices.addAll(gpus);
+      }else{
+        eligibleDevices.addAll(gpus);
+        eligibleDevices.addAll(cpus);
+      }
     }
+    return eligibleDevices;
+  }
 
+  private OpenCLDevice findDeviceWithoutMeasurements(List<String> rankedNames, List<OpenCLDevice> devices){
+    for(OpenCLDevice device:devices){
+      if(!rankedNames.contains(device.getPerformanceIdentifier())){
+        return device;
+      }
+    }
+    return null;
+  }
+
+  private OpenCLDevice findDeviceWithBestRanking(List<String> rankedNames, List<OpenCLDevice> devices){
+    for(String name:rankedNames){
+      for(OpenCLDevice device:devices){
+        if(name.equals(device.getPerformanceIdentifier())){
+          return device;
+        }
+      }
+    }
     return null;
   }
 }
