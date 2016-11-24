@@ -61,7 +61,6 @@ public class DynamoThread extends Thread{
   }
 
   public void dispose(){
-    System.out.println("Thread " + this.getId() + " being disposed.");
     kernel.dispose();
   }
 

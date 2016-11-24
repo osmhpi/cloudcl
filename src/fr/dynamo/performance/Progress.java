@@ -9,9 +9,13 @@ public class Progress {
   private AtomicInteger finished = new AtomicInteger(0);;
   private AtomicInteger running = new AtomicInteger(0);;
 
+  private long start;
+  private long end = -1;
+
   public Progress(String jobId) {
     super();
     this.jobId = jobId;
+    start = System.currentTimeMillis();
   }
 
   public int incrementTotal(){
@@ -19,7 +23,11 @@ public class Progress {
   }
 
   public int incrementFinished(){
-    return finished.incrementAndGet();
+    int finishedCount = finished.incrementAndGet();
+    if(total.get() == finishedCount){
+      end = System.currentTimeMillis();
+    }
+    return finishedCount;
   }
 
   public int incrementRunning(){
@@ -49,8 +57,26 @@ public class Progress {
     return running.get();
   }
 
+  public long getExecutionTime(){
+    if(end == -1){
+      return System.currentTimeMillis() - start;
+    }
+    return end - start;
+  }
+
+  public long estimatedRemainingRuntime(){
+    if(getFinished() == 0) return -1;
+
+    int remainingItems = getTotal() - getFinished() - getRunning();
+
+    long timePerItem = getExecutionTime() / getFinished();
+
+    return (remainingItems + getRunning() / 2) * timePerItem;
+  }
+
   @Override
   public String toString() {
-    return "Job: " + getJobId() + " at " + Math.round(getProgress() * 100) + "% (" + getFinished() + "/" + getTotal() + " " + getRunning() + " running).";
+    return "Job: " + getJobId() + " at " + Math.round(getProgress() * 100) + "% (" + getFinished() + "/" +
+            getTotal() + " " + getRunning() + " running) after " + getExecutionTime() + "ms (" + estimatedRemainingRuntime() + "ms remaining estimated).";
   }
 }
