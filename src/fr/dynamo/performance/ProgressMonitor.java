@@ -19,7 +19,7 @@ public class ProgressMonitor {
   public void printStatus(){
     for(String key:stats.keySet()){
       Progress p = stats.get(key);
-      System.out.println("Job: " + p.getJobId() + " at " + Math.round(p.getProgress() * 100) + "%.");
+      System.out.println(p);
     }
   }
 
@@ -31,6 +31,16 @@ public class ProgressMonitor {
   public void incrementFinished(String jobId){
     createIfNonExistant(jobId);
     stats.get(jobId).incrementFinished();
+  }
+
+  public void incrementRunning(String jobId){
+    createIfNonExistant(jobId);
+    stats.get(jobId).incrementRunning();
+  }
+
+  public void decrementRunning(String jobId){
+    createIfNonExistant(jobId);
+    stats.get(jobId).decrementRunning();
   }
 
   private void createIfNonExistant(String jobId){

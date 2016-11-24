@@ -68,6 +68,7 @@ public class KernelExecutor implements Executor, Notifyable{
     for(DynamoThread t:threads){
       t.start();
       awaitConversion(t);
+      ProgressMonitor.instance().incrementRunning(t.getKernel().getJobId());
     }
   }
 
@@ -94,12 +95,13 @@ public class KernelExecutor implements Executor, Notifyable{
 
     if(thread.getKernel().getRemainingTries() == 0){
       PerformanceCache.getInstance().addPerformanceMeasurement(thread.getKernel(), thread.getDevice(), (long)thread.getKernel().getExecutionTime());
+      ProgressMonitor.instance().incrementFinished(thread.getKernel().getJobId());
     }else{
       kernelsToRun.add(thread.getKernel());
     }
 
+    ProgressMonitor.instance().decrementRunning(thread.getKernel().getJobId());
     threads.remove(thread);
-    ProgressMonitor.instance().incrementFinished(thread.getKernel().getJobId());
     assignKernels();
   }
 
