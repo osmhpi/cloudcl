@@ -34,7 +34,7 @@ public class DeviceQueue {
   }
 
   public OpenCLDevice findFittingDevice(DynamoKernel kernel, DevicePreference preference){
-    PerformanceMeasurement measurement = PerformanceCache.getInstance().getPerformanceMeasurement(kernel);
+    PerformanceMeasurement measurement = PerformanceCache.getInstance().getPerformanceMeasurement(kernel.getJob());
     List<String> rankedDeviceNames = new ArrayList<String>();
     for(Entry<String, Long> entry : measurement.getDeviceRanking()){
       rankedDeviceNames.add(entry.getKey());

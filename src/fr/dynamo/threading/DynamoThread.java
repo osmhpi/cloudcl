@@ -25,6 +25,7 @@ public class DynamoThread extends Thread{
   @Override
   public void run() {
     try{
+      getKernel().getJob().submitThread(this);
       LinkedHashSet<Device> preferences = new LinkedHashSet<Device>();
       preferences.add(device);
       KernelManager.instance().setPreferredDevices(kernel, preferences);

@@ -5,9 +5,11 @@ import java.lang.reflect.Field;
 import com.amd.aparapi.Kernel;
 import com.amd.aparapi.Range;
 import com.amd.aparapi.device.Device;
+import com.amd.aparapi.device.OpenCLDevice;
 import com.amd.aparapi.internal.instruction.InstructionSet.TypeSpec;
 
 import fr.dynamo.DevicePreference;
+import fr.dynamo.Notifyable;
 import fr.dynamo.performance.NetworkEstimator;
 import fr.dynamo.performance.NetworkSpeed;
 
@@ -17,17 +19,22 @@ public abstract class DynamoKernel extends Kernel implements Runnable{
   private DevicePreference devicePreference;
   private long executionTime = -1;
   private int remainingTries = 1;
-  private String jobId;
+  private final DynamoJob job;
 
-  public DynamoKernel(String jobId, Range range) {
-    this(jobId, range,DevicePreference.NONE);
+  public DynamoKernel(DynamoJob job, Range range) {
+    this(job, range,DevicePreference.NONE);
   }
 
-  public DynamoKernel(String jobId, Range range, DevicePreference devicePreference) {
+  public DynamoKernel(DynamoJob job, Range range, DevicePreference devicePreference) {
     super();
-    this.jobId = jobId;
+    this.job = job;
     this.range = range;
     this.devicePreference = devicePreference;
+  }
+
+  public DynamoThread buildThread(OpenCLDevice device, Notifyable notifyable){
+    getJob().getKernelsToRun().remove(this);
+    return new DynamoThread(this, device, notifyable);
   }
 
   public void execute(){
@@ -140,8 +147,8 @@ public abstract class DynamoKernel extends Kernel implements Runnable{
     this.remainingTries--;
   }
 
-  public String getJobId() {
-    return jobId;
+  public DynamoJob getJob() {
+    return job;
   }
 
 
