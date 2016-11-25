@@ -1,6 +1,7 @@
 package fr.dynamo.samples.matrix_multiplication;
 import com.amd.aparapi.Range;
 
+import fr.dynamo.threading.DynamoJob;
 import fr.dynamo.threading.DynamoKernel;
 
 public class MatrixKernel extends DynamoKernel{
@@ -11,8 +12,8 @@ public class MatrixKernel extends DynamoKernel{
 
   final int size_$constant$;
 
-  public MatrixKernel(Range range, float[] a, float[] b, float[] result, int size) {
-    super("Matrix", range);
+  public MatrixKernel(DynamoJob job, Range range, float[] a, float[] b, float[] result, int size) {
+    super(job, range);
     this.a = a;
     this.b = b;
     this.result = result;

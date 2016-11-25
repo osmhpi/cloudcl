@@ -2,15 +2,16 @@ package fr.dynamo.samples.matrix_multiplication;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.rmi.UnexpectedException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import com.amd.aparapi.Range;
 
-import fr.dynamo.execution.KernelExecutor;
+import fr.dynamo.DevicePreference;
+import fr.dynamo.execution.DynamoExecutor;
 import fr.dynamo.performance.PerformanceCache;
+import fr.dynamo.threading.DynamoJob;
+import fr.dynamo.threading.DynamoKernel;
 
 public class MatrixMain {
 
@@ -25,9 +26,8 @@ public class MatrixMain {
     Random random = new Random();
     random.setSeed(1000);
 
-    KernelExecutor executor = new KernelExecutor();
+    DynamoJob job = new DynamoJob("Matrix");
 
-    List<MatrixKernel> kernels = new ArrayList<MatrixKernel>();
     for(int tile=0; tile<tiles; tile++){
       final float[] a = new float[tileWidth*size];
       final float[] b = new float[tileWidth*size];
@@ -42,23 +42,19 @@ public class MatrixMain {
 
       Range range = Range.create2D(size, tileWidth, 200, 1);
 
-      MatrixKernel kernel = new MatrixKernel(range, a, b, result, tileWidth);
-      //kernel.setDevicePreference(DevicePreference.CPU_ONLY);
-      kernels.add(kernel);
+      MatrixKernel kernel = new MatrixKernel(job, range, a, b, result, tileWidth);
+      kernel.setDevicePreference(DevicePreference.CPU_ONLY);
+      job.addKernel(kernel);
     }
 
-    long before = System.currentTimeMillis();
-    for(MatrixKernel k:kernels){
-      executor.execute(k);
-    }
+    DynamoExecutor.instance().submit(job);
 
-    executor.shutdown();
-    executor.awaitTermination(1, TimeUnit.DAYS);
-    long after = System.currentTimeMillis();
+    job.awaitTermination(1, TimeUnit.DAYS);
 
     int zeroes = 0;
-    for(MatrixKernel k: kernels){
-      for(float f : k.result){
+    for(DynamoKernel k:job.getFinishedKernels()){
+      MatrixKernel matrixKernel = (MatrixKernel)k;
+      for(float f : matrixKernel.result){
         if(f == 0){
           zeroes++;
         }
@@ -69,10 +65,8 @@ public class MatrixMain {
       throw new UnexpectedException("Checksum error when checking the resulting matrix.");
     }
 
-    System.out.println("Execution took " + (after-before) + " ms.");
-
-    PerformanceCache.getInstance().printStatistics(kernels.get(0));
-
+    PerformanceCache.getInstance().printStatistics(job);
+    System.out.println(job);
   }
 
 }

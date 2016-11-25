@@ -4,7 +4,8 @@ import java.util.concurrent.TimeUnit;
 
 import com.amd.aparapi.Range;
 
-import fr.dynamo.execution.KernelExecutor;
+import fr.dynamo.execution.DynamoExecutor;
+import fr.dynamo.threading.DynamoJob;
 
 public class NBodyDynamo {
 
@@ -12,9 +13,10 @@ public class NBodyDynamo {
   public final static float UNIVERSE_RADIUS = 1e18f;
   public static final float SOLARMASS = 1.98892e30f;
   public static final float DT_$constant$ = 1e14f;
+
   public static void main(String[] args) throws InterruptedException {
 
-    KernelExecutor executor = new KernelExecutor();
+    DynamoJob job = new DynamoJob("NBody");
 
     int particleCount = Integer.parseInt(args[0]);
     float[] x = new float[particleCount];
@@ -32,16 +34,13 @@ public class NBodyDynamo {
       x[i] = (float) Math.abs(random.nextDouble() * UNIVERSE_RADIUS);
       y[i] = (float) Math.abs(random.nextDouble() * UNIVERSE_RADIUS);
       mass[i] = (float) Math.abs(random.nextDouble() * SOLARMASS / 100.0);
-
     }
 
-    NBodyKernel kernel = new NBodyKernel(Range.create(particleCount, 100), x, y, mass);
+    NBodyKernel kernel = new NBodyKernel(job, Range.create(particleCount, 100), x, y, mass);
+    job.addKernel(kernel);
 
-    long before = System.currentTimeMillis();
-    executor.execute(kernel);
-    executor.shutdown();
-    executor.awaitTermination(1, TimeUnit.DAYS);
-
+    DynamoExecutor.instance().submit(job);
+    job.awaitTermination(1, TimeUnit.DAYS);
 
     for (int i = 0; i < particleCount; i++) {
       kernel.vx[i] += DT_$constant$ * kernel.fx[i] / kernel.mass[i];
@@ -49,13 +48,7 @@ public class NBodyDynamo {
       kernel.x[i] += DT_$constant$ * kernel.vx[i];
       kernel.y[i] += DT_$constant$ * kernel.vy[i];
      }
-    long after = System.currentTimeMillis();
 
-    System.out.println(after - before + " ms");
+    System.out.println(kernel.x[0]);
   }
-
-  public static void update(int i, double dt) {
-
-  }
-
 }

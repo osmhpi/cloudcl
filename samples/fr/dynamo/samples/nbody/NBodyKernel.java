@@ -1,6 +1,7 @@
 package fr.dynamo.samples.nbody;
 import com.amd.aparapi.Range;
 
+import fr.dynamo.threading.DynamoJob;
 import fr.dynamo.threading.DynamoKernel;
 
 public class NBodyKernel extends DynamoKernel{
@@ -16,8 +17,8 @@ public class NBodyKernel extends DynamoKernel{
   public float[] fy;
   public float[] mass;
 
-  public NBodyKernel(Range range, float[] x, float[] y, float[] mass) {
-    super("NBody", range);
+  public NBodyKernel(DynamoJob job, Range range, float[] x, float[] y, float[] mass) {
+    super(job, range);
     this.x = x;
     this.y = y;
     this.mass = mass;

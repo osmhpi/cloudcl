@@ -1,6 +1,7 @@
 package fr.dynamo.samples.mandelbrot;
 import com.amd.aparapi.Range;
 
+import fr.dynamo.threading.DynamoJob;
 import fr.dynamo.threading.DynamoKernel;
 
 public class MandelbrotKernel extends DynamoKernel{
@@ -12,8 +13,8 @@ public class MandelbrotKernel extends DynamoKernel{
   final int offsetX;
   final boolean[] result;
 
-  public MandelbrotKernel(Range range, int fullWidth, int fullHeight, int width, int offsetX, int maxIterations){
-    super("Mandelbrot", range);
+  public MandelbrotKernel(DynamoJob job, Range range, int fullWidth, int fullHeight, int width, int offsetX, int maxIterations){
+    super(job, range);
     this.fullHeight = fullHeight;
     this.fullWidth = fullWidth;
     this.width = width;

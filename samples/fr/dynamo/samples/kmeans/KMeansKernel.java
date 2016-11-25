@@ -1,6 +1,7 @@
 package fr.dynamo.samples.kmeans;
 import com.amd.aparapi.Range;
 
+import fr.dynamo.threading.DynamoJob;
 import fr.dynamo.threading.DynamoKernel;
 
 public class KMeansKernel extends DynamoKernel{
@@ -12,8 +13,8 @@ public class KMeansKernel extends DynamoKernel{
   public int[] relatedClusterIndex;
   private final int centroidsCount_$constant$;
 
-  public KMeansKernel(Range range, double[] coordinatesX, double[] coordinatesY, int[] relatedClusterIndex, double[] centroidsX, double[] centroidsY){
-     super("KMeans", range);
+  public KMeansKernel(DynamoJob job, Range range, double[] coordinatesX, double[] coordinatesY, int[] relatedClusterIndex, double[] centroidsX, double[] centroidsY){
+     super(job, range);
      this.coordinatesX = coordinatesX;
      this.coordinatesY = coordinatesY;
      this.relatedClusterIndex = relatedClusterIndex;

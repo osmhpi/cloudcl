@@ -1,5 +1,4 @@
 package fr.dynamo.samples.kmeans;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -9,13 +8,13 @@ import java.util.concurrent.TimeUnit;
 import com.amd.aparapi.Range;
 
 import fr.dynamo.DevicePreference;
-import fr.dynamo.execution.KernelExecutor;
+import fr.dynamo.execution.DynamoExecutor;
+import fr.dynamo.threading.DynamoJob;
+import fr.dynamo.threading.DynamoKernel;
 
 public class KMeansMain {
 
   public static void main(String[] args) throws InterruptedException {
-    KernelExecutor executor = new KernelExecutor();
-
     int pointCountPerKernel = Integer.parseInt(args[0]);
     int clusterCount = Integer.parseInt(args[1]);
     int kernelCount = Integer.parseInt(args[2]);
@@ -33,7 +32,7 @@ public class KMeansMain {
       centroidCoordinatesY[i] = random.nextFloat() * maxCoordinate % maxCoordinate;
     }
 
-    List<KMeansKernel> kernels = new ArrayList<KMeansKernel>();
+    DynamoJob job = new DynamoJob("KMeans");
 
     for(int i = 0; i<kernelCount; i++){
 
@@ -46,35 +45,23 @@ public class KMeansMain {
         coordinatesY[j] = random.nextFloat() * maxCoordinate % maxCoordinate;
       }
 
-      KMeansKernel kernel = new KMeansKernel(Range.create(pointCountPerKernel, 100), coordinatesX, coordinatesY, relatedClusterIndex, centroidCoordinatesX, centroidCoordinatesY);
-      kernels.add(kernel);
+      KMeansKernel kernel = new KMeansKernel(job, Range.create(pointCountPerKernel, 100), coordinatesX, coordinatesY, relatedClusterIndex, centroidCoordinatesX, centroidCoordinatesY);
+      kernel.setDevicePreference(DevicePreference.CPU_ONLY);
+      job.addKernel(kernel);
     }
 
-    boolean firstIteration = true;
-
-    long before = System.currentTimeMillis();
+    int count = 0;
     outer: while(true){
-      for(KMeansKernel kernel:kernels){
-        //kernel.setExplicit(true);
-
-        if(firstIteration){
-          kernel.put(kernel.coordinatesX).put(kernel.coordinatesY);
-          firstIteration = false;
-        }
-
-        kernel.put(kernel.relatedClusterIndex).put(centroidCoordinatesX).put(centroidCoordinatesY);
-
-        kernel.setDevicePreference(DevicePreference.CPU_ONLY);
-        executor.execute(kernel);
-        executor.shutdown();
-        executor.awaitTermination(1, TimeUnit.DAYS);
-        kernel.get(kernel.relatedClusterIndex);
-      }
+      System.out.println("Iteration: " + count++);
+      DynamoExecutor.instance().submit(job);
+      job.awaitTermination(1, TimeUnit.DAYS);
 
       double[] oldCentroidsX = centroidCoordinatesX.clone();
       double[] oldCentroidsY = centroidCoordinatesY.clone();
 
-      updateCentroids(centroidCoordinatesX, centroidCoordinatesY, kernels);
+      updateCentroids(centroidCoordinatesX, centroidCoordinatesY, job.getFinishedKernels());
+
+      job.reset();
 
       for(int i=0; i<clusterCount;i++){
         if(Math.abs(oldCentroidsX[i] - centroidCoordinatesX[i]) > diff) continue outer;
@@ -87,19 +74,17 @@ public class KMeansMain {
 
     System.out.println("FINAL");
     System.out.println(Arrays.toString(centroidCoordinatesX) + " " + Arrays.toString(centroidCoordinatesY));
-
-    long after = System.currentTimeMillis();
-    System.out.println(after-before + " ms");
   }
 
-  public static void updateCentroids(double[] clusters_x, double[] clusters_y, List<KMeansKernel> kernels){
+  public static void updateCentroids(double[] clusters_x, double[] clusters_y, List<DynamoKernel> kernels){
 
     HashMap<Integer, Centroid> centroids = new HashMap<Integer, Centroid>();
     for(int i=0;i<clusters_x.length;i++){
       centroids.put(i, new Centroid(clusters_x[i], clusters_y[i]));
     }
 
-    for(KMeansKernel kernel:kernels){
+    for(DynamoKernel k:kernels){
+      KMeansKernel kernel = (KMeansKernel)k;
       for(int i = 0; i<kernel.relatedClusterIndex.length;i++){
         int cluster = kernel.relatedClusterIndex[i];
         double x = kernel.coordinatesX[i];
