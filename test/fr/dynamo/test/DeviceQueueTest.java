@@ -12,6 +12,7 @@ import com.amd.aparapi.internal.opencl.OpenCLPlatform;
 import fr.dynamo.DevicePreference;
 import fr.dynamo.execution.DeviceQueue;
 import fr.dynamo.performance.PerformanceCache;
+import fr.dynamo.threading.DynamoJob;
 import fr.dynamo.threading.DynamoKernel;
 
 public class DeviceQueueTest {
@@ -39,7 +40,7 @@ public class DeviceQueueTest {
     gpu2.setMaxComputeUnits(2);
   }
 
-  private DynamoKernel kernel = new DynamoKernel("Test", Range.create(0)) {
+  private DynamoKernel kernel = new DynamoKernel(new DynamoJob("Test"), Range.create(0)) {
     @Override
     public void run() {
     }
@@ -145,33 +146,4 @@ public class DeviceQueueTest {
   }
 
 
-  @Test
-  public void testPreferDeviceWithoutMeasurement() {
-    PerformanceCache.getInstance().addPerformanceMeasurement(kernel, cpu1, 10);
-    OpenCLDevice device = deviceQueue.findFittingDevice(kernel, DevicePreference.CPU_PREFERRED);
-    assertEquals(1, device.getDeviceId());
-
-    device = deviceQueue.findFittingDevice(kernel, DevicePreference.CPU_PREFERRED);
-    assertEquals(2, device.getDeviceId());
-  }
-
-  @Test
-  public void testPreferFasterDevice() {
-    PerformanceCache.getInstance().addPerformanceMeasurement(kernel, cpu1, 10);
-    PerformanceCache.getInstance().addPerformanceMeasurement(kernel, cpu2, 20);
-    PerformanceCache.getInstance().addPerformanceMeasurement(kernel, gpu1, 5);
-    PerformanceCache.getInstance().addPerformanceMeasurement(kernel, gpu2, 8);
-
-    OpenCLDevice device = deviceQueue.findFittingDevice(kernel, DevicePreference.NONE);
-    assertEquals(2, device.getDeviceId());
-
-    device = deviceQueue.findFittingDevice(kernel, DevicePreference.NONE);
-    assertEquals(3, device.getDeviceId());
-
-    device = deviceQueue.findFittingDevice(kernel, DevicePreference.NONE);
-    assertEquals(0, device.getDeviceId());
-
-    device = deviceQueue.findFittingDevice(kernel, DevicePreference.NONE);
-    assertEquals(1, device.getDeviceId());
-  }
 }

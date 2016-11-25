@@ -8,6 +8,7 @@ import com.amd.aparapi.device.Device.TYPE;
 import com.amd.aparapi.device.OpenCLDevice;
 import com.amd.aparapi.internal.opencl.OpenCLPlatform;
 
+import fr.dynamo.threading.DynamoJob;
 import fr.dynamo.threading.DynamoKernel;
 
 
@@ -17,7 +18,7 @@ public class TileKernelTest {
   public void testGetSize() {
     OpenCLDevice device = new OpenCLDevice(new OpenCLPlatform(), 1, TYPE.CPU);
     Range range = new Range(device, 1);
-    DynamoKernel kernel = new DynamoKernel("Test", range) {
+    DynamoKernel kernel = new DynamoKernel(new DynamoJob("Test"), range) {
 
       private int[] x = new int[]{1,2,3,4,5,6,7,8,9,10};
 
@@ -34,7 +35,7 @@ public class TileKernelTest {
   public void testGetSizeComplex() {
     OpenCLDevice device = new OpenCLDevice(new OpenCLPlatform(), 1, TYPE.CPU);
     Range range = new Range(device, 1);
-    DynamoKernel kernel = new DynamoKernel("Test", range) {
+    DynamoKernel kernel = new DynamoKernel(new DynamoJob("Test"), range) {
 
       private int[] ints = new int[]{1,2,3,4,5,6,7,8,9,10};
       private double[] doubles = new double[]{1,2,3,4,5,6,7,8,9,10};
@@ -56,7 +57,7 @@ public class TileKernelTest {
   public void testGetSizeNestedObject() {
     OpenCLDevice device = new OpenCLDevice(new OpenCLPlatform(), 1, TYPE.CPU);
     Range range = new Range(device, 1);
-    DynamoKernel kernel = new DynamoKernel("Test", range) {
+    DynamoKernel kernel = new DynamoKernel(new DynamoJob("Test"), range) {
 
       private SimpleBean[] objects = new SimpleBean[]{new SimpleBean(1, 1),new SimpleBean(1, 1),new SimpleBean(1, 1),new SimpleBean(1, 1),new SimpleBean(1, 1)};
 

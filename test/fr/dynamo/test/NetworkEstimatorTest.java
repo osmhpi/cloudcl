@@ -10,6 +10,7 @@ import com.amd.aparapi.internal.opencl.OpenCLPlatform;
 
 import fr.dynamo.performance.NetworkEstimator;
 import fr.dynamo.performance.NetworkSpeed;
+import fr.dynamo.threading.DynamoJob;
 import fr.dynamo.threading.DynamoKernel;
 
 
@@ -19,7 +20,7 @@ public class NetworkEstimatorTest {
   public void testGetSize() {
     OpenCLDevice device = new OpenCLDevice(new OpenCLPlatform(), 1, TYPE.CPU);
     Range range = new Range(device, 1);
-    DynamoKernel kernel = new DynamoKernel("Test", range) {
+    DynamoKernel kernel = new DynamoKernel(new DynamoJob("Test"), range) {
 
       private int[] x = new int[1000000];
 
