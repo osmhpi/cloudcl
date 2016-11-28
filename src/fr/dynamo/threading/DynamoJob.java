@@ -12,12 +12,13 @@ public class DynamoJob {
 
   private final String jobName;
   private final String id;
-  private final List< DynamoKernel> kernelsToRun = Collections.synchronizedList(new ArrayList<DynamoKernel>());
+  private final List<DynamoKernel> kernelsToRun = Collections.synchronizedList(new ArrayList<DynamoKernel>());
   private final List<DynamoThread> runningThreads = Collections.synchronizedList(new ArrayList<DynamoThread>());
   private final List<DynamoKernel> finishedKernels = Collections.synchronizedList(new ArrayList<DynamoKernel>());
   private boolean terminated = false;
   private long start = System.currentTimeMillis();
   private long end = -1;
+  private int iteration = 1;
 
   public DynamoJob(String jobId) {
     super();
@@ -47,6 +48,7 @@ public class DynamoJob {
     finishedKernels.add(thread.getKernel());
     runningThreads.remove(thread);
 
+    end = System.currentTimeMillis();
     terminated = kernelsToRun.isEmpty() && runningThreads.isEmpty();
   }
 
@@ -72,6 +74,9 @@ public class DynamoJob {
       finishedKernels.clear();
     }
 
+    iteration++;
+    end = -1;
+
     terminated = kernelsToRun.isEmpty() && runningThreads.isEmpty();
   }
 
@@ -85,6 +90,10 @@ public class DynamoJob {
 
   public int remaining(){
     return kernelsToRun.size();
+  }
+
+  public int getIteration() {
+    return iteration;
   }
 
   public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
@@ -129,9 +138,42 @@ public class DynamoJob {
     return (remaining() + running() / 2) * timePerItem;
   }
 
+  public void cleanUp(){
+    for(DynamoKernel k:kernelsToRun){
+      k.dispose();
+    }
+
+    for(DynamoKernel k:finishedKernels){
+      k.dispose();
+    }
+
+    for(Thread t:runningThreads){
+      if(t.isAlive()){
+       t.interrupt();
+      }
+    }
+
+    kernelsToRun.clear();
+    runningThreads.clear();
+    finishedKernels.clear();
+  }
+
   @Override
   public String toString() {
     return "Job: " + getName() + " (" + getId() +") at " + Math.round(getProgress() * 100) + "% (" + finished() + "/" +
             total() + " " + running() + " running) after " + getExecutionTime() + "ms (" + estimatedRemainingRuntime() + "ms remaining estimated).";
+  }
+
+  @Override
+  public int hashCode() {
+    return getId().hashCode();
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if(obj instanceof DynamoJob){
+      return getId().equals(((DynamoJob)obj).getId());
+    }
+    return false;
   }
 }

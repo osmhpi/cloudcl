@@ -67,6 +67,8 @@ public class MatrixMain {
 
     PerformanceCache.getInstance().printStatistics(job);
     System.out.println(job);
+
+    job.cleanUp();
   }
 
 }

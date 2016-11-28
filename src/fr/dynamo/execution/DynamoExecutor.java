@@ -1,8 +1,10 @@
 package fr.dynamo.execution;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import com.amd.aparapi.device.OpenCLDevice;
 import com.amd.aparapi.internal.kernel.KernelRunner;
@@ -15,7 +17,7 @@ import fr.dynamo.threading.DynamoThread;
 public class DynamoExecutor implements Notifyable{
 
   private DeviceManager deviceManager = new DeviceManager();
-  private List<DynamoJob> jobs = Collections.synchronizedList(new ArrayList<DynamoJob>());
+  private Set<DynamoJob> jobs = Collections.synchronizedSet(new HashSet<DynamoJob>());
 
   private static DynamoExecutor instance;
 
@@ -125,6 +127,10 @@ public class DynamoExecutor implements Notifyable{
     }
 
     assignKernels();
+  }
+
+  public Set<DynamoJob> getJobs() {
+    return jobs;
   }
 
 }

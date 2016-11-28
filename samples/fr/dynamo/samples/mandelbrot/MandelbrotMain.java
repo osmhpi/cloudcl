@@ -58,7 +58,7 @@ public class MandelbrotMain {
     } catch (IOException e) {
       e.printStackTrace();
     }
-
+    job.cleanUp();
   }
 
 

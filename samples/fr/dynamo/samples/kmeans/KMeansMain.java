@@ -53,6 +53,7 @@ public class KMeansMain {
     int count = 0;
     outer: while(true){
       System.out.println("Iteration: " + count++);
+      job.reset();
       DynamoExecutor.instance().submit(job);
       job.awaitTermination(1, TimeUnit.DAYS);
 
@@ -60,8 +61,6 @@ public class KMeansMain {
       double[] oldCentroidsY = centroidCoordinatesY.clone();
 
       updateCentroids(centroidCoordinatesX, centroidCoordinatesY, job.getFinishedKernels());
-
-      job.reset();
 
       for(int i=0; i<clusterCount;i++){
         if(Math.abs(oldCentroidsX[i] - centroidCoordinatesX[i]) > diff) continue outer;
@@ -74,6 +73,7 @@ public class KMeansMain {
 
     System.out.println("FINAL");
     System.out.println(Arrays.toString(centroidCoordinatesX) + " " + Arrays.toString(centroidCoordinatesY));
+    job.cleanUp();
   }
 
   public static void updateCentroids(double[] clusters_x, double[] clusters_y, List<DynamoKernel> kernels){

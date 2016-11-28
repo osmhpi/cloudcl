@@ -13,7 +13,7 @@ build.dependsOn { copyRuntimeLibs }
 sourceSets {
     main {
         java {
-            srcDirs 'src'
+            srcDirs = ["src","samples"]
         }
     }
 
@@ -58,7 +58,7 @@ jar {
 }
 
 task copyRuntimeLibs(type: Copy) {
-	into new File(project.buildDir, "/libs/dependencies/")
+	into new File(project.buildDir, "/libs/lib/")
 	
 	from configurations.runtime
 
