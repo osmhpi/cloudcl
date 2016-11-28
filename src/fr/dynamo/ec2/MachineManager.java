@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
@@ -14,7 +13,10 @@ import com.amazonaws.auth.profile.ProfilesConfigFile;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
+import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
+import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.Instance;
+import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.ec2.model.RunInstancesRequest;
 import com.amazonaws.services.ec2.model.RunInstancesResult;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
@@ -28,11 +30,24 @@ public class MachineManager {
   private String keyName;
   private String securityGroup;
 
-  private NodeList nodeList;
+  private static String propertiesPath;
+  private static MachineManager instance;
 
-  public MachineManager(String propertiesPath) throws IOException{
-    nodeList = new NodeList();
+  public static MachineManager getInstance(){
+    if(instance == null)
+      try {
+        instance = new MachineManager(propertiesPath);
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    return instance;
+  }
 
+  public static void setup(String pathToPropertiesFile){
+    propertiesPath = pathToPropertiesFile;
+  }
+
+  private MachineManager(String propertiesPath) throws IOException{
     AWSCredentialsProvider credentials = new ProfileCredentialsProvider(new ProfilesConfigFile(propertiesPath), "default");
     this.client = AmazonEC2ClientBuilder.standard().withCredentials(credentials).withRegion(Regions.EU_CENTRAL_1).build();
 
@@ -48,6 +63,26 @@ public class MachineManager {
     gpuInstanceType = prop.getProperty("gpu_instance_type");
     keyName = prop.getProperty("key_name");
     securityGroup = prop.getProperty("security_group");
+
+    discoverExistingInstances();
+  }
+
+  private void discoverExistingInstances(){
+    System.out.println("Discover already running instances.");
+    List<DynamoInstance> dynamoInstances = new ArrayList<DynamoInstance>();
+
+    DescribeInstancesRequest request = new DescribeInstancesRequest();
+    DescribeInstancesResult result = getClient().describeInstances(request);
+    List<Reservation> reservations = result.getReservations();
+
+    for (Reservation reservation : reservations) {
+      List<Instance> instances = reservation.getInstances();
+      for(Instance i:instances){
+        if(i.getImageId().equals(imageId));
+        dynamoInstances.add(new DynamoInstance(i.getInstanceId()));
+      }
+    }
+    initializeInstances(dynamoInstances);
   }
 
   public AmazonEC2 getClient() {
@@ -65,7 +100,6 @@ public class MachineManager {
     .withKeyName(keyName)
     .withSecurityGroups(securityGroup);
 
-    Date before = new Date();
     RunInstancesResult runInstancesResult = client.runInstances(runInstancesRequest);
 
     System.out.println(runInstancesResult.getReservation().getInstances().size() + " instances launched.");
@@ -79,14 +113,20 @@ public class MachineManager {
       dynamoInstances.add(new DynamoInstance(instance.getInstanceId()));
     }
 
+    initializeInstances(dynamoInstances);
+    return dynamoInstances;
+  }
+
+  private void initializeInstances(List<DynamoInstance> dynamoInstances){
+    System.out.println("Launching " + dynamoInstances.size() + " instances.");
+
     blockUntilRunning(dynamoInstances, 60000);
 
     collectInstanceInformation(dynamoInstances);
 
-    Date after = new Date();
-    System.out.println(after.getTime() - before.getTime() + " ms launch time.");
+    blockUntilReachable(dynamoInstances, 120000);
+    System.out.println(dynamoInstances.size() + " instances available now.");
 
-    return dynamoInstances;
   }
 
   public void collectInstanceInformation(List<DynamoInstance> instances){
@@ -100,7 +140,7 @@ public class MachineManager {
     List<String> instanceIds = new ArrayList<String>();
     for(DynamoInstance instance:instances){
       instanceIds.add(instance.getInstanceId());
-      nodeList.removeNode(instance);
+      NodeList.getInstance().removeNode(instance);
     }
 
     TerminateInstancesRequest request = new TerminateInstancesRequest(instanceIds);
@@ -119,8 +159,8 @@ public class MachineManager {
   public boolean blockUntilReachable(List<DynamoInstance> instances, long timeout) {
     System.out.println("Waiting for Instances to be reachable via SSH.");
     for(DynamoInstance instance:instances){
-      if(!instance.blockUntilReachable(120000)) return false;
-      nodeList.addNode(instance);
+      if(!instance.blockUntilReachable(timeout)) return false;
+      NodeList.getInstance().addNode(instance);
     }
     System.out.println("Instances are reachable via SSH.");
     return true;

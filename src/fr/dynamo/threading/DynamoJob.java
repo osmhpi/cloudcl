@@ -3,8 +3,11 @@ package fr.dynamo.threading;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+
+import com.amd.aparapi.device.OpenCLDevice;
 
 import fr.dynamo.performance.PerformanceCache;
 
@@ -62,6 +65,18 @@ public class DynamoJob {
 
   public List<DynamoThread> getThreads() {
     return runningThreads;
+  }
+
+  public List<OpenCLDevice> getActiveDevices() {
+    List<OpenCLDevice> devices = new ArrayList<OpenCLDevice>();
+    for(DynamoThread thread:runningThreads){
+      devices.add(thread.getDevice());
+    }
+    return devices;
+  }
+
+  public List<Entry<String, Long>> getPerformanceStats(){
+    return PerformanceCache.getInstance().getPerformanceMeasurement(this).getDeviceRanking();
   }
 
   public void submitThread(DynamoThread thread){

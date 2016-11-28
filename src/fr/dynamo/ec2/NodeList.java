@@ -14,13 +14,26 @@ public class NodeList {
   private final String nodeFilePath;
   private Set<DynamoInstance> nodes = new HashSet<DynamoInstance>();
 
-  public NodeList() throws IOException{
+  private static NodeList instance;
+
+  private NodeList() throws IOException{
     if(System.getenv().containsKey("DCL_NODE_FILE")){
       nodeFilePath = System.getenv().get("DCL_NODE_FILE");
     }else{
       throw new IOException("Environment Variable for DCL_NODE_FILE not defined.");
     }
     serialize();
+  }
+
+  public static NodeList getInstance(){
+    if(instance == null)
+      try {
+        instance = new NodeList();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+
+    return instance;
   }
 
   public void addNode(DynamoInstance node){
