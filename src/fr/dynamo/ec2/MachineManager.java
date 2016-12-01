@@ -25,11 +25,9 @@ public class MachineManager {
 
   private AmazonEC2 client;
   private String imageId;
-  private String cpuInstanceType;
-  private String gpuInstanceType;
   private String keyName;
   private String securityGroup;
-
+  private String regionName;
   private static String propertiesPath;
   private static MachineManager instance;
 
@@ -48,21 +46,20 @@ public class MachineManager {
   }
 
   private MachineManager(String propertiesPath) throws IOException{
-    AWSCredentialsProvider credentials = new ProfileCredentialsProvider(new ProfilesConfigFile(propertiesPath), "default");
-    this.client = AmazonEC2ClientBuilder.standard().withCredentials(credentials).withRegion(Regions.EU_CENTRAL_1).build();
-
     Properties prop = new Properties();
     try {
       prop.load(new FileInputStream(new File(propertiesPath)));
     } catch (IOException e) {
       e.printStackTrace();
     }
-
     imageId = prop.getProperty("image_id");
-    cpuInstanceType = prop.getProperty("cpu_instance_type");
-    gpuInstanceType = prop.getProperty("gpu_instance_type");
     keyName = prop.getProperty("key_name");
     securityGroup = prop.getProperty("security_group");
+
+    regionName = prop.getProperty("aws_region");
+
+    AWSCredentialsProvider credentials = new ProfileCredentialsProvider(new ProfilesConfigFile(propertiesPath), "default");
+    this.client = AmazonEC2ClientBuilder.standard().withCredentials(credentials).withRegion(Regions.fromName(regionName)).build();
 
     discoverExistingInstances();
   }
@@ -78,8 +75,9 @@ public class MachineManager {
     for (Reservation reservation : reservations) {
       List<Instance> instances = reservation.getInstances();
       for(Instance i:instances){
-        if(i.getImageId().equals(imageId));
-        dynamoInstances.add(new DynamoInstance(i.getInstanceId()));
+        if(i.getImageId().equals(imageId) && !i.getState().getName().toString().equals("terminated")){
+          dynamoInstances.add(new DynamoInstance(i.getInstanceId()));
+        }
       }
     }
     initializeInstances(dynamoInstances);
@@ -89,12 +87,12 @@ public class MachineManager {
     return client;
   }
 
-  public List<DynamoInstance> bookInstance(int count){
+  public List<DynamoInstance> bookInstance(int count, String type){
 
     RunInstancesRequest runInstancesRequest = new RunInstancesRequest();
 
     runInstancesRequest.withImageId(imageId)
-    .withInstanceType(cpuInstanceType)
+    .withInstanceType(type)
     .withMinCount(count)
     .withMaxCount(count)
     .withKeyName(keyName)
@@ -164,6 +162,22 @@ public class MachineManager {
     }
     System.out.println("Instances are reachable via SSH.");
     return true;
+  }
+
+  public String getImageId() {
+    return imageId;
+  }
+
+  public String getKeyName() {
+    return keyName;
+  }
+
+  public String getSecurityGroup() {
+    return securityGroup;
+  }
+
+  public String getRegion() {
+    return regionName;
   }
 
 }
