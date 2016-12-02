@@ -57,11 +57,24 @@ public class NodeList {
     }
   }
 
+  public Set<OpenCLDevice> getAllDevices(){
+    Set<OpenCLDevice> devices = new HashSet<OpenCLDevice>();
+    synchronized(nodes){
+      for (OpenCLPlatform platform : OpenCLPlatform.getUncachedOpenCLPlatforms()) {
+        for (OpenCLDevice device : platform.getOpenCLDevices()) {
+          devices.add(device);
+        }
+      }
+    }
+    return devices;
+  }
+
   private Set<OpenCLDevice> getDevicesForNode(DynamoInstance node){
     Set<OpenCLDevice> devices = new HashSet<OpenCLDevice>();
 
     serializeSingleNode(node);
-    for (OpenCLPlatform platform : new OpenCLPlatform().getOpenCLPlatforms()) {
+
+    for (OpenCLPlatform platform : OpenCLPlatform.getUncachedOpenCLPlatforms()) {
       for (OpenCLDevice device : platform.getOpenCLDevices()) {
         devices.add(device);
       }

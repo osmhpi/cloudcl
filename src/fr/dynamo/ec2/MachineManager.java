@@ -21,6 +21,8 @@ import com.amazonaws.services.ec2.model.RunInstancesRequest;
 import com.amazonaws.services.ec2.model.RunInstancesResult;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
 
+import fr.dynamo.execution.DynamoExecutor;
+
 public class MachineManager {
 
   private AmazonEC2 client;
@@ -112,6 +114,9 @@ public class MachineManager {
     }
 
     initializeInstances(dynamoInstances);
+
+    DynamoExecutor.instance().triggerAssignment();
+
     return dynamoInstances;
   }
 
@@ -159,6 +164,7 @@ public class MachineManager {
     for(DynamoInstance instance:instances){
       if(!instance.blockUntilReachable(timeout)) return false;
       NodeList.getInstance().addNode(instance);
+      System.out.println(NodeList.getInstance().getAllDevices().size() + " devices in the cluster now.");
     }
     System.out.println("Instances are reachable via SSH.");
     return true;

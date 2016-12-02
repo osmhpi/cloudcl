@@ -37,6 +37,11 @@ public class DynamoExecutor implements Notifyable{
     assignKernels();
   }
 
+  public void triggerAssignment(){
+    System.out.println("Assignment of kernels to devices has been triggered externally.");
+    assignKernels();
+  }
+
   private synchronized void assignKernels(){
     List<DynamoThread> builtThreads = buildThreads();
     start(builtThreads);
