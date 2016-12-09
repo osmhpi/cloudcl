@@ -7,9 +7,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.amd.aparapi.device.OpenCLDevice;
+import com.amd.aparapi.internal.jni.OpenCLJNI;
 import com.amd.aparapi.internal.opencl.OpenCLPlatform;
 
-public class NodeList {
+public class NodeList extends OpenCLJNI{
 
   private final String nodeFilePath;
   private Set<DynamoInstance> nodes = new HashSet<DynamoInstance>();
@@ -23,7 +24,8 @@ public class NodeList {
       throw new IOException("Environment Variable for DCL_NODE_FILE not defined.");
     }
     serialize();
-  }
+    OpenCLPlatform.getUncachedOpenCLPlatforms();
+ }
 
   public static NodeList getInstance(){
     if(instance == null)
@@ -38,9 +40,13 @@ public class NodeList {
 
   public void addNode(DynamoInstance node){
     synchronized(nodes){
+      System.out.println("Adding: " + node.getPublicIp());
       nodes.add(node);
-      node.setDevices(getDevicesForNode(node));
       serialize();
+
+      addNode(OpenCLPlatform.getUncachedOpenCLPlatforms().get(0), node.getPublicIp());
+      node.setDevices(getDevicesForNode(node));
+
     }
   }
 
