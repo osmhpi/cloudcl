@@ -10,15 +10,21 @@ import com.amd.aparapi.device.OpenCLDevice;
 import com.amd.aparapi.internal.kernel.KernelRunner;
 
 import fr.dynamo.Notifyable;
+import fr.dynamo.scheduling.device.AbstractDeviceScheduler;
+import fr.dynamo.scheduling.device.KernelDevicePairing;
+import fr.dynamo.scheduling.device.SimpleDeviceScheduler;
+import fr.dynamo.scheduling.job.JobScheduler;
+import fr.dynamo.scheduling.job.RoundRobinJobScheduler;
 import fr.dynamo.threading.DynamoJob;
 import fr.dynamo.threading.DynamoKernel;
 import fr.dynamo.threading.DynamoThread;
 
 public class DynamoExecutor implements Notifyable{
 
-  private DeviceManager deviceManager = new DeviceManager();
   private Set<DynamoJob> jobs = Collections.synchronizedSet(new HashSet<DynamoJob>());
-
+  
+  private JobScheduler scheduler = new RoundRobinJobScheduler();
+  private AbstractDeviceScheduler deviceScheduler = new SimpleDeviceScheduler();
   private static DynamoExecutor instance;
 
   private DynamoExecutor() {
@@ -49,45 +55,22 @@ public class DynamoExecutor implements Notifyable{
 
   private synchronized List<DynamoThread> buildThreads(){
     List<DynamoThread> newThreads = new ArrayList<DynamoThread>();
-    DeviceQueue unusedDevices = deviceManager.getUnusedDevices(allThreads());
+    List<OpenCLDevice> unusedDevices = deviceScheduler.getUnusedDevices(allThreads());
     if(unusedDevices.size() == 0){
       System.out.println("No Devices available at this time. Waiting for another task to finish.");
       return newThreads;
     }
 
-    List<DynamoKernel> scheduledKernels = buildScheduledList();
+    List<DynamoKernel> scheduledKernels = scheduler.schedule(new ArrayList<DynamoJob>(jobs));
     System.out.println(scheduledKernels.size() + " kernels and " + unusedDevices.size() + " devices available for disposition.");
 
-    for(DynamoKernel kernel:scheduledKernels){
-      if(unusedDevices.size() == 0) break;
-
-      OpenCLDevice device = unusedDevices.findFittingDevice(kernel, kernel.getDevicePreference());
-      if(device == null){
-        continue;
-      }
-
-      newThreads.add(kernel.buildThread(device, this));
+    List<KernelDevicePairing> pairings = deviceScheduler.scheduleDevices(scheduledKernels, unusedDevices);
+    
+    for(KernelDevicePairing pairing:pairings){
+      newThreads.add(pairing.kernel.buildThread(pairing.device, this));
     }
 
     return newThreads;
-  }
-
-  private synchronized List<DynamoKernel> buildScheduledList(){
-    List<DynamoKernel> kernels = new LinkedList<DynamoKernel>();
-    int maxKernelCount = 0;
-    for(DynamoJob job:jobs){
-      maxKernelCount = Math.max(maxKernelCount, job.remaining());
-    }
-
-    for(int i=0; i<maxKernelCount; i++){
-      for(DynamoJob job:jobs){
-        if(i<job.getKernelsToRun().size()){
-          kernels.add(job.getKernelsToRun().get(i));
-        }
-      }
-    }
-
-    return kernels;
   }
 
   private synchronized List<DynamoThread> allThreads(){
@@ -137,5 +120,9 @@ public class DynamoExecutor implements Notifyable{
   public Set<DynamoJob> getJobs() {
     return jobs;
   }
+
+  public void setScheduler(JobScheduler scheduler) {
+    this.scheduler = scheduler;
+  }  
 
 }

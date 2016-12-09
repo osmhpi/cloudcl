@@ -1,4 +1,6 @@
-package fr.dynamo.execution;
+package fr.dynamo.scheduling.device;
+
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -6,18 +8,17 @@ import java.util.Set;
 import com.amd.aparapi.device.Device.TYPE;
 import com.amd.aparapi.device.OpenCLDevice;
 
+import fr.dynamo.threading.DynamoKernel;
 import fr.dynamo.threading.DynamoThread;
 
-public class DeviceManager {
+public abstract class AbstractDeviceScheduler {
+  
+  private static TYPE[] usableTypes = new TYPE[]{TYPE.CPU, TYPE.GPU};
 
-  private TYPE[] usableTypes = new TYPE[]{TYPE.CPU, TYPE.GPU};
+  public abstract List<KernelDevicePairing> scheduleDevices(List<DynamoKernel> kernels, List<OpenCLDevice> unusedDevices);
 
-  public DeviceManager() {
-    super();
-  }
-
-  public DeviceQueue getUnusedDevices(List<DynamoThread> threads){
-    DeviceQueue unusedDevices = new DeviceQueue();
+  public static List<OpenCLDevice> getUnusedDevices(List<DynamoThread> threads){
+    List<OpenCLDevice> unusedDevices = new ArrayList<OpenCLDevice>();
     Set<OpenCLDevice> devices = getDevices();
     Set<Long> usedDeviceIds = getUsedDeviceIds(threads);
     for(OpenCLDevice device:devices){
@@ -28,7 +29,7 @@ public class DeviceManager {
     return unusedDevices;
   }
 
-  public Set<Long> getUsedDeviceIds(List<DynamoThread> threads){
+  public static Set<Long> getUsedDeviceIds(List<DynamoThread> threads){
     Set<Long> usedDeviceIds = new HashSet<Long>();
     for(DynamoThread t:threads){
       usedDeviceIds.add(t.getDevice().getDeviceId());
@@ -36,11 +37,19 @@ public class DeviceManager {
     return usedDeviceIds;
   }
 
-  public Set<OpenCLDevice> getDevices(){
+  public static Set<OpenCLDevice> getDevices(){
     Set<OpenCLDevice> devices = new HashSet<OpenCLDevice>();
     for(TYPE type:usableTypes){
       devices.addAll(OpenCLDevice.listDevices(type));
     }
     return devices;
   }
+  
+  protected OpenCLDevice getFirstDeviceOfType(List<OpenCLDevice> devices, TYPE type){
+    for(OpenCLDevice device:devices){
+      if(device.getType() == type) return device;
+    }
+    return null;
+  }
+
 }
