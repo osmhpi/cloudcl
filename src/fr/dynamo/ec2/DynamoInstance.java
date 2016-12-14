@@ -15,6 +15,7 @@ import com.amazonaws.services.ec2.model.InstanceState;
 import com.amazonaws.services.ec2.model.InstanceStateName;
 import com.amazonaws.services.ec2.model.Reservation;
 import com.amd.aparapi.device.OpenCLDevice;
+import com.amd.aparapi.internal.opencl.OpenCLPlatform;
 
 public class DynamoInstance {
 
@@ -98,7 +99,18 @@ public class DynamoInstance {
   }
 
   public void setDevices(Set<OpenCLDevice> devices) {
-    this.devices = devices;
+    Set<OpenCLDevice> devicesWithDetails = new HashSet<OpenCLDevice>();
+
+    List<OpenCLDevice> allDevices = OpenCLPlatform.getUncachedOpenCLPlatforms().get(0).getOpenCLDevices();
+    
+    for(OpenCLDevice device:devices){
+      for(OpenCLDevice completeDevice:allDevices){
+        if(device.getDeviceId() == completeDevice.getDeviceId()){
+          devicesWithDetails.add(completeDevice);
+        }
+      }
+    }
+    this.devices = devicesWithDetails;
   }
 
   @Override

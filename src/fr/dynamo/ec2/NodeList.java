@@ -43,9 +43,7 @@ public class NodeList extends OpenCLJNI{
     synchronized(nodes){
       System.out.println("Adding: " + node.getPublicIp());
       nodes.add(node);
-      serialize();
       List<OpenCLDevice> devices = addNode(OpenCLPlatform.getUncachedOpenCLPlatforms().get(0), node.getPublicIp());
-      
       node.setDevices(new HashSet<OpenCLDevice>(devices));
     }
   }
@@ -53,7 +51,6 @@ public class NodeList extends OpenCLJNI{
   public void removeNode(DynamoInstance node){
     synchronized(nodes){
       nodes.remove(node);
-      serialize();
     }
   }
 
@@ -75,20 +72,6 @@ public class NodeList extends OpenCLJNI{
     return devices;
   }
 
-  private Set<OpenCLDevice> getDevicesForNode(DynamoInstance node){
-    Set<OpenCLDevice> devices = new HashSet<OpenCLDevice>();
-
-    serializeSingleNode(node);
-
-    for (OpenCLPlatform platform : OpenCLPlatform.getUncachedOpenCLPlatforms()) {
-      for (OpenCLDevice device : platform.getOpenCLDevices()) {
-        devices.add(device);
-      }
-    }
-
-    return devices;
-  }
-
   private void serialize(){
     StringBuffer buffer = new StringBuffer();
 
@@ -102,14 +85,6 @@ public class NodeList extends OpenCLJNI{
       e.printStackTrace();
     }
 
-  }
-
-  private void serializeSingleNode(DynamoInstance node){
-    try {
-      Files.write(Paths.get(nodeFilePath), node.getPublicIp().getBytes());
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
   }
 
 }

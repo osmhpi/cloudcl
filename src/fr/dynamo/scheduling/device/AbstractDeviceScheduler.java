@@ -19,7 +19,7 @@ public abstract class AbstractDeviceScheduler {
 
   public static List<OpenCLDevice> getUnusedDevices(List<DynamoThread> threads){
     List<OpenCLDevice> unusedDevices = new ArrayList<OpenCLDevice>();
-    Set<OpenCLDevice> devices = getDevices();
+    List<OpenCLDevice> devices = getDevices();
     Set<Long> usedDeviceIds = getUsedDeviceIds(threads);
     for(OpenCLDevice device:devices){
       if(!usedDeviceIds.contains(device.getDeviceId())){
@@ -37,12 +37,8 @@ public abstract class AbstractDeviceScheduler {
     return usedDeviceIds;
   }
 
-  public static Set<OpenCLDevice> getDevices(){
-    Set<OpenCLDevice> devices = new HashSet<OpenCLDevice>();
-    for(TYPE type:usableTypes){
-      devices.addAll(OpenCLDevice.listDevices(type));
-    }
-    return devices;
+  public static List<OpenCLDevice> getDevices(){
+    return OpenCLDevice.listDevices(null);
   }
   
   protected OpenCLDevice getFirstDeviceOfType(List<OpenCLDevice> devices, TYPE type){
