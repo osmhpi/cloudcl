@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import com.amd.aparapi.device.OpenCLDevice;
@@ -43,10 +44,9 @@ public class NodeList extends OpenCLJNI{
       System.out.println("Adding: " + node.getPublicIp());
       nodes.add(node);
       serialize();
-
-      addNode(OpenCLPlatform.getUncachedOpenCLPlatforms().get(0), node.getPublicIp());
-      node.setDevices(getDevicesForNode(node));
-
+      List<OpenCLDevice> devices = addNode(OpenCLPlatform.getUncachedOpenCLPlatforms().get(0), node.getPublicIp());
+      
+      node.setDevices(new HashSet<OpenCLDevice>(devices));
     }
   }
 
