@@ -51,6 +51,7 @@ public class NodeList extends OpenCLJNI{
   public void removeNode(DynamoInstance node){
     synchronized(nodes){
       nodes.remove(node);
+      removeNode(OpenCLPlatform.getUncachedOpenCLPlatforms().get(0), node.getDevices().iterator().next().getDeviceId());
     }
   }
 
