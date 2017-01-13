@@ -4,7 +4,6 @@
 	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="src" path="samples"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8/"/>
 	<classpathentry kind="lib" path="/Users/florianrosler/.gradle/caches/modules-2/files-2.1/com.amazonaws/aws-java-sdk-ec2/1.11.34/26b13cb82c26c552975820f99a12825a72520b0a/aws-java-sdk-ec2-1.11.34.jar" sourcepath="/Users/florianrosler/.gradle/caches/modules-2/files-2.1/com.amazonaws/aws-java-sdk-ec2/1.11.34/c0b929796957f685d851e4553745f0f2e93ec344/aws-java-sdk-ec2-1.11.34-sources.jar"/>
 	<classpathentry kind="lib" path="/Users/florianrosler/.gradle/caches/modules-2/files-2.1/junit/junit/4.12/2973d150c0dc1fefe998f834810d68f278ea58ec/junit-4.12.jar" sourcepath="/Users/florianrosler/.gradle/caches/modules-2/files-2.1/junit/junit/4.12/a6c32b40bf3d76eca54e3c601e5d1470c86fcdfa/junit-4.12-sources.jar"/>
 	<classpathentry kind="lib" path="/Users/florianrosler/.gradle/caches/modules-2/files-2.1/com.amazonaws/aws-java-sdk-core/1.11.34/2ebcb9e78cf88d76e1073e4f14419c0460e983f7/aws-java-sdk-core-1.11.34.jar" sourcepath="/Users/florianrosler/.gradle/caches/modules-2/files-2.1/com.amazonaws/aws-java-sdk-core/1.11.34/b3446de75ca98699643e34c7eae25bd38f7f636c/aws-java-sdk-core-1.11.34-sources.jar"/>
@@ -24,5 +23,6 @@
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="/Users/florianrosler/opencl"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
