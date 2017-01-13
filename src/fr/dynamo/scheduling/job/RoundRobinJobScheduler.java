@@ -23,6 +23,8 @@ public class RoundRobinJobScheduler implements JobScheduler{
     }
 
     for(int i=0; i<maxKernelCount; i++){
+      if(roundRobinCounter >= jobs.size()) roundRobinCounter = 0;
+
       while(roundRobinCounter < jobs.size()){
         DynamoJob job = jobs.get(roundRobinCounter);
         if(i<job.getKernelsToRun().size()){
