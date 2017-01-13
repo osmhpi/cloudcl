@@ -10,15 +10,14 @@ public class MatrixKernel extends DynamoKernel{
   final float[] b;
   final float[] result;
 
-  final int size_$constant$;
+  final int size;
 
   public MatrixKernel(DynamoJob job, Range range, float[] a, float[] b, float[] result, int size) {
     super(job, range);
     this.a = a;
     this.b = b;
     this.result = result;
-
-    this.size_$constant$ = size;
+    this.size = size;
   }
 
   @Override
@@ -27,9 +26,9 @@ public class MatrixKernel extends DynamoKernel{
     int x = getGlobalId(1);
 
     float sum = 0;
-    for(int i=0; i<=size_$constant$; i++){
-      sum += a[y * size_$constant$ + i] * b[x * size_$constant$ + i];
+    for(int i=0; i<size; i++){
+      sum += a[y * size + i] * b[x * size + i];
     }
-    result[y*size_$constant$+x] = sum;
+    result[y*size+x] = sum;
   }
 }

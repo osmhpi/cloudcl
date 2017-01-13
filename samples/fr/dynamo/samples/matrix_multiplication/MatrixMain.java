@@ -44,12 +44,9 @@ public class MatrixMain {
 
       float[] aSplit = Arrays.copyOfRange(a, tile*tileHeight*size, (tile+1)*tileHeight*size);
 
-      System.out.println(Arrays.toString(aSplit));
-      System.out.println(Arrays.toString(b));
+      Range range = Range.create2D(tileHeight, size, 100, 1);
 
-      Range range = Range.create2D(size, tileHeight, 100, 1);
-
-      MatrixKernel kernel = new MatrixKernel(job, range, aSplit, b, result, tileHeight);
+      MatrixKernel kernel = new MatrixKernel(job, range, aSplit, b, result, size);
       kernel.setDevicePreference(DevicePreference.CPU_ONLY);
       job.addKernel(kernel);
     }
@@ -61,7 +58,6 @@ public class MatrixMain {
     int zeroes = 0;
     for(DynamoKernel k:job.getFinishedKernels()){
       MatrixKernel matrixKernel = (MatrixKernel)k;
-      System.out.println(Arrays.toString(matrixKernel.result));
 
       for(float f : matrixKernel.result){
         if(f == 0){
