@@ -2,7 +2,6 @@ package fr.dynamo.execution;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -22,7 +21,7 @@ import fr.dynamo.threading.DynamoThread;
 public class DynamoExecutor implements Notifyable{
 
   private Set<DynamoJob> jobs = Collections.synchronizedSet(new HashSet<DynamoJob>());
-  
+
   private JobScheduler scheduler = new RoundRobinJobScheduler();
   private AbstractDeviceScheduler deviceScheduler = new SimpleDeviceScheduler();
   private static DynamoExecutor instance;
@@ -65,7 +64,7 @@ public class DynamoExecutor implements Notifyable{
     System.out.println(scheduledKernels.size() + " kernels and " + unusedDevices.size() + " devices available for disposition.");
 
     List<KernelDevicePairing> pairings = deviceScheduler.scheduleDevices(scheduledKernels, unusedDevices);
-    
+
     for(KernelDevicePairing pairing:pairings){
       newThreads.add(pairing.kernel.buildThread(pairing.device, this));
     }
@@ -123,6 +122,6 @@ public class DynamoExecutor implements Notifyable{
 
   public void setScheduler(JobScheduler scheduler) {
     this.scheduler = scheduler;
-  }  
+  }
 
 }

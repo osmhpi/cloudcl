@@ -9,13 +9,13 @@ import fr.dynamo.threading.DynamoKernel;
 public class RoundRobinJobScheduler implements JobScheduler{
 
   private int roundRobinCounter;
-  
+
   @Override
   public List<DynamoKernel> schedule(List<DynamoJob> jobs) {
     if(roundRobinCounter >= jobs.size()){
       roundRobinCounter = 0;
     }
-    
+
     List<DynamoKernel> kernels = new LinkedList<DynamoKernel>();
     int maxKernelCount = 0;
     for(DynamoJob job:jobs){
@@ -23,16 +23,15 @@ public class RoundRobinJobScheduler implements JobScheduler{
     }
 
     for(int i=0; i<maxKernelCount; i++){
-      
-      for(int j = roundRobinCounter; j < jobs.size(); j++){
-        DynamoJob job = jobs.get(j);
+      while(roundRobinCounter < jobs.size()){
+        DynamoJob job = jobs.get(roundRobinCounter);
         if(i<job.getKernelsToRun().size()){
           kernels.add(job.getKernelsToRun().get(i));
         }
+        roundRobinCounter++;
       }
     }
-    
-    roundRobinCounter++;
+
     return kernels;
   }
 
