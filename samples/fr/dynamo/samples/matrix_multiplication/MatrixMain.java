@@ -2,6 +2,7 @@ package fr.dynamo.samples.matrix_multiplication;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.rmi.UnexpectedException;
+import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -20,29 +21,35 @@ public class MatrixMain {
     final int tiles = Integer.parseInt(args[1]);
 
     System.out.println("Width/Height: " + size);
-    int tileWidth = size/ tiles;
-    System.out.println("Width per Tile: " + tileWidth);
+    int tileHeight = size/tiles;
+    System.out.println("Height per Tile: " + tileHeight);
 
     Random random = new Random();
     random.setSeed(1000);
 
     DynamoJob job = new DynamoJob("Matrix");
 
+    final float[] a = new float[size*size];
+    final float[] b = new float[size*size];
+    for (int i = 0; i < a.length; i++) {
+      a[i] = random.nextFloat() * 3;
+    }
+    for (int i = 0; i < b.length; i++) {
+      b[i] = random.nextFloat() * 3;
+    }
+
     for(int tile=0; tile<tiles; tile++){
-      final float[] a = new float[tileWidth*size];
-      final float[] b = new float[tileWidth*size];
-      final float[] result = new float[tileWidth*size];
 
-      float value = random.nextFloat() * 3;
+      final float[] result = new float[tileHeight*size];
 
-      for (int i = 0; i < a.length; i++) {
-        a[i] = value;
-        b[i] = value;
-      }
+      float[] aSplit = Arrays.copyOfRange(a, tile*tileHeight*size, (tile+1)*tileHeight*size);
 
-      Range range = Range.create2D(size, tileWidth, 200, 1);
+      System.out.println(Arrays.toString(aSplit));
+      System.out.println(Arrays.toString(b));
 
-      MatrixKernel kernel = new MatrixKernel(job, range, a, b, result, tileWidth);
+      Range range = Range.create2D(size, tileHeight, 100, 1);
+
+      MatrixKernel kernel = new MatrixKernel(job, range, aSplit, b, result, tileHeight);
       kernel.setDevicePreference(DevicePreference.CPU_ONLY);
       job.addKernel(kernel);
     }
@@ -54,6 +61,8 @@ public class MatrixMain {
     int zeroes = 0;
     for(DynamoKernel k:job.getFinishedKernels()){
       MatrixKernel matrixKernel = (MatrixKernel)k;
+      System.out.println(Arrays.toString(matrixKernel.result));
+
       for(float f : matrixKernel.result){
         if(f == 0){
           zeroes++;
