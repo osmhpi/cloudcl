@@ -1,8 +1,6 @@
 package fr.dynamo.ec2;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -13,18 +11,14 @@ import com.amd.aparapi.internal.opencl.OpenCLPlatform;
 
 public class NodeList extends OpenCLJNI{
 
-  private final String nodeFilePath;
   private Set<DynamoInstance> nodes = new HashSet<DynamoInstance>();
 
   private static NodeList instance;
 
   private NodeList() throws IOException{
-    if(System.getenv().containsKey("DCL_NODE_FILE")){
-      nodeFilePath = System.getenv().get("DCL_NODE_FILE");
-    }else{
+    if(!System.getenv().containsKey("DCL_NODE_FILE")){
       throw new IOException("Environment Variable for DCL_NODE_FILE not defined.");
     }
-    serialize();
     OpenCLPlatform.getUncachedOpenCLPlatforms();
  }
 
@@ -71,21 +65,6 @@ public class NodeList extends OpenCLJNI{
       }
     }
     return devices;
-  }
-
-  private void serialize(){
-    StringBuffer buffer = new StringBuffer();
-
-    for(DynamoInstance node:nodes){
-      buffer.append(node.getPublicIp()+"\n");
-    }
-
-    try {
-      Files.write(Paths.get(nodeFilePath), buffer.toString().getBytes());
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-
   }
 
 }
