@@ -3,17 +3,10 @@ package fr.dynamo.ec2;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.amazonaws.services.ec2.AmazonEC2;
-import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
-import com.amazonaws.services.ec2.model.DescribeInstancesResult;
-import com.amazonaws.services.ec2.model.InstanceState;
-import com.amazonaws.services.ec2.model.InstanceStateName;
-import com.amazonaws.services.ec2.model.Reservation;
 import com.amd.aparapi.device.OpenCLDevice;
 import com.amd.aparapi.internal.opencl.OpenCLPlatform;
 
@@ -30,30 +23,6 @@ public class DynamoInstance {
     this.instanceId = instanceId;
   }
 
-  public boolean blockUntilRunning(AmazonEC2 client, long timeout){
-    long start = System.currentTimeMillis();
-    final InstanceState pendingState = new InstanceState().withName(InstanceStateName.Pending.name());
-
-    boolean pending = true;
-    while(pending){
-      if(System.currentTimeMillis() - start > timeout) return false;
-
-      try {
-        Thread.sleep(500);
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-      }
-      DescribeInstancesRequest request = new DescribeInstancesRequest().withInstanceIds(getInstanceId());
-      DescribeInstancesResult describeInstanceResult = client.describeInstances(request);
-
-      if(describeInstanceResult.getReservations().get(0).getInstances().get(0).getState().getCode() != pendingState.getCode()){
-        pending = false;
-      }
-    }
-
-    return true;
-  }
-
   public boolean blockUntilReachable(long timeout){
     long start = System.currentTimeMillis();
 
@@ -67,19 +36,6 @@ public class DynamoInstance {
       } catch (IOException ex) {
       }
     }
-  }
-
-  public void collectInformation(AmazonEC2 client){
-    List<String> instanceId = new ArrayList<String>();
-    instanceId.add(getInstanceId());
-    DescribeInstancesRequest request = new DescribeInstancesRequest();
-    request.setInstanceIds(instanceId);
-
-    DescribeInstancesResult result = client.describeInstances(request);
-    List<Reservation> reservations = result.getReservations();
-
-    publicIp = reservations.get(0).getInstances().get(0).getPublicIpAddress();
-    System.out.println(publicIp);
   }
 
   public String getInstanceId() {
@@ -102,7 +58,7 @@ public class DynamoInstance {
     Set<OpenCLDevice> devicesWithDetails = new HashSet<OpenCLDevice>();
 
     List<OpenCLDevice> allDevices = OpenCLPlatform.getUncachedOpenCLPlatforms().get(0).getOpenCLDevices();
-    
+
     for(OpenCLDevice device:devices){
       for(OpenCLDevice completeDevice:allDevices){
         if(device.getDeviceId() == completeDevice.getDeviceId()){
