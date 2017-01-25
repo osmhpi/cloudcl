@@ -2,6 +2,7 @@ package fr.dynamo.threading;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.UUID;
@@ -22,12 +23,15 @@ public class DynamoJob {
   private long start = System.currentTimeMillis();
   private long end = -1;
   private int iteration = 1;
+  private Date submissionTime;
 
-  public DynamoJob(String jobId) {
+
+  public DynamoJob(String jobName) {
     super();
 
-    this.jobName = jobId;
+    this.jobName = jobName;
     this.id = UUID.randomUUID().toString();
+    submissionTime = new Date();
   }
 
   public String getId() {
@@ -137,6 +141,9 @@ public class DynamoJob {
     return (float)finished() / total();
   }
 
+  public Date getSubmissionTime() {
+    return submissionTime;
+  }
 
   public long getExecutionTime(){
     if(end == -1){
