@@ -84,30 +84,30 @@ public abstract class DynamoKernel extends Kernel implements Runnable{
   }
 
   public double getTransferrableGigabytes(){
-    return getTransferSize() / 1024.0 / 1024 / 1024;
+    return getDataSize() / 1024.0 / 1024 / 1024;
   }
 
   public long getExpectedTransferTime(NetworkSpeed speed){
     return NetworkEstimator.calculateTranferTime(this, speed);
   }
 
-  public long getTransferSize(){
+  public long getDataSize(){
     long byteSum = 0;
     Field[] allFields = getClass().getDeclaredFields();
     for(Field f:allFields){
-      if(f.getType().isArray()){
-        Class<?> type = f.getType();
-        String typeString = type.toString().replace("class [", "");
+      Class<?> type = f.getType();
+      long length = 0;
 
-        int length = 0;
+      if(type.isArray()){
+        String typeString = type.toString().replace("class [", "").replace("[", "");
+
         try {
           f.setAccessible(true);
-          length = Array.getLength(f.get(this));
+          length = getArrayLength(f.get(this));
           f.setAccessible(false);
         } catch (Exception e) {
           e.printStackTrace();
         }
-
         if(typeString.length() == 1){
           TypeSpec spec = TypeSpec.valueOf(typeString);
           byteSum += spec.getSize() * length;
@@ -122,7 +122,6 @@ public abstract class DynamoKernel extends Kernel implements Runnable{
                 }
               }
             }
-
           }
           byteSum += bytes;
         }
@@ -130,9 +129,22 @@ public abstract class DynamoKernel extends Kernel implements Runnable{
       }
 
     }
-
-
     return byteSum;
+  }
+
+  private long getArrayLength(Object value){
+    long length = 0;
+
+      length = Array.getLength(value);
+
+      while(value.getClass().isArray()){
+        value = Array.get(value, 0);
+        if(value.getClass().isArray()){
+          length = length * Array.getLength(value);
+        }
+      }
+
+    return length;
   }
 
   public int getRemainingTries() {

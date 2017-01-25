@@ -23,15 +23,16 @@ public class NetworkEstimatorTest {
     DynamoKernel kernel = new DynamoKernel(new DynamoJob("Test"), range) {
 
       private int[] x = new int[1000000];
+      private int[][][] z = new int[100][1000][10];
 
       @Override
       public void run() {
       }
     };
 
-    assertEquals(4000000, kernel.getTransferSize());
-    assertEquals(3200.0, NetworkEstimator.calculateTranferTime(kernel, NetworkSpeed.MBIT10), 0);
-    assertEquals(3.0, NetworkEstimator.calculateTranferTime(kernel, NetworkSpeed.GBIT10), 0);
+    assertEquals(8000000, kernel.getDataSize());
+    assertEquals(6400, NetworkEstimator.calculateTranferTime(kernel, NetworkSpeed.MBIT10));
+    assertEquals(6, NetworkEstimator.calculateTranferTime(kernel, NetworkSpeed.GBIT10));
 
   }
 }
