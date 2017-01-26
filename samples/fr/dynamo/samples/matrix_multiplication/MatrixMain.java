@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 import com.amd.aparapi.Range;
 
 import fr.dynamo.DevicePreference;
+import fr.dynamo.ThreadFinishedNotifier;
 import fr.dynamo.execution.DynamoExecutor;
 import fr.dynamo.performance.PerformanceCache;
 import fr.dynamo.threading.DynamoJob;
@@ -27,7 +28,12 @@ public class MatrixMain {
     Random random = new Random();
     random.setSeed(1000);
 
-    DynamoJob job = new DynamoJob("Matrix");
+    DynamoJob job = new DynamoJob("Matrix", new ThreadFinishedNotifier() {
+      @Override
+      public void notifyListener(DynamoKernel kernel) {
+        System.out.println("Callback for Kernel: " + kernel.hashCode());
+      }
+    });
 
     final float[] a = new float[size*size];
     final float[] b = new float[size*size];
