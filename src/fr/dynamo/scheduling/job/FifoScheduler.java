@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.PriorityQueue;
 
+import fr.dynamo.scheduling.device.KernelDevicePairing;
 import fr.dynamo.threading.DynamoJob;
 import fr.dynamo.threading.DynamoKernel;
 
@@ -30,6 +31,10 @@ public class FifoScheduler implements JobScheduler{
     }
 
     return kernels;
+  }
+
+  @Override
+  public void registerSchedulingDecisions(List<KernelDevicePairing> scheduledKernels) {
   }
 
 }

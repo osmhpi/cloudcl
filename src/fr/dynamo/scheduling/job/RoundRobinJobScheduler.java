@@ -3,6 +3,7 @@ package fr.dynamo.scheduling.job;
 import java.util.LinkedList;
 import java.util.List;
 
+import fr.dynamo.scheduling.device.KernelDevicePairing;
 import fr.dynamo.threading.DynamoJob;
 import fr.dynamo.threading.DynamoKernel;
 
@@ -13,6 +14,7 @@ public class RoundRobinJobScheduler implements JobScheduler{
   @Override
   public List<DynamoKernel> schedule(List<DynamoJob> jobs) {
     if(roundRobinCounter >= jobs.size()) roundRobinCounter = 0;
+    int previousRoundRobinIndex = roundRobinCounter;
 
     List<DynamoKernel> kernels = new LinkedList<DynamoKernel>();
     int maxKernelCount = 0;
@@ -32,7 +34,12 @@ public class RoundRobinJobScheduler implements JobScheduler{
       }
     }
 
+    roundRobinCounter = previousRoundRobinIndex + 1;
     return kernels;
+  }
+
+  @Override
+  public void registerSchedulingDecisions(List<KernelDevicePairing> scheduledKernels) {
   }
 
 }

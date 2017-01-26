@@ -16,15 +16,7 @@ import fr.dynamo.threading.DynamoKernel;
 
 public class RoundRobinScheduleTest {
 
-
   JobScheduler scheduler = new RoundRobinJobScheduler();
-
-  private DynamoKernel kernel = new DynamoKernel(new DynamoJob("Test"), Range.create(0)) {
-    @Override
-    public void run() {
-    }
-  };
-
   List<DynamoJob> jobs = new ArrayList<DynamoJob>();
 
   @Before
@@ -77,7 +69,7 @@ public class RoundRobinScheduleTest {
     for(int n=0; n<2; n++){
       for(int i = 0;i<4;i++){
         kernels = scheduler.schedule(jobs);
-        //assertEquals("Test_" + i, kernels.get(0).getJob().getName());
+        assertEquals("Test_" + i, kernels.get(0).getJob().getName());
       }
     }
   }

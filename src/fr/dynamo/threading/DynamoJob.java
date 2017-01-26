@@ -26,6 +26,7 @@ public class DynamoJob {
   private int iteration = 1;
   private Date submissionTime;
   private ThreadFinishedNotifyable finishedKernelNotifier;
+  private int priority = 1;
 
   public DynamoJob(String jobName) {
     super();
@@ -169,6 +170,17 @@ public class DynamoJob {
 
   public void setFinishedKernelNotifier(ThreadFinishedNotifyable finishedKernelNotifier) {
     this.finishedKernelNotifier = finishedKernelNotifier;
+  }
+
+  public int getPriority() {
+    return priority;
+  }
+
+  public void setPriority(int priority) {
+    if(priority < 1){
+      throw new IllegalArgumentException("Priority has to be a minimum of 1.");
+    }
+    this.priority = priority;
   }
 
   public void cleanUp(){

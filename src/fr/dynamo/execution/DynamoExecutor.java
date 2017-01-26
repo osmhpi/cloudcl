@@ -69,6 +69,7 @@ public class DynamoExecutor implements ThreadFinishedNotifyable{
       newThreads.add(pairing.kernel.buildThread(pairing.device, this));
     }
 
+    scheduler.registerSchedulingDecisions(pairings);
     return newThreads;
   }
 
