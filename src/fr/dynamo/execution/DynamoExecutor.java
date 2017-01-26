@@ -9,6 +9,7 @@ import com.amd.aparapi.device.OpenCLDevice;
 import com.amd.aparapi.internal.kernel.KernelRunner;
 
 import fr.dynamo.ThreadFinishedNotifyable;
+import fr.dynamo.logging.Logger;
 import fr.dynamo.scheduling.device.AbstractDeviceScheduler;
 import fr.dynamo.scheduling.device.KernelDevicePairing;
 import fr.dynamo.scheduling.device.SimpleDeviceScheduler;
@@ -36,13 +37,13 @@ public class DynamoExecutor implements ThreadFinishedNotifyable{
   }
 
   public void submit(DynamoJob job){
-    System.out.println("Enqueueing job " + job.getName() + " with " + job.total() + " kernels to run.");
+    Logger.instance().info("Enqueueing job " + job.getName() + " with " + job.total() + " kernels to run.");
     jobs.add(job);
     assignKernels();
   }
 
   public void triggerAssignment(){
-    System.out.println("Assignment of kernels to devices has been triggered externally.");
+    Logger.instance().debug("Assignment of kernels to devices has been triggered externally.");
     assignKernels();
   }
 
@@ -55,12 +56,12 @@ public class DynamoExecutor implements ThreadFinishedNotifyable{
     List<DynamoThread> newThreads = new ArrayList<DynamoThread>();
     List<OpenCLDevice> unusedDevices = AbstractDeviceScheduler.getUnusedDevices(allThreads());
     if(unusedDevices.size() == 0){
-      System.out.println("No Devices available at this time. Waiting for another task to finish.");
+      Logger.instance().info("No Devices available at this time. Waiting for another task to finish.");
       return newThreads;
     }
 
     List<DynamoKernel> scheduledKernels = scheduler.schedule(new ArrayList<DynamoJob>(jobs));
-    System.out.println(scheduledKernels.size() + " kernels and " + unusedDevices.size() + " devices available for disposition.");
+    Logger.instance().info(scheduledKernels.size() + " kernels and " + unusedDevices.size() + " devices available for disposition.");
 
     List<KernelDevicePairing> pairings = deviceScheduler.scheduleDevices(scheduledKernels, unusedDevices);
 

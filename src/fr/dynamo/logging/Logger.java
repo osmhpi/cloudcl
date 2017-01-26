@@ -1,6 +1,8 @@
 package fr.dynamo.logging;
 
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.impl.Log4JLogger;
+import org.apache.log4j.PropertyConfigurator;
 
 public class Logger {
 
@@ -8,6 +10,9 @@ public class Logger {
 
   public static Log instance(){
     if(log == null){
+      String log4jConfPath = "log4j.properties";
+      PropertyConfigurator.configure(log4jConfPath);
+      log = new Log4JLogger("Dynamic OpenCL");
     }
     return log;
   }

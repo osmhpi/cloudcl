@@ -38,8 +38,7 @@ test {
 
 dependencies {
 	compile group: 'com.amazonaws', name: 'aws-java-sdk-ec2', version: '1.11.34'
-	compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.7'
-	compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.7'
+	compile group: 'log4j', name: 'log4j', version: '1.2.17'
 	compile files('aparapi/com.amd.aparapi/dist/aparapi.jar')
 	testCompile group: 'junit', name: 'junit', version: '4.12'
 }

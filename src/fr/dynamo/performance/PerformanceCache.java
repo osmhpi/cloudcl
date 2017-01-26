@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 
 import com.amd.aparapi.device.OpenCLDevice;
 
+import fr.dynamo.logging.Logger;
 import fr.dynamo.threading.DynamoJob;
 
 public class PerformanceCache {
@@ -44,7 +45,7 @@ public class PerformanceCache {
   }
 
   public void printStatistics(DynamoJob job){
-    System.out.println("Average execution times per device:");
+    Logger.instance().info("Average execution times per device:");
     for(Entry<String, Long> entry:getPerformanceMeasurement(job).getDeviceRanking()){
       System.out.println(entry.getKey() + ": " + entry.getValue() + "ms");
     }

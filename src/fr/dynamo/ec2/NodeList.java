@@ -9,6 +9,8 @@ import com.amd.aparapi.device.OpenCLDevice;
 import com.amd.aparapi.internal.jni.OpenCLJNI;
 import com.amd.aparapi.internal.opencl.OpenCLPlatform;
 
+import fr.dynamo.logging.Logger;
+
 public class NodeList extends OpenCLJNI{
 
   private Set<DynamoInstance> nodes = new HashSet<DynamoInstance>();
@@ -35,7 +37,7 @@ public class NodeList extends OpenCLJNI{
 
   public void addNode(DynamoInstance node){
     synchronized(nodes){
-      System.out.println("Adding: " + node.getPublicIp());
+      Logger.instance().debug("Adding: " + node.getPublicIp());
       nodes.add(node);
       List<OpenCLDevice> devices = addNode(OpenCLPlatform.getUncachedOpenCLPlatforms().get(0), node.getPublicIp());
       node.setDevices(new HashSet<OpenCLDevice>(devices));

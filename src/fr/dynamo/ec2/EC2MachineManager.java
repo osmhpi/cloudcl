@@ -21,6 +21,8 @@ import com.amazonaws.services.ec2.model.RunInstancesRequest;
 import com.amazonaws.services.ec2.model.RunInstancesResult;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
 
+import fr.dynamo.logging.Logger;
+
 public class EC2MachineManager extends MachineManager{
 
   private static AmazonEC2 client;
@@ -90,7 +92,7 @@ public class EC2MachineManager extends MachineManager{
 
     RunInstancesResult runInstancesResult = client.runInstances(runInstancesRequest);
 
-    System.out.println(runInstancesResult.getReservation().getInstances().size() + " instances launched.");
+    Logger.instance().info(runInstancesResult.getReservation().getInstances().size() + " instances launched.");
 
     List<Instance> bookedInstances = runInstancesResult.getReservation().getInstances();
     List<DynamoInstance> dynamoInstances = new ArrayList<DynamoInstance>();

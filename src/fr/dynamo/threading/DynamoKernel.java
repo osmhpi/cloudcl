@@ -10,6 +10,7 @@ import com.amd.aparapi.internal.instruction.InstructionSet.TypeSpec;
 
 import fr.dynamo.DevicePreference;
 import fr.dynamo.ThreadFinishedNotifyable;
+import fr.dynamo.logging.Logger;
 import fr.dynamo.performance.NetworkEstimator;
 import fr.dynamo.performance.NetworkSpeed;
 
@@ -62,7 +63,7 @@ public abstract class DynamoKernel extends Kernel implements Runnable{
         break;
     }
 
-    System.out.println("Kernel " + hashCode() + " executing " + deviceSpecificRange);
+    Logger.instance().debug("Kernel " + hashCode() + " executing " + deviceSpecificRange);
     long before = System.currentTimeMillis();
 
     execute(deviceSpecificRange);

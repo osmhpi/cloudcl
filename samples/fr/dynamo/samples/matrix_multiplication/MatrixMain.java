@@ -11,6 +11,7 @@ import com.amd.aparapi.Range;
 import fr.dynamo.DevicePreference;
 import fr.dynamo.ThreadFinishedNotifyable;
 import fr.dynamo.execution.DynamoExecutor;
+import fr.dynamo.logging.Logger;
 import fr.dynamo.performance.PerformanceCache;
 import fr.dynamo.threading.DynamoJob;
 import fr.dynamo.threading.DynamoKernel;
@@ -21,7 +22,7 @@ public class MatrixMain {
   public static void main(String[] args) throws InterruptedException, FileNotFoundException, IOException {
     final int size = Integer.parseInt(args[0]);
     final int tiles = Integer.parseInt(args[1]);
-
+    
     System.out.println("Width/Height: " + size);
     int tileHeight = size/tiles;
     System.out.println("Height per Tile: " + tileHeight);
@@ -32,7 +33,7 @@ public class MatrixMain {
     DynamoJob job = new DynamoJob("Matrix", new ThreadFinishedNotifyable() {
       @Override
       public void notifyListener(DynamoThread thread) {
-        System.out.println("Callback for Kernel: " + thread.getKernel().hashCode());
+        Logger.instance().debug("Callback for Kernel: " + thread.getKernel().hashCode());
       }
     });
 
@@ -78,7 +79,7 @@ public class MatrixMain {
     }
 
     PerformanceCache.getInstance().printStatistics(job);
-    System.out.println(job);
+    Logger.instance().info(job);
 
     job.cleanUp();
   }

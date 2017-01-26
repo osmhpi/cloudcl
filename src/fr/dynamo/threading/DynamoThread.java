@@ -8,6 +8,7 @@ import com.amd.aparapi.device.OpenCLDevice;
 import com.amd.aparapi.internal.kernel.KernelManager;
 
 import fr.dynamo.ThreadFinishedNotifyable;
+import fr.dynamo.logging.Logger;
 
 public class DynamoThread extends Thread{
 
@@ -36,16 +37,16 @@ public class DynamoThread extends Thread{
         kernel.setExecutionModeWithoutFallback(EXECUTION_MODE.CPU);
       }
 
-      System.out.println("Execute Thread " + this.getId() + " on " + device.getShortDescription() + " " + device.getDeviceId());
+      Logger.instance().info("Execute Thread " + this.getId() + " on " + device.getShortDescription() + " " + device.getDeviceId());
       try{
         kernel.execute();
       }catch(Error e){
-        System.out.println("Thread " + this.getId() + " has failed.");
+        Logger.instance().error("Thread " + this.getId() + " has failed.");
         kernel.reduceRemainingTries();
         throw e;
       }
 
-      System.out.println("Execution of Thread " + this.getId() + " finished after " + kernel.getExecutionTime() + " ms");
+      Logger.instance().info("Execution of Thread " + this.getId() + " finished after " + kernel.getExecutionTime() + " ms");
       kernel.setRemainingTries(0);
       dispose();
     }finally{

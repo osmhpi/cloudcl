@@ -3,6 +3,7 @@ package fr.dynamo.ec2;
 import java.util.List;
 
 import fr.dynamo.execution.DynamoExecutor;
+import fr.dynamo.logging.Logger;
 
 public abstract class MachineManager {
   protected abstract List<DynamoInstance> bookInstance(int count, String type);
@@ -11,7 +12,7 @@ public abstract class MachineManager {
   protected abstract void collectInstanceInformation(List<DynamoInstance> instances);
 
   public MachineManager(){
-    System.out.println("Discover already running instances.");
+    Logger.instance().info("Discover already running instances.");
     discoverExistingInstances();
   }
 
@@ -23,29 +24,29 @@ public abstract class MachineManager {
   }
 
   public void release(List<DynamoInstance> instances){
-    System.out.println("Terminating instances.");
+    Logger.instance().info("Terminating instances.");
     terminateInstances(instances);
     for(DynamoInstance instance:instances){
       NodeList.getInstance().removeNode(instance);
     }
-    System.out.println("Instances terminated.");
+    Logger.instance().info("Instances terminated.");
   }
 
   private void initializeInstances(List<DynamoInstance> dynamoInstances){
-    System.out.println("Launching " + dynamoInstances.size() + " instances.");
+    Logger.instance().info("Launching " + dynamoInstances.size() + " instances.");
     collectInstanceInformation(dynamoInstances);
     blockUntilReachable(dynamoInstances, 120000);
-    System.out.println(dynamoInstances.size() + " instances available now.");
+    Logger.instance().info(dynamoInstances.size() + " instances available now.");
   }
 
   private boolean blockUntilReachable(List<DynamoInstance> instances, long timeout) {
-    System.out.println("Waiting for Instances to be reachable via SSH.");
+    Logger.instance().info("Waiting for Instances to be reachable via SSH.");
     for(DynamoInstance instance:instances){
       if(!instance.blockUntilReachable(timeout)) return false;
       NodeList.getInstance().addNode(instance);
-      System.out.println(NodeList.getInstance().getAllDevices().size() + " devices in the cluster now.");
+      Logger.instance().info(NodeList.getInstance().getAllDevices().size() + " devices in the cluster now.");
     }
-    System.out.println("Instances are reachable via SSH.");
+    Logger.instance().info("Instances are reachable via SSH.");
     return true;
   }
 
