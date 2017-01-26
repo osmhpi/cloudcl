@@ -8,7 +8,7 @@ import java.util.Set;
 import com.amd.aparapi.device.OpenCLDevice;
 import com.amd.aparapi.internal.kernel.KernelRunner;
 
-import fr.dynamo.Notifyable;
+import fr.dynamo.ThreadFinishedNotifyable;
 import fr.dynamo.scheduling.device.AbstractDeviceScheduler;
 import fr.dynamo.scheduling.device.KernelDevicePairing;
 import fr.dynamo.scheduling.device.SimpleDeviceScheduler;
@@ -18,7 +18,7 @@ import fr.dynamo.threading.DynamoJob;
 import fr.dynamo.threading.DynamoKernel;
 import fr.dynamo.threading.DynamoThread;
 
-public class DynamoExecutor implements Notifyable{
+public class DynamoExecutor implements ThreadFinishedNotifyable{
 
   private Set<DynamoJob> jobs = Collections.synchronizedSet(new HashSet<DynamoJob>());
 
@@ -102,9 +102,16 @@ public class DynamoExecutor implements Notifyable{
     }
   }
 
+  public Set<DynamoJob> getJobs() {
+    return jobs;
+  }
+
+  public void setScheduler(JobScheduler scheduler) {
+    this.scheduler = scheduler;
+  }
+
   @Override
-  public synchronized void notifyListener(Object notifier) {
-    DynamoThread thread = (DynamoThread) notifier;
+  public void notifyListener(DynamoThread thread) {
     DynamoKernel kernel = thread.getKernel();
 
     if(kernel.getRemainingTries() == 0){
@@ -114,14 +121,6 @@ public class DynamoExecutor implements Notifyable{
     }
 
     assignKernels();
-  }
-
-  public Set<DynamoJob> getJobs() {
-    return jobs;
-  }
-
-  public void setScheduler(JobScheduler scheduler) {
-    this.scheduler = scheduler;
   }
 
 }

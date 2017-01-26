@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.amd.aparapi.device.OpenCLDevice;
 
-import fr.dynamo.ThreadFinishedNotifier;
+import fr.dynamo.ThreadFinishedNotifyable;
 import fr.dynamo.performance.PerformanceCache;
 
 public class DynamoJob {
@@ -25,7 +25,7 @@ public class DynamoJob {
   private long end = -1;
   private int iteration = 1;
   private Date submissionTime;
-  private ThreadFinishedNotifier finishedKernelNotifier;
+  private ThreadFinishedNotifyable finishedKernelNotifier;
 
   public DynamoJob(String jobName) {
     super();
@@ -35,7 +35,7 @@ public class DynamoJob {
     submissionTime = new Date();
   }
 
-  public DynamoJob(String jobName, ThreadFinishedNotifier finishedKernelNotifier) {
+  public DynamoJob(String jobName, ThreadFinishedNotifyable finishedKernelNotifier) {
     this(jobName);
     this.finishedKernelNotifier = finishedKernelNotifier;
   }
@@ -63,7 +63,7 @@ public class DynamoJob {
 
     end = System.currentTimeMillis();
     terminated = kernelsToRun.isEmpty() && runningThreads.isEmpty();
-    finishedKernelNotifier.notifyListener(thread.getKernel());
+    finishedKernelNotifier.notifyListener(thread);
   }
 
   public List<DynamoKernel> getFinishedKernels() {
@@ -167,7 +167,7 @@ public class DynamoJob {
     return (remaining() + running() / 2) * timePerItem;
   }
 
-  public void setFinishedKernelNotifier(ThreadFinishedNotifier finishedKernelNotifier) {
+  public void setFinishedKernelNotifier(ThreadFinishedNotifyable finishedKernelNotifier) {
     this.finishedKernelNotifier = finishedKernelNotifier;
   }
 

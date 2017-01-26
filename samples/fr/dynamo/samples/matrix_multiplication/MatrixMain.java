@@ -9,11 +9,12 @@ import java.util.concurrent.TimeUnit;
 import com.amd.aparapi.Range;
 
 import fr.dynamo.DevicePreference;
-import fr.dynamo.ThreadFinishedNotifier;
+import fr.dynamo.ThreadFinishedNotifyable;
 import fr.dynamo.execution.DynamoExecutor;
 import fr.dynamo.performance.PerformanceCache;
 import fr.dynamo.threading.DynamoJob;
 import fr.dynamo.threading.DynamoKernel;
+import fr.dynamo.threading.DynamoThread;
 
 public class MatrixMain {
 
@@ -28,10 +29,10 @@ public class MatrixMain {
     Random random = new Random();
     random.setSeed(1000);
 
-    DynamoJob job = new DynamoJob("Matrix", new ThreadFinishedNotifier() {
+    DynamoJob job = new DynamoJob("Matrix", new ThreadFinishedNotifyable() {
       @Override
-      public void notifyListener(DynamoKernel kernel) {
-        System.out.println("Callback for Kernel: " + kernel.hashCode());
+      public void notifyListener(DynamoThread thread) {
+        System.out.println("Callback for Kernel: " + thread.getKernel().hashCode());
       }
     });
 

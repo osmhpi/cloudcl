@@ -7,15 +7,15 @@ import com.amd.aparapi.device.Device.TYPE;
 import com.amd.aparapi.device.OpenCLDevice;
 import com.amd.aparapi.internal.kernel.KernelManager;
 
-import fr.dynamo.Notifyable;
+import fr.dynamo.ThreadFinishedNotifyable;
 
 public class DynamoThread extends Thread{
 
   private DynamoKernel kernel;
   private OpenCLDevice device;
-  private Notifyable notifyable;
+  private ThreadFinishedNotifyable notifyable;
 
-  public DynamoThread(DynamoKernel kernel, OpenCLDevice device, Notifyable notifyable) {
+  public DynamoThread(DynamoKernel kernel, OpenCLDevice device, ThreadFinishedNotifyable notifyable) {
     super();
     this.kernel = kernel;
     this.device = device;

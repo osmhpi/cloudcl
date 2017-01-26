@@ -9,7 +9,7 @@ import com.amd.aparapi.device.OpenCLDevice;
 import com.amd.aparapi.internal.instruction.InstructionSet.TypeSpec;
 
 import fr.dynamo.DevicePreference;
-import fr.dynamo.Notifyable;
+import fr.dynamo.ThreadFinishedNotifyable;
 import fr.dynamo.performance.NetworkEstimator;
 import fr.dynamo.performance.NetworkSpeed;
 
@@ -32,7 +32,7 @@ public abstract class DynamoKernel extends Kernel implements Runnable{
     this.devicePreference = devicePreference;
   }
 
-  public DynamoThread buildThread(OpenCLDevice device, Notifyable notifyable){
+  public DynamoThread buildThread(OpenCLDevice device, ThreadFinishedNotifyable notifyable){
     getJob().getKernelsToRun().remove(this);
     return new DynamoThread(this, device, notifyable);
   }
