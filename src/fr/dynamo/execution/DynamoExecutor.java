@@ -21,7 +21,6 @@ import fr.dynamo.threading.DynamoThread;
 public class DynamoExecutor implements ThreadFinishedNotifyable{
 
   private Set<DynamoJob> jobs = Collections.synchronizedSet(new HashSet<DynamoJob>());
-
   private JobScheduler scheduler = new RoundRobinJobScheduler();
   private AbstractDeviceScheduler deviceScheduler = new SimpleDeviceScheduler();
   private static DynamoExecutor instance;
@@ -54,7 +53,7 @@ public class DynamoExecutor implements ThreadFinishedNotifyable{
 
   private synchronized List<DynamoThread> buildThreads(){
     List<DynamoThread> newThreads = new ArrayList<DynamoThread>();
-    List<OpenCLDevice> unusedDevices = deviceScheduler.getUnusedDevices(allThreads());
+    List<OpenCLDevice> unusedDevices = AbstractDeviceScheduler.getUnusedDevices(allThreads());
     if(unusedDevices.size() == 0){
       System.out.println("No Devices available at this time. Waiting for another task to finish.");
       return newThreads;

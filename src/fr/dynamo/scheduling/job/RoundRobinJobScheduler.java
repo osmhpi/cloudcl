@@ -12,9 +12,7 @@ public class RoundRobinJobScheduler implements JobScheduler{
 
   @Override
   public List<DynamoKernel> schedule(List<DynamoJob> jobs) {
-    if(roundRobinCounter >= jobs.size()){
-      roundRobinCounter = 0;
-    }
+    if(roundRobinCounter >= jobs.size()) roundRobinCounter = 0;
 
     List<DynamoKernel> kernels = new LinkedList<DynamoKernel>();
     int maxKernelCount = 0;
