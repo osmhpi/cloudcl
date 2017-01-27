@@ -100,8 +100,6 @@ public abstract class DynamoKernel extends Kernel implements Runnable{
       long length = 0;
 
       if(type.isArray()){
-        String typeString = type.toString().replace("class [", "").replace("[", "");
-
         try {
           f.setAccessible(true);
           length = getArrayLength(f.get(this));
@@ -109,24 +107,7 @@ public abstract class DynamoKernel extends Kernel implements Runnable{
         } catch (Exception e) {
           e.printStackTrace();
         }
-        if(typeString.length() == 1){
-          TypeSpec spec = TypeSpec.valueOf(typeString);
-          byteSum += spec.getSize() * length;
-        }else{
-          long bytes = 0;
-          for(Field nestedField:type.getComponentType().getDeclaredFields()){
-            if(nestedField.getType().isPrimitive()){
-              for(TypeSpec typeSpec:TypeSpec.values()){
-                if(typeSpec.getLongName().equals(nestedField.getType().toString())){
-                  byteSum += typeSpec.getSize() * length;
-                  break;
-                }
-              }
-            }
-          }
-          byteSum += bytes;
-        }
-
+        byteSum +=  getObjectSize(type) * length;
       }
 
     }
@@ -134,18 +115,36 @@ public abstract class DynamoKernel extends Kernel implements Runnable{
   }
 
   private long getArrayLength(Object value){
-    long length = 0;
+    long length = Array.getLength(value);
 
-      length = Array.getLength(value);
+    while(value.getClass().isArray()){
+      value = Array.get(value, 0);
+      if(value.getClass().isArray()){
+        length = length * Array.getLength(value);
+      }
+    }
+    return length;
+  }
 
-      while(value.getClass().isArray()){
-        value = Array.get(value, 0);
-        if(value.getClass().isArray()){
-          length = length * Array.getLength(value);
+  private long getObjectSize(Class<?> type){
+    String typeString = type.toString().replace("class [", "").replace("[", "");
+    if(typeString.length() == 1){
+      TypeSpec spec = TypeSpec.valueOf(typeString);
+      return spec.getSize();
+    }else{
+      long bytes = 0;
+      for(Field nestedField:type.getComponentType().getDeclaredFields()){
+        if(nestedField.getType().isPrimitive()){
+          for(TypeSpec typeSpec:TypeSpec.values()){
+            if(typeSpec.getLongName().equals(nestedField.getType().toString())){
+              bytes += typeSpec.getSize();
+              break;
+            }
+          }
         }
       }
-
-    return length;
+      return bytes;
+    }
   }
 
   public int getRemainingTries() {
