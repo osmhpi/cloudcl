@@ -22,7 +22,7 @@ import fr.dynamo.threading.DynamoThread;
 public class DynamoExecutor implements ThreadFinishedNotifyable{
 
   private Set<DynamoJob> jobs = Collections.synchronizedSet(new HashSet<DynamoJob>());
-  private JobScheduler scheduler = new RoundRobinJobScheduler();
+  private JobScheduler jobScheduler = new RoundRobinJobScheduler();
   private AbstractDeviceScheduler deviceScheduler = new SimpleDeviceScheduler();
   private static DynamoExecutor instance;
 
@@ -60,17 +60,28 @@ public class DynamoExecutor implements ThreadFinishedNotifyable{
       return newThreads;
     }
 
-    List<DynamoKernel> scheduledKernels = scheduler.schedule(new ArrayList<DynamoJob>(jobs));
+    List<DynamoKernel> scheduledKernels = jobScheduler.schedule(getUnfinishedJobs());
     Logger.instance().info(scheduledKernels.size() + " kernels and " + unusedDevices.size() + " devices available for disposition.");
 
     List<KernelDevicePairing> pairings = deviceScheduler.scheduleDevices(scheduledKernels, unusedDevices);
+    Logger.instance().info(pairings.size() + " pairings found.");
 
     for(KernelDevicePairing pairing:pairings){
       newThreads.add(pairing.kernel.buildThread(pairing.device, this));
     }
 
-    scheduler.registerSchedulingDecisions(pairings);
+    jobScheduler.registerSchedulingDecisions(pairings);
     return newThreads;
+  }
+
+  private synchronized List<DynamoJob> getUnfinishedJobs(){
+    List<DynamoJob> unfinishedJobs = new ArrayList<DynamoJob>();
+    for(DynamoJob job:jobs){
+      if(job.getKernelsToRun().size() > 0){
+        unfinishedJobs.add(job);
+      }
+    }
+    return unfinishedJobs;
   }
 
   private synchronized List<DynamoThread> allThreads(){
@@ -108,7 +119,7 @@ public class DynamoExecutor implements ThreadFinishedNotifyable{
   }
 
   public void setScheduler(JobScheduler scheduler) {
-    this.scheduler = scheduler;
+    this.jobScheduler = scheduler;
   }
 
   @Override
