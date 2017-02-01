@@ -23,9 +23,11 @@ public class MandelbrotMain {
     int fullWidth = Integer.parseInt(args[0]);
     int fullHeight = Integer.parseInt(args[0]);
     int iterations = Integer.parseInt(args[1]);
+    final int kernelCount = Integer.parseInt(args[2]);;
+    boolean outputPicture = Integer.parseInt(args[3]) == 1;
+
     System.out.println("Size: " + fullWidth + "; Iterations: " + iterations);
 
-    final int kernelCount = Integer.parseInt(args[2]);;
     int stripWidth = fullWidth / kernelCount;
 
     for(int i = 0; i<kernelCount; i++){
@@ -38,26 +40,29 @@ public class MandelbrotMain {
     DynamoExecutor.instance().submit(job);
     job.awaitTermination(1, TimeUnit.DAYS);
 
-    BufferedImage fullImage = new BufferedImage(fullWidth, fullHeight, BufferedImage.TYPE_INT_ARGB);
-    Graphics2D graphics = fullImage.createGraphics();
-    for(int i = 0; i < job.getFinishedKernels().size(); i++){
-      MandelbrotKernel kernel = (MandelbrotKernel) job.getFinishedKernels().get(i);
-      BufferedImage image = paintPicture(kernel.result, stripWidth, fullHeight);
+    if(outputPicture){
+      BufferedImage fullImage = new BufferedImage(fullWidth, fullHeight, BufferedImage.TYPE_INT_ARGB);
+      Graphics2D graphics = fullImage.createGraphics();
+      for(int i = 0; i < job.getFinishedKernels().size(); i++){
+        MandelbrotKernel kernel = (MandelbrotKernel) job.getFinishedKernels().get(i);
+        BufferedImage image = paintPicture(kernel.result, stripWidth, fullHeight);
+        try {
+          ImageIO.write(image, "png", new File("TILE_"+i+".png"));
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+        graphics.drawImage(image, stripWidth*i, 0, null);
+      }
+
+      File outputfile = new File("result.png");
+      System.out.println(outputfile.getAbsolutePath());
       try {
-        ImageIO.write(image, "png", new File("TILE_"+i+".png"));
+        ImageIO.write(fullImage, "png", outputfile);
       } catch (IOException e) {
         e.printStackTrace();
       }
-      graphics.drawImage(image, stripWidth*i, 0, null);
     }
 
-    File outputfile = new File("result.png");
-    System.out.println(outputfile.getAbsolutePath());
-    try {
-      ImageIO.write(fullImage, "png", outputfile);
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
     job.cleanUp();
   }
 
