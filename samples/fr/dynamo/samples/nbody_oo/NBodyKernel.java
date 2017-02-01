@@ -28,12 +28,10 @@ public class NBodyKernel extends DynamoKernel{
       final float phi = (float) (Math.random() * Math.PI * 2);
       final float radius = (float) (Math.random() * maxDist);
 
-      // get the 3D dimensional coordinates
       float x = (float) (radius * Math.cos(theta) * Math.sin(phi));
       float y = (float) (radius * Math.sin(theta) * Math.sin(phi));
       float z = (float) (radius * Math.cos(phi));
 
-      // divide into two 'spheres of bodies' by adjusting x
       if ((body % 2) == 0) {
         x += maxDist * 1.5;
       } else {
@@ -45,9 +43,6 @@ public class NBodyKernel extends DynamoKernel{
     Body.allBodies = bodies;
   }
 
-  /**
-   * Here is the kernel entrypoint. Here is where we calculate the position of each body
-   */
   @Override public void run() {
     final int body = getGlobalId();
 

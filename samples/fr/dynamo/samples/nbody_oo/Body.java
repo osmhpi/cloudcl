@@ -1,11 +1,12 @@
 package fr.dynamo.samples.nbody_oo;
 
-public final class Body{
+public final class Body {
   protected final float delT = .005f;
 
   protected final float espSqr = 1.0f;
 
   public static Body[] allBodies;
+  float x, y, z, m, vx, vy, vz;
 
   public Body(float _x, float _y, float _z, float _m) {
      x = _x;
@@ -13,8 +14,6 @@ public final class Body{
      z = _z;
      m = _m;
   }
-
-  float x, y, z, m, vx, vy, vz;
 
   public float getX() {
      return x;
