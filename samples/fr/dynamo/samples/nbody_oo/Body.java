@@ -5,7 +5,6 @@ public final class Body {
 
   protected final float espSqr = 1.0f;
 
-  public static Body[] allBodies;
   float x, y, z, m, vx, vy, vz;
 
   public Body(float _x, float _y, float _z, float _m) {

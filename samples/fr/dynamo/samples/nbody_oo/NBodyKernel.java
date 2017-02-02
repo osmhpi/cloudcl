@@ -9,38 +9,16 @@ import fr.dynamo.threading.DynamoKernel;
 public class NBodyKernel extends DynamoKernel{
 
   protected final float delT = .005f;
-
   protected final float espSqr = 1.0f;
-
   protected final float mass = 5f;
 
+  public final Body[] bodies;
+  public final int bodyCount;
 
-  public Body[] bodies;
-
-  public NBodyKernel(DynamoJob job, Range _range, DevicePreference preference) {
-    super(job, _range, preference);
-
-    bodies = new Body[range.getGlobalSize(0)];
-
-    final float maxDist = 20f;
-    for (int body = 0; body < range.getGlobalSize(0); body++) {
-      final float theta = (float) (Math.random() * Math.PI * 2);
-      final float phi = (float) (Math.random() * Math.PI * 2);
-      final float radius = (float) (Math.random() * maxDist);
-
-      float x = (float) (radius * Math.cos(theta) * Math.sin(phi));
-      float y = (float) (radius * Math.sin(theta) * Math.sin(phi));
-      float z = (float) (radius * Math.cos(phi));
-
-      if ((body % 2) == 0) {
-        x += maxDist * 1.5;
-      } else {
-        x -= maxDist * 1.5;
-      }
-      bodies[body] = new Body(x, y, z, 5f);
-    }
-
-    Body.allBodies = bodies;
+  public NBodyKernel(DynamoJob job, Body[] bodies, DevicePreference preference) {
+    super(job, Range.create(bodies.length), preference);
+    this.bodies = bodies;
+    this.bodyCount = bodies.length;
   }
 
   @Override public void run() {
@@ -54,7 +32,7 @@ public class NBodyKernel extends DynamoKernel{
     float myPosy = bodies[body].getY();
     float myPosz = bodies[body].getZ();
 
-    for (int i = 0; i < getGlobalSize(0); i++) {
+    for (int i = 0; i < bodyCount; i++) {
 
       final float dx = bodies[i].getX() - myPosx;
       final float dy = bodies[i].getY() - myPosy;
