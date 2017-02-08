@@ -12,6 +12,7 @@ import com.amd.aparapi.device.OpenCLDevice;
 
 import fr.dynamo.ThreadFinishedNotifyable;
 import fr.dynamo.performance.PerformanceCache;
+import fr.dynamo.performance.PerformanceMeasurement;
 
 public class DynamoJob {
 
@@ -89,7 +90,11 @@ public class DynamoJob {
     return devices;
   }
 
-  public List<Entry<String, Long>> getPerformanceStats(){
+  public PerformanceMeasurement getDevicePerformance(){
+    return PerformanceCache.getInstance().getPerformanceMeasurement(this);
+  }
+
+  public List<Entry<String, Long>> getPerformanceRanking(){
     return PerformanceCache.getInstance().getPerformanceMeasurement(this).getDeviceRanking();
   }
 

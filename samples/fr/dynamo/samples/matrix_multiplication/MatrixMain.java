@@ -2,63 +2,22 @@ package fr.dynamo.samples.matrix_multiplication;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.rmi.UnexpectedException;
-import java.util.Arrays;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
-import com.amd.aparapi.Range;
-
 import fr.dynamo.DevicePreference;
-import fr.dynamo.ThreadFinishedNotifyable;
 import fr.dynamo.execution.DynamoExecutor;
 import fr.dynamo.logging.Logger;
 import fr.dynamo.performance.PerformanceCache;
 import fr.dynamo.threading.DynamoJob;
 import fr.dynamo.threading.DynamoKernel;
-import fr.dynamo.threading.DynamoThread;
 
 public class MatrixMain {
 
   public static void main(String[] args) throws InterruptedException, FileNotFoundException, IOException {
     final int size = Integer.parseInt(args[0]);
     final int tiles = Integer.parseInt(args[1]);
-    
-    System.out.println("Width/Height: " + size);
-    int tileHeight = size/tiles;
-    System.out.println("Height per Tile: " + tileHeight);
 
-    Random random = new Random();
-    random.setSeed(1000);
-
-    DynamoJob job = new DynamoJob("Matrix", new ThreadFinishedNotifyable() {
-      @Override
-      public void notifyListener(DynamoThread thread) {
-        Logger.instance().debug("Callback for Kernel: " + thread.getKernel().hashCode());
-      }
-    });
-
-    final float[] a = new float[size*size];
-    final float[] b = new float[size*size];
-    for (int i = 0; i < a.length; i++) {
-      a[i] = random.nextFloat() * 3;
-    }
-    for (int i = 0; i < b.length; i++) {
-      b[i] = random.nextFloat() * 3;
-    }
-
-    for(int tile=0; tile<tiles; tile++){
-
-      final float[] result = new float[tileHeight*size];
-
-      float[] aSplit = Arrays.copyOfRange(a, tile*tileHeight*size, (tile+1)*tileHeight*size);
-
-      Range range = Range.create2D(tileHeight, size, 100, 1);
-
-      MatrixKernel kernel = new MatrixKernel(job, range, aSplit, b, result, size);
-      kernel.setDevicePreference(DevicePreference.CPU_ONLY);
-      job.addKernel(kernel);
-    }
-
+    DynamoJob job = new MatrixJob(size, tiles, DevicePreference.NONE);
     DynamoExecutor.instance().submit(job);
 
     job.awaitTermination(1, TimeUnit.DAYS);

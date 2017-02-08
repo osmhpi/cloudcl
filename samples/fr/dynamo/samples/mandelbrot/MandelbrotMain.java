@@ -8,8 +8,6 @@ import java.util.concurrent.TimeUnit;
 
 import javax.imageio.ImageIO;
 
-import com.amd.aparapi.Range;
-
 import fr.dynamo.DevicePreference;
 import fr.dynamo.execution.DynamoExecutor;
 import fr.dynamo.threading.DynamoJob;
@@ -18,34 +16,23 @@ public class MandelbrotMain {
 
 
   public static void main(String[] args) throws InterruptedException {
-    DynamoJob job = new DynamoJob("Mandelbrot");
-
-    int fullWidth = Integer.parseInt(args[0]);
-    int fullHeight = Integer.parseInt(args[0]);
+    int size = Integer.parseInt(args[0]);
     int iterations = Integer.parseInt(args[1]);
-    final int kernelCount = Integer.parseInt(args[2]);;
+    final int tileCount = Integer.parseInt(args[2]);;
     boolean outputPicture = Integer.parseInt(args[3]) == 1;
+    int stripWidth = size / tileCount;
 
-    System.out.println("Size: " + fullWidth + "; Iterations: " + iterations);
-
-    int stripWidth = fullWidth / kernelCount;
-
-    for(int i = 0; i<kernelCount; i++){
-      Range range = Range.create2D(stripWidth, fullHeight, 100, 1);
-      MandelbrotKernel k = new MandelbrotKernel(job, range, fullWidth, fullHeight, stripWidth, stripWidth * i, iterations);
-      k.setDevicePreference(DevicePreference.CPU_ONLY);
-      job.addKernel(k);
-    }
+    DynamoJob job = new MandelbrotJob(size, tileCount, iterations, DevicePreference.NONE);
 
     DynamoExecutor.instance().submit(job);
     job.awaitTermination(1, TimeUnit.DAYS);
 
     if(outputPicture){
-      BufferedImage fullImage = new BufferedImage(fullWidth, fullHeight, BufferedImage.TYPE_INT_ARGB);
+      BufferedImage fullImage = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
       Graphics2D graphics = fullImage.createGraphics();
       for(int i = 0; i < job.getFinishedKernels().size(); i++){
         MandelbrotKernel kernel = (MandelbrotKernel) job.getFinishedKernels().get(i);
-        BufferedImage image = paintPicture(kernel.result, stripWidth, fullHeight);
+        BufferedImage image = paintPicture(kernel.result, stripWidth, size);
         try {
           ImageIO.write(image, "png", new File("TILE_"+i+".png"));
         } catch (IOException e) {

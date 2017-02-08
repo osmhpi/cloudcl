@@ -27,22 +27,16 @@ public class PerformanceMeasurement {
     measurements.get(deviceName).add(timing);
   }
 
+  public Map<String, List<Long>> getMeasurements() {
+    return measurements;
+  }
+
   public List<Entry<String, Long>> getDeviceRanking(){
     Map<String, Long> averages = new HashMap<String, Long>();
     for(String key:measurements.keySet()){
-      averages.put(key, average(measurements.get(key)));
+      averages.put(key, Statistics.average(measurements.get(key)));
     }
     return devicesSortedByPerformance(averages);
-  }
-
-  private long average(List<Long> measurements){
-    long sum = 0;
-    long count = 0;
-    for(long l:measurements){
-      count++;
-      sum += l;
-    }
-    return sum/count;
   }
 
   private List<Entry<String, Long>> devicesSortedByPerformance(Map<String, Long> map) {

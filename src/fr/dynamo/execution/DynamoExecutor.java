@@ -25,6 +25,7 @@ public class DynamoExecutor implements ThreadFinishedNotifyable{
   private JobScheduler jobScheduler = new RoundRobinJobScheduler();
   private AbstractDeviceScheduler deviceScheduler = new SimpleDeviceScheduler();
   private static DynamoExecutor instance;
+  private boolean stopped = false;
 
   private DynamoExecutor() {
     super();
@@ -48,6 +49,7 @@ public class DynamoExecutor implements ThreadFinishedNotifyable{
   }
 
   private synchronized void assignKernels(){
+    if(stopped) return;
     List<DynamoThread> builtThreads = buildThreads();
     start(builtThreads);
   }
@@ -56,7 +58,7 @@ public class DynamoExecutor implements ThreadFinishedNotifyable{
     List<DynamoThread> newThreads = new ArrayList<DynamoThread>();
     List<OpenCLDevice> unusedDevices = AbstractDeviceScheduler.getUnusedDevices(allThreads());
     if(unusedDevices.size() == 0){
-      Logger.instance().info("No Devices available at this time. Waiting for another task to finish.");
+      Logger.instance().debug("No Devices available at this time. Waiting for another task to finish.");
       return newThreads;
     }
 
@@ -64,7 +66,7 @@ public class DynamoExecutor implements ThreadFinishedNotifyable{
     Logger.instance().info(scheduledKernels.size() + " kernels and " + unusedDevices.size() + " devices available for disposition.");
 
     List<KernelDevicePairing> pairings = deviceScheduler.scheduleDevices(scheduledKernels, unusedDevices);
-    Logger.instance().info(pairings.size() + " pairings found.");
+    Logger.instance().debug(pairings.size() + " pairings found.");
 
     for(KernelDevicePairing pairing:pairings){
       newThreads.add(pairing.kernel.buildThread(pairing.device, this));
@@ -118,8 +120,25 @@ public class DynamoExecutor implements ThreadFinishedNotifyable{
     return jobs;
   }
 
-  public void setScheduler(JobScheduler scheduler) {
+  public void setJobScheduler(JobScheduler scheduler) {
     this.jobScheduler = scheduler;
+  }
+
+  public void setDeviceScheduler(AbstractDeviceScheduler deviceScheduler) {
+    this.deviceScheduler = deviceScheduler;
+  }
+
+  public boolean isStopped() {
+    return stopped;
+  }
+
+  public void stop() {
+    this.stopped = true;
+  }
+
+  public void start() {
+    this.stopped = false;
+    assignKernels();
   }
 
   @Override

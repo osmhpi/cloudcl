@@ -28,8 +28,8 @@ public class MandelbrotKernel extends DynamoKernel{
     int col = offsetX + getGlobalId(0);
     int row = getGlobalId(1);
 
-    double c_re = (col - fullWidth/2.0)*4.0/fullWidth;
-    double c_im = (row - fullHeight/2.0)*4.0/fullHeight;
+    double c_re = ((col - fullWidth/2.0)*4.0/fullWidth);
+    double c_im = ((row - fullHeight/2.0)*4.0/fullHeight);
     double x = 0, y = 0;
     int iteration = 0;
     while (x*x+y*y <= 4 && iteration < maxIterations) {

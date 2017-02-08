@@ -37,7 +37,7 @@ public class DynamoThread extends Thread{
         kernel.setExecutionModeWithoutFallback(EXECUTION_MODE.CPU);
       }
 
-      Logger.instance().info("Execute Thread " + this.getId() + " on " + device.getShortDescription() + " " + device.getDeviceId());
+      Logger.instance().info(getKernel().getJob().getName() + ": execute Thread " + this.getId() + " on " + device.getShortDescription() + " " + device.getDeviceId());
       try{
         kernel.execute();
       }catch(Error e){
@@ -46,7 +46,7 @@ public class DynamoThread extends Thread{
         throw e;
       }
 
-      Logger.instance().info("Execution of Thread " + this.getId() + " finished after " + kernel.getExecutionTime() + " ms");
+      Logger.instance().info(getKernel().getJob().getName() + ": execution of Thread " + this.getId() + " finished after " + kernel.getExecutionTime() + " ms");
       kernel.setRemainingTries(0);
       dispose();
     }finally{
