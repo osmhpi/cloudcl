@@ -1,5 +1,7 @@
 package fr.dynamo.scheduling.job;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -13,8 +15,8 @@ public class RoundRobinJobScheduler implements JobScheduler{
 
   @Override
   public List<DynamoKernel> schedule(List<DynamoJob> jobs) {
+
     if(roundRobinCounter >= jobs.size()) roundRobinCounter = 0;
-    int previousRoundRobinIndex = roundRobinCounter;
 
     List<DynamoKernel> kernels = new LinkedList<DynamoKernel>();
     int maxKernelCount = 0;
@@ -22,19 +24,35 @@ public class RoundRobinJobScheduler implements JobScheduler{
       maxKernelCount = Math.max(maxKernelCount, job.remaining());
     }
 
-    for(int i=0; i<maxKernelCount; i++){
-      if(roundRobinCounter >= jobs.size()) roundRobinCounter = 0;
+    Object[] front;
+    Object[] back;
+    if(roundRobinCounter > 0){
+      back = Arrays.copyOfRange(jobs.toArray(), 0, roundRobinCounter);
+      front = Arrays.copyOfRange(jobs.toArray(), roundRobinCounter, jobs.size());
+    }else{
+      front = Arrays.copyOfRange(jobs.toArray(), 0, jobs.size());
+      back = new Object[0];
+    }
 
-      while(roundRobinCounter < jobs.size()){
-        DynamoJob job = jobs.get(roundRobinCounter);
+    List<DynamoJob> reorderedJobs = new ArrayList<DynamoJob>();
+
+    for(Object o:front){
+      reorderedJobs.add((DynamoJob) o);
+    }
+
+    for(Object o:back){
+      reorderedJobs.add((DynamoJob) o);
+    }
+
+    for(int i=0; i<maxKernelCount; i++){
+      for(DynamoJob job:reorderedJobs){
         if(i<job.getKernelsToRun().size()){
           kernels.add(job.getKernelsToRun().get(i));
         }
-        roundRobinCounter++;
       }
     }
 
-    roundRobinCounter = previousRoundRobinIndex + 1;
+    roundRobinCounter = roundRobinCounter + 1;
     return kernels;
   }
 
