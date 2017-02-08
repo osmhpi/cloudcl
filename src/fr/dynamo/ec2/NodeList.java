@@ -37,7 +37,7 @@ public class NodeList extends OpenCLJNI{
 
   public void addNode(DynamoInstance node){
     synchronized(nodes){
-      Logger.instance().debug("Adding: " + node.getPublicIp());
+      Logger.instance().debug("Adding: " + node.getPublicIp() + " of Platform " + OpenCLPlatform.getUncachedOpenCLPlatforms().get(0));
       nodes.add(node);
       List<OpenCLDevice> devices = addNode(OpenCLPlatform.getUncachedOpenCLPlatforms().get(0), node.getPublicIp());
       node.setDevices(new HashSet<OpenCLDevice>(devices));

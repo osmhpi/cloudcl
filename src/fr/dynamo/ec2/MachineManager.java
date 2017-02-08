@@ -13,7 +13,9 @@ public abstract class MachineManager {
 
   public MachineManager(){
     Logger.instance().info("Discover already running instances.");
-    discoverExistingInstances();
+    for(DynamoInstance instance:discoverExistingInstances()){
+      NodeList.getInstance().addNode(instance);;
+    }
   }
 
   public List<DynamoInstance> book(int count, String type){

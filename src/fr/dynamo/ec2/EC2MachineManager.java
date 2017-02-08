@@ -71,6 +71,8 @@ public class EC2MachineManager extends MachineManager{
         }
       }
     }
+
+    collectInstanceInformation(dynamoInstances);
     return dynamoInstances;
   }
 

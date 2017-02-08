@@ -55,10 +55,11 @@ public class DynamoExecutor implements ThreadFinishedNotifyable{
   }
 
   private synchronized List<DynamoThread> buildThreads(){
+    Logger.instance().debug("Building Threads called.");
     List<DynamoThread> newThreads = new ArrayList<DynamoThread>();
     List<OpenCLDevice> unusedDevices = AbstractDeviceScheduler.getUnusedDevices(allThreads());
     if(unusedDevices.size() == 0){
-      Logger.instance().debug("No Devices available at this time. Waiting for another task to finish.");
+      Logger.instance().info("No Devices available at this time. Waiting for another task to finish.");
       return newThreads;
     }
 
