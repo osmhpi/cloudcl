@@ -6,12 +6,13 @@ import java.util.Random;
 import com.amd.aparapi.Range;
 
 import fr.dynamo.DevicePreference;
+import fr.dynamo.ThreadFinishedNotifyable;
 import fr.dynamo.threading.DynamoJob;
 
 public class MatrixJob extends DynamoJob{
 
-  public MatrixJob(int size, int tiles, DevicePreference preference) {
-    super("Matrix");
+  public MatrixJob(int size, int tiles, DevicePreference preference, ThreadFinishedNotifyable notifyable) {
+    super("Matrix", notifyable);
 
     int tileHeight = size/tiles;
 
@@ -37,6 +38,9 @@ public class MatrixJob extends DynamoJob{
 
       MatrixKernel kernel = new MatrixKernel(this, range, aSplit, b, result, size);
       kernel.setDevicePreference(preference);
+      kernel.setExplicit(true);
+      kernel.put(aSplit);
+      kernel.put(b);
       addKernel(kernel);
     }
   }

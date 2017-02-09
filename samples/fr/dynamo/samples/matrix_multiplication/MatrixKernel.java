@@ -8,7 +8,7 @@ public class MatrixKernel extends DynamoKernel{
 
   final float[] a;
   final float[] b;
-  final float[] result;
+  public final float[] result;
 
   final int size;
 
