@@ -22,7 +22,7 @@ public class DynamoJob {
   private final List<DynamoThread> runningThreads = Collections.synchronizedList(new ArrayList<DynamoThread>());
   private final List<DynamoKernel> finishedKernels = Collections.synchronizedList(new ArrayList<DynamoKernel>());
   private boolean terminated = false;
-  private long start = System.currentTimeMillis();
+  private long start = -1;
   private long end = -1;
   private int iteration = 1;
   private Date submissionTime;
@@ -99,6 +99,7 @@ public class DynamoJob {
   }
 
   public void submitThread(DynamoThread thread){
+    if(start == -1) start = System.currentTimeMillis();
     runningThreads.add(thread);
   }
 

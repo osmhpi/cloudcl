@@ -36,6 +36,10 @@ public class NodeList extends OpenCLJNI{
   }
 
   public void addNode(DynamoInstance node){
+    if(node.getPublicIp() == null){
+      Logger.instance().warn("Instance cant't be added because of missing public IP: " + node.toString());
+    }
+
     synchronized(nodes){
       Logger.instance().debug("Adding: " + node.getPublicIp() + " of Platform " + OpenCLPlatform.getUncachedOpenCLPlatforms().get(0));
       nodes.add(node);

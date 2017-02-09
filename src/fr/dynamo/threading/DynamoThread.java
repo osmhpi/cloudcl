@@ -15,6 +15,7 @@ public class DynamoThread extends Thread{
   private DynamoKernel kernel;
   private OpenCLDevice device;
   private ThreadFinishedNotifyable notifyable;
+  private long transferredDataSize;
 
   public DynamoThread(DynamoKernel kernel, OpenCLDevice device, ThreadFinishedNotifyable notifyable) {
     super();
@@ -62,7 +63,12 @@ public class DynamoThread extends Thread{
     return device;
   }
 
+  public long getTransferredDataSize() {
+    return transferredDataSize;
+  }
+
   public void dispose(){
+    transferredDataSize = kernel.getTransferredDataSize();
     kernel.dispose();
   }
 

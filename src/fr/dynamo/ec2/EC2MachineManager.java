@@ -66,7 +66,7 @@ public class EC2MachineManager extends MachineManager{
     for (Reservation reservation : reservations) {
       List<Instance> instances = reservation.getInstances();
       for(Instance i:instances){
-        if(i.getImageId().equals(imageId) && !i.getState().getName().toString().equals("terminated")){
+        if(i.getImageId().equals(imageId) && (i.getState().getName().toString().equals("running") || i.getState().getName().toString().equals("pending"))){
           dynamoInstances.add(new DynamoInstance(i.getInstanceId()));
         }
       }

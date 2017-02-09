@@ -17,7 +17,7 @@ public class PerformanceBasedDeviceScheduler extends AbstractDeviceScheduler {
   public List<KernelDevicePairing> scheduleDevices(List<DynamoKernel> kernels, List<OpenCLDevice> unusedDevices) {
     List<KernelDevicePairing> pairings = new ArrayList<KernelDevicePairing>();
 
-    
+
     for(DynamoKernel kernel:kernels){
       PerformanceMeasurement measurement = PerformanceCache.getInstance().getPerformanceMeasurement(kernel.getJob());
       List<String> rankedDeviceNames = new ArrayList<String>();
@@ -30,13 +30,13 @@ public class PerformanceBasedDeviceScheduler extends AbstractDeviceScheduler {
       if(device == null){
         device = findDeviceWithBestRanking(rankedDeviceNames, unusedDevices);
       }
-      
+
       if(device != null){
         unusedDevices.remove(device);
         pairings.add(new KernelDevicePairing(kernel, device));
       }
     }
-    
+
     return pairings;
   }
 
