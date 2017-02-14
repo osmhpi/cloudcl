@@ -42,8 +42,14 @@ public class NodeList extends OpenCLJNI{
 
     synchronized(nodes){
       Logger.instance().debug("Adding: " + node.getPublicIp() + " of Platform " + OpenCLPlatform.getUncachedOpenCLPlatforms().get(0));
+
       nodes.add(node);
       List<OpenCLDevice> devices = addNode(OpenCLPlatform.getUncachedOpenCLPlatforms().get(0), node.getPublicIp());
+
+      for(OpenCLDevice d:devices){
+        d.setCloudDevice(true);
+      }
+
       node.setDevices(new HashSet<OpenCLDevice>(devices));
     }
   }
