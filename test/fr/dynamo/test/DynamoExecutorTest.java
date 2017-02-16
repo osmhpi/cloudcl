@@ -51,4 +51,23 @@ public class DynamoExecutorTest {
     Assert.assertTrue(job.isTerminated());
   }
 
+  @Test
+  public void testRetries() throws InterruptedException {
+    DynamoJob job = new DynamoJob("Fail");
+
+    DynamoKernel kernel = new DynamoKernel(job, Range.create(1)) {
+      @Override
+      public void run() {
+        System.out.println("FAIL");
+      }
+    };
+    kernel.setRemainingTries(2);
+    job.addKernel(kernel);
+
+    DynamoExecutor.instance().submit(job);
+
+    job.awaitTermination(10, TimeUnit.SECONDS);
+
+    Assert.assertTrue(job.isTerminated());
+  }
 }

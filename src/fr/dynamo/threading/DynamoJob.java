@@ -55,12 +55,14 @@ public class DynamoJob {
   }
 
   public void requeue(DynamoThread thread){
+    runningThreads.remove(thread);
     kernelsToRun.add(thread.getKernel());
   }
 
   public synchronized void finish(DynamoThread thread){
     PerformanceCache.getInstance().addPerformanceMeasurement(thread.getKernel().getJob(), thread.getDevice(), (long)thread.getKernel().getExecutionTime());
     finishedKernels.add(thread.getKernel());
+
     runningThreads.remove(thread);
 
     end = System.currentTimeMillis();
@@ -107,12 +109,12 @@ public class DynamoJob {
     if(isTerminated()){
       kernelsToRun.addAll(finishedKernels);
       finishedKernels.clear();
+
+      iteration++;
+      end = -1;
+
+      terminated = kernelsToRun.isEmpty() && runningThreads.isEmpty();
     }
-
-    iteration++;
-    end = -1;
-
-    terminated = kernelsToRun.isEmpty() && runningThreads.isEmpty();
   }
 
   public int total(){

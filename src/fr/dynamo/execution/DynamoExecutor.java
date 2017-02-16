@@ -146,10 +146,10 @@ public class DynamoExecutor implements ThreadFinishedNotifyable{
   public void notifyListener(DynamoThread thread) {
     DynamoKernel kernel = thread.getKernel();
 
-    if(kernel.getRemainingTries() == 0){
-      kernel.getJob().finish(thread);
-    }else{
+    if(kernel.getRemainingTries() > 0 && thread.isFailed()){
       kernel.getJob().requeue(thread);
+    }else{
+      kernel.getJob().finish(thread);
     }
 
     assignKernels();
