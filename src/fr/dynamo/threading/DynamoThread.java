@@ -16,6 +16,7 @@ public class DynamoThread extends Thread{
   private OpenCLDevice device;
   private ThreadFinishedNotifyable notifyable;
   private long transferredDataSize;
+  private boolean failed;
 
   public DynamoThread(DynamoKernel kernel, OpenCLDevice device, ThreadFinishedNotifyable notifyable) {
     super();
@@ -26,6 +27,7 @@ public class DynamoThread extends Thread{
 
   @Override
   public void run() {
+    failed = false;
     try{
       getKernel().getJob().submitThread(this);
       LinkedHashSet<Device> preferences = new LinkedHashSet<Device>();
@@ -38,16 +40,17 @@ public class DynamoThread extends Thread{
         kernel.setExecutionModeWithoutFallback(EXECUTION_MODE.CPU);
       }
 
-      Logger.instance().info(getKernel().getJob().getName() + ": execute Thread " + this.getId() + " on " + device.getShortDescription() + " " + device.getDeviceId());
+      Logger.instance().info(getKernel().getJob().getName() + ": execute Thread " + this.getId() + " on " + device.getName() + " " + device.getDeviceId());
       try{
         kernel.execute();
       }catch(Error e){
         Logger.instance().error("Thread " + this.getId() + " has failed.");
+        failed = true;
         kernel.reduceRemainingTries();
         throw e;
       }
 
-      Logger.instance().info(getKernel().getJob().getName() + ": execution of Thread " + this.getId() + " finished after " + kernel.getExecutionTime() + " ms");
+      Logger.instance().info(getKernel().getJob().getName() + ": execution of Thread " + this.getId() + " on " + device.getName() + " " + " finished after " + kernel.getExecutionTime() + " ms");
       kernel.setRemainingTries(0);
       dispose();
     }finally{
@@ -65,6 +68,10 @@ public class DynamoThread extends Thread{
 
   public long getTransferredDataSize() {
     return transferredDataSize;
+  }
+
+  public boolean isFailed() {
+    return failed;
   }
 
   public void dispose(){

@@ -80,7 +80,7 @@ public class DynamoExecutor implements ThreadFinishedNotifyable{
   private synchronized List<DynamoJob> getUnfinishedJobs(){
     List<DynamoJob> unfinishedJobs = new ArrayList<DynamoJob>();
     for(DynamoJob job:jobs){
-      if(job.getKernelsToRun().size() > 0){
+      if(!job.isTerminated() && job.getKernelsToRun().size() > 0){
         unfinishedJobs.add(job);
       }
     }

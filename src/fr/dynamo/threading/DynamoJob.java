@@ -58,7 +58,7 @@ public class DynamoJob {
     kernelsToRun.add(thread.getKernel());
   }
 
-  public void finish(DynamoThread thread){
+  public synchronized void finish(DynamoThread thread){
     PerformanceCache.getInstance().addPerformanceMeasurement(thread.getKernel().getJob(), thread.getDevice(), (long)thread.getKernel().getExecutionTime());
     finishedKernels.add(thread.getKernel());
     runningThreads.remove(thread);
