@@ -46,10 +46,6 @@ public class NodeList extends OpenCLJNI{
       nodes.add(node);
       List<OpenCLDevice> devices = addNode(OpenCLPlatform.getUncachedOpenCLPlatforms().get(0), node.getPublicIp());
 
-      for(OpenCLDevice d:devices){
-        d.setCloudDevice(true);
-      }
-
       node.setDevices(new HashSet<OpenCLDevice>(devices));
     }
   }
@@ -65,6 +61,18 @@ public class NodeList extends OpenCLJNI{
     synchronized(nodes){
       return nodes;
     }
+  }
+
+  public Set<OpenCLDevice> getCloudDevices(){
+    Set<OpenCLDevice> devices = new HashSet<OpenCLDevice>();
+    synchronized(nodes){
+      for(DynamoInstance instance:nodes){
+        for (OpenCLDevice device : instance.getDevices()) {
+          devices.add(device);
+        }
+      }
+    }
+    return devices;
   }
 
   public Set<OpenCLDevice> getAllDevices(){

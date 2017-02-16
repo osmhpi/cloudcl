@@ -3,9 +3,11 @@ package fr.dynamo.scheduling.device;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 import com.amd.aparapi.device.OpenCLDevice;
 
+import fr.dynamo.ec2.NodeList;
 import fr.dynamo.threading.DynamoKernel;
 
 public class NetworkAwareDeviceScheduler extends AbstractDeviceScheduler{
@@ -21,18 +23,21 @@ public class NetworkAwareDeviceScheduler extends AbstractDeviceScheduler{
       }
     });
 
-    List<OpenCLDevice> localDevices = new ArrayList<OpenCLDevice>();
-    List<OpenCLDevice> cloudDevices = new ArrayList<OpenCLDevice>();
+
+    List<OpenCLDevice> unusedLocalDevices = new ArrayList<OpenCLDevice>();
+    List<OpenCLDevice> unusedCloudDevices = new ArrayList<OpenCLDevice>();
+
+    Set<OpenCLDevice> cloudDevices = NodeList.getInstance().getCloudDevices();
 
     for(OpenCLDevice device:unusedDevices){
-      if(device.isCloudDevice()){
-        cloudDevices.add(device);
+      if(cloudDevices.contains(device)){
+        unusedCloudDevices.add(device);
       }else{
-        localDevices.add(device);
+        unusedLocalDevices.add(device);
       }
     }
 
-    for(OpenCLDevice localDevice:localDevices){
+    for(OpenCLDevice localDevice:unusedLocalDevices){
       for(int i = kernels.size() - 1; i >= 0; i--){
         DynamoKernel k = kernels.get(i);
 
@@ -44,7 +49,7 @@ public class NetworkAwareDeviceScheduler extends AbstractDeviceScheduler{
       }
     }
 
-    for(OpenCLDevice cloudDevice:cloudDevices){
+    for(OpenCLDevice cloudDevice:unusedCloudDevices){
       for(int i = 0; i < kernels.size(); i++){
         DynamoKernel k = kernels.get(i);
 

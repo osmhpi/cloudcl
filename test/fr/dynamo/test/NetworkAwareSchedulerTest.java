@@ -33,11 +33,11 @@ public class NetworkAwareSchedulerTest {
   {
     localCpu.setName("local");
     localCpu.setMaxComputeUnits(1);
-    localCpu.setCloudDevice(false);
+    //localCpu.setCloudDevice(false);
 
     cloudCpu.setName("cloud");
     cloudCpu.setMaxComputeUnits(2);
-    cloudCpu.setCloudDevice(true);
+    //cloudCpu.setCloudDevice(true);
   }
 
   private DynamoKernel bigKernel = new DynamoKernel(new DynamoJob("bigJob"), Range.create(0)) {
@@ -90,10 +90,10 @@ public class NetworkAwareSchedulerTest {
       System.out.println(p.device.getName() + " " + p.kernel.getJob().getName());
     }
     assertEquals("hugeJob", pairings.get(0).kernel.getJob().getName());
-    assertEquals(false, pairings.get(0).device.isCloudDevice());
+    //assertEquals(false, pairings.get(0).device.isCloudDevice());
 
     assertEquals("tinyJob", pairings.get(1).kernel.getJob().getName());
-    assertEquals(true, pairings.get(1).device.isCloudDevice());
+    //assertEquals(true, pairings.get(1).device.isCloudDevice());
 
   }
 
