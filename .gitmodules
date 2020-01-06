@@ -1,4 +1,4 @@
 [submodule "aparapi"]
 	path = aparapi
-	url = https://github.com/florianroesler/aparapi.git
+	url = https://github.com/osmhpi/aparapi.git
 
