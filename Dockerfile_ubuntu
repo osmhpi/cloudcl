@@ -1,0 +1,27 @@
+FROM ubuntu:bionic
+
+# Install dependencies
+RUN apt-get update \
+ && apt-get install --yes --no-install-recommends \
+        # Needs certificates for HTTPS clone
+        git ca-certificates \
+        # Build fails with Java 11, use Java 8 instead
+        openjdk-8-jdk-headless openjdk-8-jre-headless gradle \
+        # For the native part (JNI bindings)
+        g++ opencl-c-headers ocl-icd-opencl-dev \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
+
+COPY --from=dopencl_ubuntu /opt/dopencl /opt/dopencl
+ENV CPLUS_INCLUDE_PATH="/opt/dopencl/include:${CPLUS_INCLUDE_PATH}"
+
+# Copy source files in
+COPY . /tmp/cloudcl
+
+# Build
+WORKDIR /tmp/cloudcl/aparapi
+RUN gradle build
+
+WORKDIR /tmp/cloudcl
+RUN gradle jar
+# TODO: What to do with the JARs? And how to get the tests to pass?
