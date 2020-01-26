@@ -2,8 +2,6 @@ FROM alpine:3.11
 
 # Install dependencies
 RUN apk add --update \
-        # Needs certificates for HTTPS clone
-        git ca-certificates \
         # Build fails with Java 11, use Java 8 instead
         openjdk8 gradle \
         # For the native part (JNI bindings)
