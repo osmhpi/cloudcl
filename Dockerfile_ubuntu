@@ -7,19 +7,30 @@ RUN apt-get update \
         openjdk-8-jdk-headless openjdk-8-jre-headless gradle \
         # For the native part (JNI bindings)
         g++ opencl-c-headers ocl-icd-opencl-dev \
- && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
+# OpenCL runtime for nvidia-docker. Based on the nvidia/opencl DockerHub image
+# See https://gitlab.com/nvidia/container-images/opencl/blob/ubuntu18.04/runtime/Dockerfile
+RUN mkdir -p /etc/OpenCL/vendors \
+ && echo "libnvidia-opencl.so.1" > /etc/OpenCL/vendors/nvidia.icd
+
+# nvidia-container-runtime
+ENV NVIDIA_VISIBLE_DEVICES all
+ENV NVIDIA_DRIVER_CAPABILITIES compute,utility
+
+# Copy dOpenCL files (also required to build Aparapi)
 COPY --from=dopencl_ubuntu /opt/dopencl /opt/dopencl
 ENV CPLUS_INCLUDE_PATH="/opt/dopencl/include:${CPLUS_INCLUDE_PATH}"
 
 # Copy source files in
 COPY . /tmp/cloudcl
 
-# Build
+# Build Aparapi
 WORKDIR /tmp/cloudcl/aparapi
 RUN gradle build
+ENV LD_LIBRARY_PATH="/tmp/cloudcl/aparapi/com.amd.aparapi.jni/dist"
 
+# Build dOpenCL
 WORKDIR /tmp/cloudcl
 RUN gradle jar
 # TODO: What to do with the JARs? And how to get the tests to pass?
