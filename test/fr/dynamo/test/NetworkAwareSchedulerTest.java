@@ -2,9 +2,11 @@ package fr.dynamo.test;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
+import com.amd.aparapi.opencl.OpenCL;
+import fr.dynamo.ec2.DynamoInstance;
+import fr.dynamo.ec2.NodeListBase;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -21,8 +23,7 @@ import fr.dynamo.threading.DynamoJob;
 import fr.dynamo.threading.DynamoKernel;
 
 public class NetworkAwareSchedulerTest {
-
-  AbstractDeviceScheduler scheduler = new NetworkAwareDeviceScheduler();
+  AbstractDeviceScheduler scheduler;
 
   OpenCLPlatform platform = new OpenCLPlatform();
   List<OpenCLDevice> unusedDevices = new ArrayList<OpenCLDevice>();
@@ -34,11 +35,36 @@ public class NetworkAwareSchedulerTest {
   {
     localCpu.setName("local");
     localCpu.setMaxComputeUnits(1);
-    //localCpu.setCloudDevice(false);
 
     cloudCpu.setName("cloud");
     cloudCpu.setMaxComputeUnits(2);
-    //cloudCpu.setCloudDevice(true);
+
+    scheduler = new NetworkAwareDeviceScheduler(new NodeListBase() {
+      @Override
+      public void addNode(DynamoInstance node) {
+        throw new UnsupportedOperationException();
+      }
+
+      @Override
+      public void removeNode(DynamoInstance node) {
+        throw new UnsupportedOperationException();
+      }
+
+      @Override
+      public Set<DynamoInstance> getNodes() {
+        throw new UnsupportedOperationException();
+      }
+
+      @Override
+      public Set<OpenCLDevice> getCloudDevices() {
+        return new HashSet<>(Collections.singletonList(cloudCpu));
+      }
+
+      @Override
+      public Set<OpenCLDevice> getAllDevices() {
+        throw new UnsupportedOperationException();
+      }
+    });
   }
 
   private DynamoKernel bigKernel = new DynamoKernel(new DynamoJob("bigJob"), Range.create(0)) {
@@ -85,11 +111,6 @@ public class NetworkAwareSchedulerTest {
   }
 
   @Test
-  // TODOXXX: I am pretty sure that this test either is broken, or requires a pretty complex manual setup step
-  //          (having a working dOpenCL environment running), or probably both
-  //          It seems the easiest way to fix this would be to have a mock NodeList returning what the test wants
-  //          and then making sure the rest of the test works correctly
-  @Ignore
   public void testScheduling() {
     List<KernelDevicePairing> pairings = scheduler.scheduleDevices(kernels, unusedDevices);
     for(KernelDevicePairing p : pairings){

@@ -11,7 +11,7 @@ import com.amd.aparapi.internal.opencl.OpenCLPlatform;
 
 import fr.dynamo.logging.Logger;
 
-public class NodeList extends OpenCLJNI{
+public class NodeList extends OpenCLJNI implements NodeListBase {
 
   private Set<DynamoInstance> nodes = new HashSet<DynamoInstance>();
 
@@ -35,6 +35,7 @@ public class NodeList extends OpenCLJNI{
     return instance;
   }
 
+  @Override
   public void addNode(DynamoInstance node){
     if(node.getPublicIp() == null){
       Logger.instance().warn("Instance cant't be added because of missing public IP: " + node.toString());
@@ -50,6 +51,7 @@ public class NodeList extends OpenCLJNI{
     }
   }
 
+  @Override
   public void removeNode(DynamoInstance node){
     synchronized(nodes){
       nodes.remove(node);
@@ -57,12 +59,14 @@ public class NodeList extends OpenCLJNI{
     }
   }
 
+  @Override
   public Set<DynamoInstance> getNodes(){
     synchronized(nodes){
       return nodes;
     }
   }
 
+  @Override
   public Set<OpenCLDevice> getCloudDevices(){
     Set<OpenCLDevice> devices = new HashSet<OpenCLDevice>();
     synchronized(nodes){
@@ -75,6 +79,7 @@ public class NodeList extends OpenCLJNI{
     return devices;
   }
 
+  @Override
   public Set<OpenCLDevice> getAllDevices(){
     Set<OpenCLDevice> devices = new HashSet<OpenCLDevice>();
     synchronized(nodes){

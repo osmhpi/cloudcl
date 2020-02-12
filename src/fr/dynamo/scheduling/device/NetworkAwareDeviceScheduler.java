@@ -8,9 +8,19 @@ import java.util.Set;
 import com.amd.aparapi.device.OpenCLDevice;
 
 import fr.dynamo.ec2.NodeList;
+import fr.dynamo.ec2.NodeListBase;
 import fr.dynamo.threading.DynamoKernel;
 
 public class NetworkAwareDeviceScheduler extends AbstractDeviceScheduler{
+  private final NodeListBase nodeList;
+
+  public NetworkAwareDeviceScheduler() {
+    this(NodeList.getInstance());
+  }
+
+  public NetworkAwareDeviceScheduler(NodeListBase nodeList) {
+    this.nodeList = nodeList;
+  }
 
   @Override
   public List<KernelDevicePairing> scheduleDevices(List<DynamoKernel> kernels, List<OpenCLDevice> unusedDevices) {
@@ -27,7 +37,7 @@ public class NetworkAwareDeviceScheduler extends AbstractDeviceScheduler{
     List<OpenCLDevice> unusedLocalDevices = new ArrayList<OpenCLDevice>();
     List<OpenCLDevice> unusedCloudDevices = new ArrayList<OpenCLDevice>();
 
-    Set<OpenCLDevice> cloudDevices = NodeList.getInstance().getCloudDevices();
+    Set<OpenCLDevice> cloudDevices = nodeList.getCloudDevices();
 
     for(OpenCLDevice device:unusedDevices){
       if(cloudDevices.contains(device)){
