@@ -18,7 +18,7 @@ public class MandelbrotMain {
   public static void main(String[] args) throws InterruptedException {
     int size = Integer.parseInt(args[0]);
     int iterations = Integer.parseInt(args[1]);
-    final int tileCount = Integer.parseInt(args[2]);;
+    final int tileCount = Integer.parseInt(args[2]);
     boolean outputPicture = Integer.parseInt(args[3]) == 1;
     int stripWidth = size / tileCount;
 

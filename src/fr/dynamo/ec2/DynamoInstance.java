@@ -14,9 +14,9 @@ public class DynamoInstance {
 
   private static final int DOPENCL_PORT = 25025;
 
-  private String instanceId;
+  private final String instanceId;
   private String publicIp;
-  private Set<OpenCLDevice> devices = new HashSet<OpenCLDevice>();
+  private Set<OpenCLDevice> devices = new HashSet<>();
 
   public DynamoInstance(String instanceId) {
     super();
@@ -55,7 +55,7 @@ public class DynamoInstance {
   }
 
   public void setDevices(Set<OpenCLDevice> devices) {
-    Set<OpenCLDevice> devicesWithDetails = new HashSet<OpenCLDevice>();
+    Set<OpenCLDevice> devicesWithDetails = new HashSet<>();
 
     List<OpenCLDevice> allDevices = OpenCLPlatform.getUncachedOpenCLPlatforms().get(0).getOpenCLDevices();
 

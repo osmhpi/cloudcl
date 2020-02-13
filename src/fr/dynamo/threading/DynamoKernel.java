@@ -16,7 +16,7 @@ import fr.dynamo.performance.NetworkSpeed;
 
 public abstract class DynamoKernel extends Kernel implements Runnable{
 
-  protected Range range;
+  protected final Range range;
   private DevicePreference devicePreference;
   private long executionTime = -1;
   private int remainingTries = 1;

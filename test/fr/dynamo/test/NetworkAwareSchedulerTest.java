@@ -4,11 +4,9 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.*;
 
-import com.amd.aparapi.opencl.OpenCL;
 import fr.dynamo.ec2.DynamoInstance;
 import fr.dynamo.ec2.NodeListBase;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.amd.aparapi.Range;
@@ -23,13 +21,13 @@ import fr.dynamo.threading.DynamoJob;
 import fr.dynamo.threading.DynamoKernel;
 
 public class NetworkAwareSchedulerTest {
-  AbstractDeviceScheduler scheduler;
+  final AbstractDeviceScheduler scheduler;
 
-  OpenCLPlatform platform = new OpenCLPlatform();
-  List<OpenCLDevice> unusedDevices = new ArrayList<OpenCLDevice>();
+  final OpenCLPlatform platform = new OpenCLPlatform();
+  final List<OpenCLDevice> unusedDevices = new ArrayList<>();
 
-  OpenCLDevice localCpu = new OpenCLDevice(platform, 0, TYPE.CPU);
-  OpenCLDevice cloudCpu = new OpenCLDevice(platform, 1, TYPE.CPU);
+  final OpenCLDevice localCpu = new OpenCLDevice(platform, 0, TYPE.CPU);
+  final OpenCLDevice cloudCpu = new OpenCLDevice(platform, 1, TYPE.CPU);
 
 
   {
@@ -67,35 +65,35 @@ public class NetworkAwareSchedulerTest {
     });
   }
 
-  private DynamoKernel bigKernel = new DynamoKernel(new DynamoJob("bigJob"), Range.create(0)) {
+  private final DynamoKernel bigKernel = new DynamoKernel(new DynamoJob("bigJob"), Range.create(0)) {
 
     int[] bigData = new int[1000];
     @Override
     public void run() {}
   };
 
-  private DynamoKernel smallKernel = new DynamoKernel(new DynamoJob("smallJob"), Range.create(0)) {
+  private final DynamoKernel smallKernel = new DynamoKernel(new DynamoJob("smallJob"), Range.create(0)) {
     int[] smallData = new int[10];
 
     @Override
     public void run() {}
   };
 
-  private DynamoKernel hugeKernel = new DynamoKernel(new DynamoJob("hugeJob"), Range.create(0)) {
+  private final DynamoKernel hugeKernel = new DynamoKernel(new DynamoJob("hugeJob"), Range.create(0)) {
 
     int[] bigData = new int[10000];
     @Override
     public void run() {}
   };
 
-  private DynamoKernel tinyKernel = new DynamoKernel(new DynamoJob("tinyJob"), Range.create(0)) {
+  private final DynamoKernel tinyKernel = new DynamoKernel(new DynamoJob("tinyJob"), Range.create(0)) {
 
     int[] tinyData = new int[1];
     @Override
     public void run() {}
   };
 
-  List<DynamoKernel> kernels = new ArrayList<DynamoKernel>();
+  final List<DynamoKernel> kernels = new ArrayList<>();
 
   @Before
   public void prepare(){

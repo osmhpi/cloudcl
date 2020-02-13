@@ -2,8 +2,8 @@ package fr.dynamo.samples.kmeans;
 
 public class Centroid {
 
-  private double currentX;
-  private double currentY;
+  private final double currentX;
+  private final double currentY;
   private double sumX;
   private double sumY;
   private int count;

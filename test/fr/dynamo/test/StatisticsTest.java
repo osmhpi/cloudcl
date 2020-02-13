@@ -9,7 +9,7 @@ import fr.dynamo.performance.Statistics;
 
 public class StatisticsTest {
 
-  Long[] values = new Long[]{(long) 9, (long)2, (long)5, (long)4, (long)12, (long)7, (long)8, (long)11, (long)9, (long)3, (long)7, (long)4, (long)12, (long)5, (long)4, (long)10, (long)9, (long)6, (long)9, (long)4};
+  final Long[] values = new Long[]{9L, 2L, 5L, 4L, 12L, 7L, 8L, 11L, 9L, 3L, 7L, 4L, 12L, 5L, 4L, 10L, 9L, 6L, 9L, 4L};
 
 
   @Test

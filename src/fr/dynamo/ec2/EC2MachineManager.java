@@ -30,7 +30,6 @@ public class EC2MachineManager extends MachineManager{
   private static String keyName;
   private static String securityGroup;
   private static String regionName;
-  private static String propertiesPath;
   private static EC2MachineManager instance;
 
   public static EC2MachineManager getInstance(){
@@ -39,10 +38,9 @@ public class EC2MachineManager extends MachineManager{
   }
 
   public static void setup(String pathToPropertiesFile){
-    propertiesPath = pathToPropertiesFile;
     Properties prop = new Properties();
     try {
-      prop.load(new FileInputStream(new File(propertiesPath)));
+      prop.load(new FileInputStream(new File(pathToPropertiesFile)));
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -51,13 +49,13 @@ public class EC2MachineManager extends MachineManager{
     securityGroup = prop.getProperty("security_group");
     regionName = prop.getProperty("aws_region");
 
-    AWSCredentialsProvider credentials = new ProfileCredentialsProvider(new ProfilesConfigFile(propertiesPath), "default");
+    AWSCredentialsProvider credentials = new ProfileCredentialsProvider(new ProfilesConfigFile(pathToPropertiesFile), "default");
     client = AmazonEC2ClientBuilder.standard().withCredentials(credentials).withRegion(Regions.fromName(regionName)).build();
   }
 
   @Override
   protected List<DynamoInstance> discoverExistingInstances(){
-    List<DynamoInstance> dynamoInstances = new ArrayList<DynamoInstance>();
+    List<DynamoInstance> dynamoInstances = new ArrayList<>();
 
     DescribeInstancesRequest request = new DescribeInstancesRequest();
     DescribeInstancesResult result = getClient().describeInstances(request);
@@ -66,7 +64,7 @@ public class EC2MachineManager extends MachineManager{
     for (Reservation reservation : reservations) {
       List<Instance> instances = reservation.getInstances();
       for(Instance i:instances){
-        if(i.getImageId().equals(imageId) && (i.getState().getName().toString().equals("running") || i.getState().getName().toString().equals("pending"))){
+        if(i.getImageId().equals(imageId) && (i.getState().getName().equals("running") || i.getState().getName().equals("pending"))){
           dynamoInstances.add(new DynamoInstance(i.getInstanceId()));
         }
       }
@@ -97,7 +95,7 @@ public class EC2MachineManager extends MachineManager{
     Logger.instance().info(runInstancesResult.getReservation().getInstances().size() + " instances launched.");
 
     List<Instance> bookedInstances = runInstancesResult.getReservation().getInstances();
-    List<DynamoInstance> dynamoInstances = new ArrayList<DynamoInstance>();
+    List<DynamoInstance> dynamoInstances = new ArrayList<>();
 
     for(Instance instance:bookedInstances){
       dynamoInstances.add(new DynamoInstance(instance.getInstanceId()));
@@ -114,7 +112,7 @@ public class EC2MachineManager extends MachineManager{
   }
 
   public void collectInformationForInstance(AmazonEC2 client, DynamoInstance instance){
-    List<String> instanceId = new ArrayList<String>();
+    List<String> instanceId = new ArrayList<>();
     instanceId.add(instance.getInstanceId());
     DescribeInstancesRequest request = new DescribeInstancesRequest();
     request.setInstanceIds(instanceId);
@@ -127,7 +125,7 @@ public class EC2MachineManager extends MachineManager{
 
   @Override
   public void terminateInstances(List<DynamoInstance> instances){
-    List<String> instanceIds = new ArrayList<String>();
+    List<String> instanceIds = new ArrayList<>();
     for(DynamoInstance instance:instances){
       instanceIds.add(instance.getInstanceId());
     }

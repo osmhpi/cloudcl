@@ -24,7 +24,7 @@ public class NetworkAwareDeviceScheduler extends AbstractDeviceScheduler{
 
   @Override
   public List<KernelDevicePairing> scheduleDevices(List<DynamoKernel> kernels, List<OpenCLDevice> unusedDevices) {
-    List<KernelDevicePairing> pairings = new ArrayList<KernelDevicePairing>();
+    List<KernelDevicePairing> pairings = new ArrayList<>();
 
     kernels.sort(new Comparator<DynamoKernel>() {
       @Override
@@ -34,8 +34,8 @@ public class NetworkAwareDeviceScheduler extends AbstractDeviceScheduler{
     });
 
 
-    List<OpenCLDevice> unusedLocalDevices = new ArrayList<OpenCLDevice>();
-    List<OpenCLDevice> unusedCloudDevices = new ArrayList<OpenCLDevice>();
+    List<OpenCLDevice> unusedLocalDevices = new ArrayList<>();
+    List<OpenCLDevice> unusedCloudDevices = new ArrayList<>();
 
     Set<OpenCLDevice> cloudDevices = nodeList.getCloudDevices();
 

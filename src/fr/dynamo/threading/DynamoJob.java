@@ -18,14 +18,14 @@ public class DynamoJob {
 
   private final String jobName;
   private final String id;
-  private final List<DynamoKernel> kernelsToRun = Collections.synchronizedList(new ArrayList<DynamoKernel>());
-  private final List<DynamoThread> runningThreads = Collections.synchronizedList(new ArrayList<DynamoThread>());
-  private final List<DynamoKernel> finishedKernels = Collections.synchronizedList(new ArrayList<DynamoKernel>());
+  private final List<DynamoKernel> kernelsToRun = Collections.synchronizedList(new ArrayList<>());
+  private final List<DynamoThread> runningThreads = Collections.synchronizedList(new ArrayList<>());
+  private final List<DynamoKernel> finishedKernels = Collections.synchronizedList(new ArrayList<>());
   private boolean terminated = false;
   private long start = -1;
   private long end = -1;
   private int iteration = 1;
-  private Date submissionTime;
+  private final Date submissionTime;
   private ThreadFinishedNotifyable finishedKernelNotifier;
   private int priority = 1;
 
@@ -85,7 +85,7 @@ public class DynamoJob {
   }
 
   public List<OpenCLDevice> getActiveDevices() {
-    List<OpenCLDevice> devices = new ArrayList<OpenCLDevice>();
+    List<OpenCLDevice> devices = new ArrayList<>();
     for(DynamoThread thread:runningThreads){
       devices.add(thread.getDevice());
     }

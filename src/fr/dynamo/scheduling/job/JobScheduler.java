@@ -7,6 +7,6 @@ import fr.dynamo.threading.DynamoJob;
 import fr.dynamo.threading.DynamoKernel;
 
 public interface JobScheduler {
-  public List<DynamoKernel> schedule(List<DynamoJob> jobs);
-  public void registerSchedulingDecisions(List<KernelDevicePairing> scheduledKernels);
+  List<DynamoKernel> schedule(List<DynamoJob> jobs);
+  void registerSchedulingDecisions(List<KernelDevicePairing> scheduledKernels);
 }

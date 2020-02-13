@@ -14,7 +14,7 @@ public abstract class MachineManager {
   public MachineManager(){
     Logger.instance().info("Discover already running instances.");
     for(DynamoInstance instance:discoverExistingInstances()){
-      NodeList.getInstance().addNode(instance);;
+      NodeList.getInstance().addNode(instance);
     }
   }
 

@@ -1,7 +1,6 @@
 package fr.dynamo.performance;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -12,7 +11,7 @@ import com.amd.aparapi.device.OpenCLDevice;
 
 public class PerformanceMeasurement {
 
-  private Map<String, List<Long>> measurements = new HashMap<String, List<Long>>();
+  private final Map<String, List<Long>> measurements = new HashMap<>();
 
   public PerformanceMeasurement() {
     super();
@@ -21,7 +20,7 @@ public class PerformanceMeasurement {
   public void addMeasurement(OpenCLDevice device, long timing){
     String deviceName = device.getPerformanceIdentifier();
     if(!measurements.containsKey(deviceName)){
-      measurements.put(deviceName, new ArrayList<Long>());
+      measurements.put(deviceName, new ArrayList<>());
     }
 
     measurements.get(deviceName).add(timing);
@@ -32,7 +31,7 @@ public class PerformanceMeasurement {
   }
 
   public List<Entry<String, Long>> getDeviceRanking(){
-    Map<String, Long> averages = new HashMap<String, Long>();
+    Map<String, Long> averages = new HashMap<>();
     for(String key:measurements.keySet()){
       averages.put(key, Statistics.average(measurements.get(key)));
     }
@@ -41,10 +40,9 @@ public class PerformanceMeasurement {
 
   private List<Entry<String, Long>> devicesSortedByPerformance(Map<String, Long> map) {
 
-    List<Entry<String, Long>> sortedEntries = new ArrayList<Entry<String, Long>>(map.entrySet());
+    List<Entry<String, Long>> sortedEntries = new ArrayList<>(map.entrySet());
 
-    Collections.sort(sortedEntries,
-        new Comparator<Entry<String, Long>>() {
+    sortedEntries.sort(new Comparator<Entry<String, Long>>() {
       @Override
       public int compare(Entry<String, Long> e1, Entry<String, Long> e2) {
         return e1.getValue().compareTo(e2.getValue());

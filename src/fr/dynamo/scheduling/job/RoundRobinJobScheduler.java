@@ -18,7 +18,7 @@ public class RoundRobinJobScheduler implements JobScheduler{
 
     if(roundRobinCounter >= jobs.size()) roundRobinCounter = 0;
 
-    List<DynamoKernel> kernels = new LinkedList<DynamoKernel>();
+    List<DynamoKernel> kernels = new LinkedList<>();
     int maxKernelCount = 0;
     for(DynamoJob job:jobs){
       maxKernelCount = Math.max(maxKernelCount, job.remaining());
@@ -34,7 +34,7 @@ public class RoundRobinJobScheduler implements JobScheduler{
       back = new Object[0];
     }
 
-    List<DynamoJob> reorderedJobs = new ArrayList<DynamoJob>();
+    List<DynamoJob> reorderedJobs = new ArrayList<>();
 
     for(Object o:front){
       reorderedJobs.add((DynamoJob) o);

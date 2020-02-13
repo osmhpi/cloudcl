@@ -15,7 +15,7 @@ import fr.dynamo.threading.DynamoThread;
 
 public class MatrixMain {
 
-  public static void main(String[] args) throws InterruptedException, FileNotFoundException, IOException {
+  public static void main(String[] args) throws InterruptedException, IOException {
     final int size = Integer.parseInt(args[0]);
     final int tiles = Integer.parseInt(args[1]);
 
