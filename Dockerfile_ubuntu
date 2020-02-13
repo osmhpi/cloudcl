@@ -33,4 +33,4 @@ ENV LD_LIBRARY_PATH="/tmp/cloudcl/aparapi/com.amd.aparapi.jni/dist"
 # Build dOpenCL
 WORKDIR /tmp/cloudcl
 RUN gradle jar
-# TODO: What to do with the JARs? And how to get the tests to pass?
+# TODO: What to do with the JARs?

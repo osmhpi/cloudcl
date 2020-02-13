@@ -43,5 +43,3 @@ Build dOpenCL:
 ```
 gradle build
 ```
-
-TODOXXX: There is currently one test (`testScheduling`) that fails despite those steps. Figure out what's wrong with it and fix it.
