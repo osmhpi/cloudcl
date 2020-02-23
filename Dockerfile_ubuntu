@@ -1,4 +1,4 @@
-FROM ubuntu:bionic
+FROM dopencl_ubuntu
 
 # Install dependencies
 RUN apt-get update \
@@ -9,28 +9,32 @@ RUN apt-get update \
         g++ opencl-c-headers ocl-icd-opencl-dev \
  && rm -rf /var/lib/apt/lists/*
 
-# OpenCL runtime for nvidia-docker. Based on the nvidia/opencl DockerHub image
-# See https://gitlab.com/nvidia/container-images/opencl/blob/ubuntu18.04/runtime/Dockerfile
-RUN mkdir -p /etc/OpenCL/vendors \
- && echo "libnvidia-opencl.so.1" > /etc/OpenCL/vendors/nvidia.icd
-
-# nvidia-container-runtime
-ENV NVIDIA_VISIBLE_DEVICES all
-ENV NVIDIA_DRIVER_CAPABILITIES compute,utility
-
-# Copy dOpenCL files (also required to build Aparapi)
-COPY --from=dopencl_ubuntu /opt/dopencl /opt/dopencl
-ENV CPLUS_INCLUDE_PATH="/opt/dopencl/include:${CPLUS_INCLUDE_PATH}"
-
 # Copy source files in
 COPY . /tmp/cloudcl
 
 # Build Aparapi
 WORKDIR /tmp/cloudcl/aparapi
-RUN gradle build
+# NOTE: dOpenCL environment needed to build the modified Aparapi (header files)
+RUN bash -c ". /etc/profile.d/dopenclenv.sh && gradle build"
 ENV LD_LIBRARY_PATH="/tmp/cloudcl/aparapi/com.amd.aparapi.jni/dist"
 
 # Build dOpenCL
 WORKDIR /tmp/cloudcl
-RUN gradle jar
-# TODO: What to do with the JARs?
+# NOTE: Skip the tests because they need a working OpenCL (or dOpenCL) device,
+# which is hard to provide at the time of the Docker build
+RUN gradle build -x test
+
+# Build one of the samples
+RUN javac -cp "build/libs/*:build/libs/lib/*" samples/fr/dynamo/samples/mandelbrot/Mandelbrot*.java
+
+# Then run it on the given dOpenCL worker nodes
+ENV DCL_NODES dopencl_worker1,dopencl_worker2
+
+RUN printf '#!/bin/sh\n\
+. /etc/profile.d/dopenclenv.sh\n\
+echo "$DCL_NODES" | tr "," "\n" > dcl.nodes\n\
+LD_PRELOAD=/opt/dopencl/lib/libdOpenCL.so java -cp "build/libs/*:build/libs/lib/*:samples" \
+  fr.dynamo.samples.mandelbrot.MandelbrotMain 1000 1000 10 1\n' > launchscript.sh \
+ && chmod +x launchscript.sh
+
+ENTRYPOINT ["./launchscript.sh"]
