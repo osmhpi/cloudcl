@@ -52,9 +52,9 @@ public class DynamoThread extends Thread{
 
       Logger.instance().info(getKernel().getJob().getName() + ": execution of Thread " + this.getId() + " on " + device.getName() + " " + " finished after " + kernel.getExecutionTime() + " ms");
       kernel.setRemainingTries(0);
-      dispose();
     }finally{
       notifyable.notifyListener(this);
+      dispose();
     }
   }
 
