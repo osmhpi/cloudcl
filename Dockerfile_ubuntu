@@ -24,17 +24,16 @@ WORKDIR /tmp/cloudcl
 # which is hard to provide at the time of the Docker build
 RUN gradle build -x test
 
-# Build one of the samples
-RUN javac -cp "build/libs/*:build/libs/lib/*" samples/fr/dynamo/samples/mandelbrot/Mandelbrot*.java
-
-# Then run it on the given dOpenCL worker nodes
+# Run some of the samples on the given dOpenCL worker nodes
 ENV DCL_NODES dopencl_worker1,dopencl_worker2
 
 RUN printf '#!/bin/sh\n\
 . /etc/profile.d/dopenclenv.sh\n\
 echo "$DCL_NODES" | tr "," "\n" > dcl.nodes\n\
-LD_PRELOAD=/opt/dopencl/lib/libdOpenCL.so java -cp "build/libs/*:build/libs/lib/*:samples" \
-  fr.dynamo.samples.mandelbrot.MandelbrotMain 1000 1000 10 1\n' > launchscript.sh \
- && chmod +x launchscript.sh
+LD_PRELOAD=/opt/dopencl/lib/libdOpenCL.so java -cp "build/libs/*:build/libs/lib/*" \
+  fr.dynamo.samples.mandelbrot.MandelbrotMain 1000 1000 10 1\n\
+LD_PRELOAD=/opt/dopencl/lib/libdOpenCL.so java -cp "build/libs/*:build/libs/lib/*" \
+  fr.dynamo.samples.matrix_multiplication.MatrixMain 99 10\n\
+' > launchscript.sh && chmod +x launchscript.sh
 
-ENTRYPOINT ["./launchscript.sh"]
+CMD ["./launchscript.sh"]
