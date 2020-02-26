@@ -5,10 +5,15 @@ import fr.dynamo.DevicePreference;
 public class NBodyMain{
 
   public static void main(String[] args) throws InterruptedException {
-   final int bodyCount = Integer.parseInt(args[0]);
-   final int steps = Integer.parseInt(args[1]);
+    if (args.length != 2) {
+      System.out.println("Usage: NBodyMain bodyCount steps");
+      System.exit(1);
+    }
 
-   NBodyJob job = new NBodyJob(bodyCount, steps, DevicePreference.NONE);
+    final int bodyCount = Integer.parseInt(args[0]);
+    final int steps = Integer.parseInt(args[1]);
+
+    NBodyJob job = new NBodyJob(bodyCount, steps, DevicePreference.NONE);
   }
 
 

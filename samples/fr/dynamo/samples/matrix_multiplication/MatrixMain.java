@@ -16,6 +16,11 @@ import fr.dynamo.threading.DynamoThread;
 public class MatrixMain {
 
   public static void main(String[] args) throws InterruptedException, IOException {
+    if (args.length != 2) {
+      System.out.println("Usage: MatrixMain size tiles");
+      System.exit(1);
+    }
+
     final int size = Integer.parseInt(args[0]);
     final int tiles = Integer.parseInt(args[1]);
 

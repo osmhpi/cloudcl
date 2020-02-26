@@ -16,6 +16,11 @@ public class MandelbrotMain {
 
 
   public static void main(String[] args) throws InterruptedException {
+    if (args.length != 4) {
+      System.out.println("Usage: MandelbrotMain size iterations tileCount outputPicture");
+      System.exit(1);
+    }
+
     int size = Integer.parseInt(args[0]);
     int iterations = Integer.parseInt(args[1]);
     final int tileCount = Integer.parseInt(args[2]);
