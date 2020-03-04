@@ -66,10 +66,10 @@ public class DynamoJob {
     runningThreads.remove(thread);
 
     end = System.currentTimeMillis();
-    terminated = kernelsToRun.isEmpty() && runningThreads.isEmpty();
     if(finishedKernelNotifier != null){
       finishedKernelNotifier.notifyListener(thread);
     }
+    terminated = kernelsToRun.isEmpty() && runningThreads.isEmpty();
   }
 
   public List<DynamoKernel> getFinishedKernels() {
