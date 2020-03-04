@@ -37,6 +37,9 @@ public class MandelbrotMain {
       Graphics2D graphics = fullImage.createGraphics();
       for(int i = 0; i < job.getFinishedKernels().size(); i++){
         MandelbrotKernel kernel = (MandelbrotKernel) job.getFinishedKernels().get(i);
+        // TODOXXX: Often, with multiple devices (not just dOpenCL devices, but also real multi-GPU)
+        //          sometimes two tiles get swapped (normally the first two).
+        //          Probably something is assuming that kernels complete in the enqueued order...
         BufferedImage image = paintPicture(kernel.result, stripWidth, size);
         try {
           ImageIO.write(image, "png", new File("TILE_"+i+".png"));
