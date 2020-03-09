@@ -22,10 +22,10 @@ public class MatrixJob extends DynamoJob{
     final float[] a = new float[size*size];
     final float[] b = new float[size*size];
     for (int i = 0; i < a.length; i++) {
-      a[i] = random.nextFloat() * 3;
+      a[i] = 0.001f + random.nextFloat() * 3;
     }
     for (int i = 0; i < b.length; i++) {
-      b[i] = random.nextFloat() * 3;
+      b[i] = 0.001f + random.nextFloat() * 3;
     }
 
     for(int tile=0; tile<tiles; tile++){
