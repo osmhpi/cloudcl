@@ -39,8 +39,11 @@ public class MatrixJob extends DynamoJob{
       MatrixKernel kernel = new MatrixKernel(this, range, aSplit, b, result, size);
       kernel.setDevicePreference(preference);
       kernel.setExplicit(true);
-      kernel.put(aSplit);
-      kernel.put(b);
+      // IMPORTANT: The initial values for the kernel data should *not* be uploaded (put) here,
+      //            because Aparapi already does this on its own on the first kernel run
+      //            In fact, doing a 'put' here results in the data being uploaded twice!
+      //kernel.put(aSplit);
+      //kernel.put(b);
       addKernel(kernel);
     }
   }

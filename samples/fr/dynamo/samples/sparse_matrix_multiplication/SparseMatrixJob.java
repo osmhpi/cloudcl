@@ -32,12 +32,14 @@ public class SparseMatrixJob extends DynamoJob{
       float[] aSplit = Arrays.copyOfRange(a, tile*tileHeight*size, (tile+1)*tileHeight*size);
 
       Range range = Range.create2D(tileHeight, size, 100, 1);
-
       SparseMatrixKernel kernel = new SparseMatrixKernel(this, range, aSplit, b, size);
       kernel.setDevicePreference(preference);
       kernel.setExplicit(true);
-      kernel.put(aSplit);
-      kernel.put(b);
+      // IMPORTANT: The initial values for the kernel data should *not* be uploaded (put) here,
+      //            because Aparapi already does this on its own on the first kernel run
+      //            In fact, doing a 'put' here results in the data being uploaded twice!
+      //kernel.put(aSplit);
+      //kernel.put(b);
       addKernel(kernel);
     }
   }
