@@ -1,9 +1,4 @@
 package fr.dynamo.samples.database_filter;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.rmi.UnexpectedException;
-import java.util.concurrent.TimeUnit;
-import java.util.Arrays;
 
 import fr.dynamo.DevicePreference;
 import fr.dynamo.ThreadFinishedNotifyable;
@@ -14,15 +9,9 @@ import fr.dynamo.threading.DynamoJob;
 import fr.dynamo.threading.DynamoKernel;
 import fr.dynamo.threading.DynamoThread;
 
-
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
-
-import com.amd.aparapi.Range;
-
-import fr.dynamo.DevicePreference;
-import fr.dynamo.execution.DynamoExecutor;
-import fr.dynamo.threading.DynamoJob;
-import fr.dynamo.threading.DynamoKernel;
 
 public class DatabaseFilterMain {
 

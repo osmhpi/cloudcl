@@ -7,7 +7,7 @@ public final class LineItemRow {
     public final int colTax; // Fixed-point with 2 decimals (real value times 100)
     public final int colReturnFlag; // A = 0, N = 1, R = 2
     public final int colLineStatus; // F = 0, O = 1
-    public final int colShippingDate; // In ISO9660 format
+    public final int colShippingDate; // In ISO8601 format
 
     public LineItemRow(int colQuantity,
                        int colExtendedPrice,
