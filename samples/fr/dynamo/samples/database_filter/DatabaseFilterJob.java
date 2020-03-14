@@ -32,10 +32,6 @@ public class DatabaseFilterJob extends DynamoJob{
       int r = 0;
       for (String line = br.readLine(); line != null; line = br.readLine()) {
         String[] lineParts = line.split("\\|");
-        int colOrderKey = Integer.parseInt(lineParts[0]);
-        int colPartKey = Integer.parseInt(lineParts[1]);
-        int colSuppKey = Integer.parseInt(lineParts[2]);
-        int colLineNumber = Integer.parseInt(lineParts[3]);
         int colQuantity = Integer.parseInt(lineParts[4]);
         int colExtendedPrice = (int)(Float.parseFloat(lineParts[5]) * 100);
         int colDiscount = (int)(Float.parseFloat(lineParts[6]) * 100);
@@ -48,24 +44,9 @@ public class DatabaseFilterJob extends DynamoJob{
                            lineParts[9].equals("O") ? 1 :
                            -1;
         int colShippingDate = Integer.parseInt(lineParts[10].replace("-", ""));
-        int colCommitDate = Integer.parseInt(lineParts[11].replace("-", ""));
-        int colReceiptDate = Integer.parseInt(lineParts[12].replace("-", ""));
-        byte[] colShippingInstructions = new byte[20];
-        for (int i = 0; i < lineParts[13].length(); i++)
-          colShippingInstructions[i] = (byte)lineParts[13].charAt(i);
 
-        byte[] colShippingMode = new byte[8];
-        for (int i = 0; i < lineParts[14].length(); i++)
-          colShippingMode[i] = (byte)lineParts[14].charAt(i);
-
-        byte[] colComment = new byte[48];
-        for (int i = 0; i < lineParts[15].length(); i++)
-          colComment[i] = (byte)lineParts[15].charAt(i);
-
-        lines[r++] = new LineItemRow(colOrderKey, colPartKey, colSuppKey, colLineNumber,
-                                     colQuantity, colExtendedPrice, colDiscount, colTax,
-                                     colReturnFlag, colLineStatus, colShippingDate, colCommitDate,
-                                     colReceiptDate, colShippingInstructions, colShippingMode, colComment);
+        lines[r++] = new LineItemRow(colQuantity, colExtendedPrice, colDiscount, colTax,
+                                     colReturnFlag, colLineStatus, colShippingDate);
       }
     }
 
