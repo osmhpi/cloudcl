@@ -14,8 +14,6 @@ public class MatrixJob extends DynamoJob{
   public MatrixJob(int size, int tiles, DevicePreference preference, ThreadFinishedNotifyable notifyable) {
     super("Matrix", notifyable);
 
-    int tileHeight = size/tiles;
-
     Random random = new Random();
     random.setSeed(1000);
 
@@ -28,6 +26,7 @@ public class MatrixJob extends DynamoJob{
       b[i] = 0.001f + random.nextFloat() * 3;
     }
 
+    int tileHeight = size/tiles;
     for(int tile=0; tile<tiles; tile++){
 
       final float[] result = new float[tileHeight*size];

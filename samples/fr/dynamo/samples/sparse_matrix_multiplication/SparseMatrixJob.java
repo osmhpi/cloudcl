@@ -11,16 +11,14 @@ import fr.dynamo.threading.DynamoJob;
 
 public class SparseMatrixJob extends DynamoJob{
 
-  public SparseMatrixJob(int size, float sparsity, int tiles, DevicePreference preference, ThreadFinishedNotifyable notifyable) {
+  public SparseMatrixJob(int sizeN, int sizeM, int sizeP, float sparsity, int tiles, DevicePreference preference, ThreadFinishedNotifyable notifyable) {
     super("SparseMatrix", notifyable);
-
-    int tileHeight = size/tiles;
 
     Random random = new Random();
     random.setSeed(1000);
 
-    final float[] a = new float[size*size];
-    final float[] b = new float[size*size];
+    final float[] a = new float[sizeN*sizeM];
+    final float[] b = new float[sizeM*sizeP];
     for (int i = 0; i < a.length; i++) {
       a[i] = random.nextFloat() >= sparsity ? (random.nextFloat() * 2 - 1) : 0;
     }
@@ -28,11 +26,12 @@ public class SparseMatrixJob extends DynamoJob{
       b[i] = random.nextFloat() >= sparsity ? (random.nextFloat() * 2 - 1) : 0;
     }
 
+    int tileHeight = sizeN/tiles;
     for(int tile=0; tile<tiles; tile++){
-      float[] aSplit = Arrays.copyOfRange(a, tile*tileHeight*size, (tile+1)*tileHeight*size);
+      float[] aSplit = Arrays.copyOfRange(a, tile*tileHeight*sizeN, (tile+1)*tileHeight*sizeN);
 
-      Range range = Range.create2D(tileHeight, size, 100, 1);
-      SparseMatrixKernel kernel = new SparseMatrixKernel(this, range, aSplit, b, size);
+      Range range = Range.create2D(tileHeight, sizeP, 100, 1);
+      SparseMatrixKernel kernel = new SparseMatrixKernel(this, range, aSplit, b, sizeN, sizeM, sizeP);
       kernel.setDevicePreference(preference);
       kernel.setExplicit(true);
       // IMPORTANT: The initial values for the kernel data should *not* be uploaded (put) here,

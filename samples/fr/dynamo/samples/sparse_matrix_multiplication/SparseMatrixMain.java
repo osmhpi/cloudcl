@@ -16,14 +16,16 @@ import fr.dynamo.threading.DynamoThread;
 public class SparseMatrixMain {
 
   public static void main(String[] args) throws InterruptedException, IOException {
-    if (args.length != 3) {
-      System.out.println("Usage: SparseMatrixMain size sparsity tiles");
+    if (args.length != 5) {
+      System.out.println("Usage: SparseMatrixMain sizeN sizeM sizeP sparsity tiles");
       System.exit(1);
     }
 
-    final int size = Integer.parseInt(args[0]);
-    final float sparsity = Float.parseFloat(args[1]);
-    final int tiles = Integer.parseInt(args[2]);
+    final int sizeN = Integer.parseInt(args[0]);
+    final int sizeM = Integer.parseInt(args[1]);
+    final int sizeP = Integer.parseInt(args[2]);
+    final float sparsity = Float.parseFloat(args[3]);
+    final int tiles = Integer.parseInt(args[4]);
 
     ThreadFinishedNotifyable matrixNotifyable = new ThreadFinishedNotifyable() {
       @Override
@@ -33,7 +35,7 @@ public class SparseMatrixMain {
       }
     };
 
-    DynamoJob job = new SparseMatrixJob(size, sparsity, tiles, DevicePreference.NONE, matrixNotifyable);
+    DynamoJob job = new SparseMatrixJob(sizeN, sizeM, sizeP, sparsity, tiles, DevicePreference.NONE, matrixNotifyable);
     DynamoExecutor.instance().submit(job);
 
     job.awaitTermination(1, TimeUnit.DAYS);
@@ -47,8 +49,8 @@ public class SparseMatrixMain {
     // Since all numbers in the input matrices are either zeroes or random values
     // between -1 and 1, we expect with high probability that the final overall
     // sum is close to zero, so check this with some heuristic bounds
-    float overallSumLowerBound = -(float)Math.pow((float)size, 1.5f);
-    float overallSumHigherBound = (float)Math.pow((float)size, 1.5f);
+    float overallSumLowerBound = -(float)Math.sqrt((float)(sizeN*sizeM*sizeP));
+    float overallSumHigherBound = (float)Math.sqrt((float)(sizeN*sizeM*sizeP));
 
     System.out.println("Got overall sum " + overallSum + ", expecting between " + overallSumLowerBound + " and " + overallSumHigherBound);
 
