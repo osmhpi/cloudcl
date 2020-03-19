@@ -32,7 +32,7 @@ public class SparseMatrixKernel extends DynamoKernel{
 
     float sum = 0;
     for(int i=0; i<sizeM; i++){
-      sum += a[y * sizeN + i] * b[x * sizeP + i];
+      sum += a[y * sizeM + i] * b[x * sizeM + i];
     }
     // Unfortunately can't atomicAdd float, but that's good enough
     atomicAdd(overallSum, 0, (int)sum);

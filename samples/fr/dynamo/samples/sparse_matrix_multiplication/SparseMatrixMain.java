@@ -49,8 +49,8 @@ public class SparseMatrixMain {
     // Since all numbers in the input matrices are either zeroes or random values
     // between -1 and 1, we expect with high probability that the final overall
     // sum is close to zero, so check this with some heuristic bounds
-    float overallSumLowerBound = -(float)Math.sqrt((float)(sizeN*sizeM*sizeP));
-    float overallSumHigherBound = (float)Math.sqrt((float)(sizeN*sizeM*sizeP));
+    float overallSumLowerBound = -(float)Math.sqrt((double)sizeN*sizeM*sizeP);
+    float overallSumHigherBound = (float)Math.sqrt((double)sizeN*sizeM*sizeP);
 
     System.out.println("Got overall sum " + overallSum + ", expecting between " + overallSumLowerBound + " and " + overallSumHigherBound);
 

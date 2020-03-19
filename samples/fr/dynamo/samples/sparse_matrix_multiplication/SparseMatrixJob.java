@@ -28,7 +28,7 @@ public class SparseMatrixJob extends DynamoJob{
 
     int tileHeight = sizeN/tiles;
     for(int tile=0; tile<tiles; tile++){
-      float[] aSplit = Arrays.copyOfRange(a, tile*tileHeight*sizeN, (tile+1)*tileHeight*sizeN);
+      float[] aSplit = Arrays.copyOfRange(a, tile*tileHeight*sizeM, (tile+1)*tileHeight*sizeM);
 
       Range range = Range.create2D(tileHeight, sizeP, 100, 1);
       SparseMatrixKernel kernel = new SparseMatrixKernel(this, range, aSplit, b, sizeN, sizeM, sizeP);
