@@ -1,3 +1,4 @@
+
 package fr.dynamo.samples.database_filter;
 
 import java.text.SimpleDateFormat;
@@ -5,6 +6,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Random;
 import java.io.*;
+import java.util.stream.IntStream;
 
 import com.amd.aparapi.Range;
 
@@ -64,32 +66,37 @@ public class DatabaseFilterJob extends DynamoJob{
     } else {
       size = Integer.parseInt(sizeOrTpchLineItemFile);
 
-      Random rng = new Random(12345);
-      SimpleDateFormat yyyymmddDateFormat = new SimpleDateFormat("yyyyMMdd");
-
       System.out.println("Generating " + size + " lines...");
       lines = new LineItemRow[size];
 
-      for (int i = 0; i < size; i++) {
-        int colQuantity = 1 + rng.nextInt(50); // [1, 50]
-        int colDiscount = rng.nextInt(11); // [0, 10]
-        int colTax = rng.nextInt(9); // [0, 8]
-        int unitPrice = 90000 + rng.nextInt(100001); // [90000,190000], aprox.
-        int colExtendedPrice = unitPrice * colQuantity;
-        Calendar c = Calendar.getInstance();
-        c.set(1992, Calendar.JANUARY, 1);
-        c.add(Calendar.DAY_OF_MONTH, rng.nextInt(2526)); // [19920101, 19981131], aprox.
-        int colShippingDate = Integer.parseInt(yyyymmddDateFormat.format(c.getTime()));
-        c.add(Calendar.DAY_OF_MONTH, 1 + rng.nextInt(30)); // + [1, 30]
-        int returnDate = Integer.parseInt(yyyymmddDateFormat.format(c.getTime()));
-        int colReturnFlag = (returnDate <= 19950617)
-                ? (rng.nextInt(2) * 2) /* R or A */
-                : 1 /* N */;
-        int colLineStatus = (colShippingDate <= 19950617) ? 0 /* F */ : 1 /* O */;
+      int NTHREADS = Runtime.getRuntime().availableProcessors();
+      IntStream.range(0, NTHREADS).parallel().forEach(ps -> {
 
-        lines[i] = new LineItemRow(colQuantity, colExtendedPrice, colDiscount, colTax,
-                colReturnFlag, colLineStatus, colShippingDate);
-      }
+        Random rng = new Random(12345 + ps);
+        SimpleDateFormat yyyymmddDateFormat = new SimpleDateFormat("yyyyMMdd");
+
+        for (int i = ps; i < size; i += NTHREADS) {
+          int colQuantity = 1 + rng.nextInt(50); // [1, 50]
+          int colDiscount = rng.nextInt(11); // [0, 10]
+          int colTax = rng.nextInt(9); // [0, 8]
+          int unitPrice = 90000 + rng.nextInt(100001); // [90000,190000], aprox.
+          int colExtendedPrice = unitPrice * colQuantity;
+          Calendar c = Calendar.getInstance();
+          c.set(1992, Calendar.JANUARY, 1);
+          c.add(Calendar.DAY_OF_MONTH, rng.nextInt(2526)); // [19920101, 19981131], aprox.
+          int colShippingDate = Integer.parseInt(yyyymmddDateFormat.format(c.getTime()));
+          c.add(Calendar.DAY_OF_MONTH, 1 + rng.nextInt(30)); // + [1, 30]
+          int returnDate = Integer.parseInt(yyyymmddDateFormat.format(c.getTime()));
+          int colReturnFlag = (returnDate <= 19950617)
+                  ? (rng.nextInt(2) * 2) /* R or A */
+                  : 1 /* N */;
+          int colLineStatus = (colShippingDate <= 19950617) ? 0 /* F */ : 1 /* O */;
+
+          lines[i] = new LineItemRow(colQuantity, colExtendedPrice, colDiscount, colTax,
+                  colReturnFlag, colLineStatus, colShippingDate);
+
+        }
+      });
     }
 
     System.out.println("Distributing data...");
