@@ -69,26 +69,25 @@ public class DatabaseFilterJob extends DynamoJob{
       System.out.println("Generating " + size + " lines...");
       lines = new LineItemRow[size];
 
-      int NTHREADS = Runtime.getRuntime().availableProcessors();
-      IntStream.range(0, NTHREADS).parallel().forEach(ps -> {
-
-        Random rng = new Random(12345 + ps);
+      int NUM_THREADS = Runtime.getRuntime().availableProcessors();
+      IntStream.range(0, NUM_THREADS).parallel().forEach(ps -> {
+        Random random = new Random(12345 + ps);
         SimpleDateFormat yyyymmddDateFormat = new SimpleDateFormat("yyyyMMdd");
 
-        for (int i = ps; i < size; i += NTHREADS) {
-          int colQuantity = 1 + rng.nextInt(50); // [1, 50]
-          int colDiscount = rng.nextInt(11); // [0, 10]
-          int colTax = rng.nextInt(9); // [0, 8]
-          int unitPrice = 90000 + rng.nextInt(100001); // [90000,190000], aprox.
+        for (int i = ps; i < size; i += NUM_THREADS) {
+          int colQuantity = 1 + random.nextInt(50); // [1, 50]
+          int colDiscount = random.nextInt(11); // [0, 10]
+          int colTax = random.nextInt(9); // [0, 8]
+          int unitPrice = 90000 + random.nextInt(100001); // [90000,190000], aprox.
           int colExtendedPrice = unitPrice * colQuantity;
           Calendar c = Calendar.getInstance();
           c.set(1992, Calendar.JANUARY, 1);
-          c.add(Calendar.DAY_OF_MONTH, rng.nextInt(2526)); // [19920101, 19981131], aprox.
+          c.add(Calendar.DAY_OF_MONTH, random.nextInt(2526)); // [19920101, 19981131], aprox.
           int colShippingDate = Integer.parseInt(yyyymmddDateFormat.format(c.getTime()));
-          c.add(Calendar.DAY_OF_MONTH, 1 + rng.nextInt(30)); // + [1, 30]
+          c.add(Calendar.DAY_OF_MONTH, 1 + random.nextInt(30)); // + [1, 30]
           int returnDate = Integer.parseInt(yyyymmddDateFormat.format(c.getTime()));
           int colReturnFlag = (returnDate <= 19950617)
-                  ? (rng.nextInt(2) * 2) /* R or A */
+                  ? (random.nextInt(2) * 2) /* R or A */
                   : 1 /* N */;
           int colLineStatus = (colShippingDate <= 19950617) ? 0 /* F */ : 1 /* O */;
 

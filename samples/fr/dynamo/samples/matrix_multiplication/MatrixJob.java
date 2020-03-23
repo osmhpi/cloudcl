@@ -2,6 +2,7 @@ package fr.dynamo.samples.matrix_multiplication;
 
 import java.util.Arrays;
 import java.util.Random;
+import java.util.stream.IntStream;
 
 import com.amd.aparapi.Range;
 
@@ -14,17 +15,18 @@ public class MatrixJob extends DynamoJob{
   public MatrixJob(int size, int tiles, DevicePreference preference, ThreadFinishedNotifyable notifyable) {
     super("Matrix", notifyable);
 
-    Random random = new Random();
-    random.setSeed(1000);
-
     final float[] a = new float[size*size];
     final float[] b = new float[size*size];
-    for (int i = 0; i < a.length; i++) {
-      a[i] = 0.001f + random.nextFloat() * 3;
-    }
-    for (int i = 0; i < b.length; i++) {
-      b[i] = 0.001f + random.nextFloat() * 3;
-    }
+    int NUM_THREADS = Runtime.getRuntime().availableProcessors();
+    IntStream.range(0, NUM_THREADS).parallel().forEach(ps -> {
+      Random random = new Random(1000 + ps);
+      for (int i = ps; i < a.length; i += NUM_THREADS) {
+        a[i] = 0.001f + random.nextFloat() * 3;
+      }
+      for (int i = ps; i < b.length; i += NUM_THREADS) {
+        b[i] = 0.001f + random.nextFloat() * 3;
+      }
+    });
 
     int tileHeight = size/tiles;
     for(int tile=0; tile<tiles; tile++){

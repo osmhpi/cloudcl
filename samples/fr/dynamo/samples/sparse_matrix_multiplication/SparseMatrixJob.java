@@ -2,6 +2,7 @@ package fr.dynamo.samples.sparse_matrix_multiplication;
 
 import java.util.Arrays;
 import java.util.Random;
+import java.util.stream.IntStream;
 
 import com.amd.aparapi.Range;
 
@@ -14,17 +15,19 @@ public class SparseMatrixJob extends DynamoJob{
   public SparseMatrixJob(int sizeN, int sizeM, int sizeP, float sparsity, int tiles, DevicePreference preference, ThreadFinishedNotifyable notifyable) {
     super("SparseMatrix", notifyable);
 
-    Random random = new Random();
-    random.setSeed(1000);
-
     final float[] a = new float[sizeN*sizeM];
     final float[] b = new float[sizeM*sizeP];
-    for (int i = 0; i < a.length; i++) {
-      a[i] = random.nextFloat() >= sparsity ? (random.nextFloat() * 2 - 1) : 0;
-    }
-    for (int i = 0; i < b.length; i++) {
-      b[i] = random.nextFloat() >= sparsity ? (random.nextFloat() * 2 - 1) : 0;
-    }
+
+    int NUM_THREADS = Runtime.getRuntime().availableProcessors();
+    IntStream.range(0, NUM_THREADS).parallel().forEach(ps -> {
+      Random random = new Random(1000 + ps);
+      for (int i = ps; i < a.length; i += NUM_THREADS) {
+        a[i] = random.nextFloat() >= sparsity ? (random.nextFloat() * 2 - 1) : 0;
+      }
+      for (int i = ps; i < b.length; i += NUM_THREADS) {
+        b[i] = random.nextFloat() >= sparsity ? (random.nextFloat() * 2 - 1) : 0;
+      }
+    });
 
     int tileHeight = sizeN/tiles;
     for(int tile=0; tile<tiles; tile++){
