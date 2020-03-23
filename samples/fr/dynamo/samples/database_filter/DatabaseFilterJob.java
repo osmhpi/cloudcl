@@ -33,6 +33,7 @@ public class DatabaseFilterJob extends DynamoJob{
       System.out.println("Counting lines...");
       try (FileReader input = new FileReader(sizeOrTpchLineItemFile);
            LineNumberReader count = new LineNumberReader(input)) {
+        //noinspection StatementWithEmptyBody
         while (count.skip(Long.MAX_VALUE) > 0) {
         }
         size = count.getLineNumber();

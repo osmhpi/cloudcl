@@ -1,5 +1,4 @@
 package fr.dynamo.samples.sparse_matrix_multiplication;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.rmi.UnexpectedException;
 import java.util.concurrent.TimeUnit;
@@ -11,7 +10,6 @@ import fr.dynamo.logging.Logger;
 import fr.dynamo.performance.PerformanceCache;
 import fr.dynamo.threading.DynamoJob;
 import fr.dynamo.threading.DynamoKernel;
-import fr.dynamo.threading.DynamoThread;
 
 public class SparseMatrixMain {
 
@@ -27,12 +25,9 @@ public class SparseMatrixMain {
     final float sparsity = Float.parseFloat(args[3]);
     final int tiles = Integer.parseInt(args[4]);
 
-    ThreadFinishedNotifyable matrixNotifyable = new ThreadFinishedNotifyable() {
-      @Override
-      public void notifyListener(DynamoThread thread) {
-        SparseMatrixKernel kernel = (SparseMatrixKernel) thread.getKernel();
-        kernel.get(kernel.overallSum);
-      }
+    ThreadFinishedNotifyable matrixNotifyable = thread -> {
+      SparseMatrixKernel kernel = (SparseMatrixKernel) thread.getKernel();
+      kernel.get(kernel.overallSum);
     };
 
     DynamoJob job = new SparseMatrixJob(sizeN, sizeM, sizeP, sparsity, tiles, DevicePreference.NONE, matrixNotifyable);

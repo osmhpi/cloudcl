@@ -1,10 +1,6 @@
 package fr.dynamo.samples.nbody_oo;
 
 public final class Body {
-  protected final float delT = .005f;
-
-  protected final float espSqr = 1.0f;
-
   float x, y, z, m, vx, vy, vz;
 
   public Body(float _x, float _y, float _z, float _m) {
@@ -40,10 +36,6 @@ public final class Body {
 
   public float getM() {
      return m;
-  }
-
-  public void setM(float _m) {
-     m = _m;
   }
 
   public void setX(float _x) {

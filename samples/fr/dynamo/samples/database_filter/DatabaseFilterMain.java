@@ -7,7 +7,6 @@ import fr.dynamo.logging.Logger;
 import fr.dynamo.performance.PerformanceCache;
 import fr.dynamo.threading.DynamoJob;
 import fr.dynamo.threading.DynamoKernel;
-import fr.dynamo.threading.DynamoThread;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -24,17 +23,14 @@ public class DatabaseFilterMain {
     final String tpchLineItemFile = args[0];
     final int tiles = Integer.parseInt(args[1]);
 
-    ThreadFinishedNotifyable finishedNotifyable = new ThreadFinishedNotifyable() {
-      @Override
-      public void notifyListener(DynamoThread thread) {
-        DatabaseFilterKernel kernel = (DatabaseFilterKernel) thread.getKernel();
-        kernel.get(kernel.resultSumQty);
-        kernel.get(kernel.resultSumBasePrice);
-        kernel.get(kernel.resultSumDiscPrice);
-        kernel.get(kernel.resultSumCharge);
-        kernel.get(kernel.resultSumDiscount);
-        kernel.get(kernel.resultCountOrder);
-      }
+    ThreadFinishedNotifyable finishedNotifyable = thread -> {
+      DatabaseFilterKernel kernel = (DatabaseFilterKernel) thread.getKernel();
+      kernel.get(kernel.resultSumQty);
+      kernel.get(kernel.resultSumBasePrice);
+      kernel.get(kernel.resultSumDiscPrice);
+      kernel.get(kernel.resultSumCharge);
+      kernel.get(kernel.resultSumDiscount);
+      kernel.get(kernel.resultCountOrder);
     };
 
     DynamoJob job = new DatabaseFilterJob(tpchLineItemFile, tiles, DevicePreference.GPU_ONLY, finishedNotifyable);

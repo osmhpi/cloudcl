@@ -13,9 +13,6 @@ public class NBodyMain{
     final int bodyCount = Integer.parseInt(args[0]);
     final int steps = Integer.parseInt(args[1]);
 
-    NBodyJob job = new NBodyJob(bodyCount, steps, DevicePreference.NONE);
+    new NBodyJob(bodyCount, steps, DevicePreference.NONE);
   }
-
-
-
 }

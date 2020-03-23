@@ -13,7 +13,7 @@ public class KMeansMain {
     int pointCountPerKernel = Integer.parseInt(args[0]);
     int clusterCount = Integer.parseInt(args[1]);
 
-    KMeansJob job = new KMeansJob(clusterCount, pointCountPerKernel, 100, DevicePreference.NONE, null);
+    new KMeansJob(clusterCount, pointCountPerKernel, 100, DevicePreference.NONE, null);
   }
 
 }
