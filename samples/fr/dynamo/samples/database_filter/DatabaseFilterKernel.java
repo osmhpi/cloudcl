@@ -4,8 +4,7 @@ import com.amd.aparapi.Range;
 import fr.dynamo.threading.DynamoJob;
 import fr.dynamo.threading.DynamoKernel;
 
-public class DatabaseFilterKernel extends DynamoKernel{
-  final int size;
+public class DatabaseFilterKernel extends DynamoKernel {
 
   public final LineItemRow[] lines;
 
@@ -35,45 +34,82 @@ public class DatabaseFilterKernel extends DynamoKernel{
     l_linestatus;
   */
   // Each of those arrays is indexed by (l_returnflag, l_linestatus)
-  public int[] resultSumQty;
-  public int[] resultSumBasePrice;
-  public int[] resultSumDiscPrice;
-  public int[] resultSumCharge;
-  public int[] resultSumDiscount;
-  public int[] resultCountOrder;
+  public int[] resultSumQty = new int[6];
+  public int[] resultSumBasePrice = new int[6];
+  public int[] resultSumDiscPrice = new int[6];
+  public int[] resultSumCharge = new int[6];
+  public int[] resultSumDiscount = new int[6];
+  public int[] resultCountOrder = new int[6];
 
-  public DatabaseFilterKernel(DynamoJob job, Range range,
-    LineItemRow[] lines, int size) {
-    
+  @Local private int[] localSumQty = new int[6 * range.getLocalSize(0)];
+  @Local private int[] localSumBasePrice = new int[6 * range.getLocalSize(0)];
+  @Local private int[] localSumDiscPrice = new int[6 * range.getLocalSize(0)];
+  @Local private int[] localSumCharge = new int[6 * range.getLocalSize(0)];
+  @Local private int[] localSumDiscount = new int[6 * range.getLocalSize(0)];
+  @Local private int[] localCountOrder = new int[6 * range.getLocalSize(0)];
+
+  public DatabaseFilterKernel(DynamoJob job, Range range, LineItemRow[] lines) {
     super(job, range);
     this.lines = lines;
-    this.size = size;
-    this.resultSumQty = new int[6];
-    this.resultSumBasePrice = new int[6];
-    this.resultSumDiscPrice = new int[6];
-    this.resultSumCharge = new int[6];
-    this.resultSumDiscount = new int[6];
-    this.resultCountOrder = new int[6];
   }
 
   @Override
   public void run() {
-    int r = getGlobalId();
+    int globalId = getGlobalId(), localId = getLocalId(), localSize = getLocalSize();
+
+    for (int g = 0; g < 6; g++) {
+      localSumQty[6 * localId + g] = 0;
+      localSumBasePrice[6 * localId + g] = 0;
+      localSumDiscPrice[6 * localId + g] = 0;
+      localSumCharge[6 * localId + g] = 0;
+      localSumDiscount[6 * localId + g] = 0;
+      localCountOrder[6 * localId + g] = 0;
+    }
+
 
     // VERY CRUDE APPROXIMATION - Should not use floats, etc.!
-    if (lines[r].colShippingDate <= 19980902) {
-      int groupByIndex = lines[r].colReturnFlag * 2 + lines[r].colLineStatus;
+    if (lines[globalId].colShippingDate <= 19980902) {
+      int groupByIndex = lines[globalId].colReturnFlag * 2 + lines[globalId].colLineStatus;
       // FIXME: This can overflow, results should rather be long[],
       //        but Aparapi only has atomicAdd(int[], ...)!
-      atomicAdd(resultSumQty, groupByIndex, lines[r].colQuantity);
-      atomicAdd(resultSumBasePrice, groupByIndex, lines[r].colExtendedPrice);
-      atomicAdd(resultSumDiscPrice, groupByIndex, (int)(
-        (lines[r].colExtendedPrice / 100.0 * (1.0 - lines[r].colDiscount / 100.0)) * 100.0));
-      atomicAdd(resultSumCharge, groupByIndex, (int)(
-        (lines[r].colExtendedPrice / 100.0 * (1.0 - lines[r].colDiscount / 100.0)
-                                           * (1.0 + lines[r].colTax / 100.0)) * 100.0));
-      atomicAdd(resultSumDiscount, groupByIndex, lines[r].colDiscount);
-      atomicAdd(resultCountOrder, groupByIndex, 1);
+      localSumQty[6 * localId + groupByIndex] = lines[globalId].colQuantity;
+      localSumBasePrice[6 * localId + groupByIndex] = lines[globalId].colExtendedPrice;
+      localSumDiscPrice[6 * localId + groupByIndex] = (int)(
+              (lines[globalId].colExtendedPrice / 100.0 * (1.0 - lines[globalId].colDiscount / 100.0)) * 100.0);
+      localSumCharge[6 * localId + groupByIndex] = (int)(
+              (lines[globalId].colExtendedPrice / 100.0 * (1.0 - lines[globalId].colDiscount / 100.0)
+                      * (1.0 + lines[globalId].colTax / 100.0)) * 100.0);
+      localSumDiscount[6 * localId + groupByIndex] = lines[globalId].colDiscount;
+      localCountOrder[6 * localId + groupByIndex] = 1;
+    }
+
+    for (int i = localSize / 2; i > 0; i >>= 1) {
+      localBarrier();
+
+      // Every iteration half of the threads wrt. the previous iteration
+      // accumulate two values while the other half do nothing
+      if (localId < i) {
+        for (int g = 0; g < 6; g++) {
+          localSumQty[6 * localId + g] += localSumQty[6 * (localId + i) + g];
+          localSumBasePrice[6 * localId + g] += localSumBasePrice[6 * (localId + i) + g];
+          localSumDiscPrice[6 * localId + g] += localSumDiscPrice[6 * (localId + i) + g];
+          localSumCharge[6 * localId + g] += localSumCharge[6 * (localId + i) + g];
+          localSumDiscount[6 * localId + g] += localSumDiscount[6 * (localId + i) + g];
+          localCountOrder[6 * localId + g] += localCountOrder[6 * (localId + i) + g];
+        }
+      }
+    }
+
+    // Group leader stores final reduced sum of group to result buffer
+    if (localId == 0) {
+      for (int g = 0; g < 6; g++) {
+        atomicAdd(resultSumQty, g, localSumQty[g]);
+        atomicAdd(resultSumBasePrice, g, localSumBasePrice[g]);
+        atomicAdd(resultSumDiscPrice, g, localSumDiscPrice[g]);
+        atomicAdd(resultSumCharge, g, localSumCharge[g]);
+        atomicAdd(resultSumDiscount, g, localSumDiscount[g]);
+        atomicAdd(resultCountOrder, g, localCountOrder[g]);
+      }
     }
   }
 }

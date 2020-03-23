@@ -106,7 +106,7 @@ public class DatabaseFilterJob extends DynamoJob{
       LineItemRow[] linesSplit = Arrays.copyOfRange(lines, tile*tileHeight, (tile+1)*tileHeight);
 
       Range range = Range.create(linesSplit.length);
-      DatabaseFilterKernel kernel = new DatabaseFilterKernel(this, range, linesSplit, size);
+      DatabaseFilterKernel kernel = new DatabaseFilterKernel(this, range, linesSplit);
       kernel.setDevicePreference(preference);
       kernel.setExplicit(true);
       // IMPORTANT: The initial values for the kernel data should *not* be uploaded (put) here,
