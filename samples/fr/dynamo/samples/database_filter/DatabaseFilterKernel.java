@@ -6,7 +6,13 @@ import fr.dynamo.threading.DynamoKernel;
 
 public class DatabaseFilterKernel extends DynamoKernel {
 
-  public final LineItemRow[] lines;
+  public final int[] colQuantity;
+  public final int[] colExtendedPrice; // Fixed-point with 2 decimals (real value times 100)
+  public final int[] colDiscount; // Fixed-point with 2 decimals (real value times 100)
+  public final int[] colTax; // Fixed-point with 2 decimals (real value times 100)
+  public final int[] colReturnFlag; // A = 0, N = 1, R = 2
+  public final int[] colLineStatus; // F = 0, O = 1
+  public final int[] colShippingDate; // In ISO8601 format
 
   /*
   TPC-H QUERY 1
@@ -48,9 +54,16 @@ public class DatabaseFilterKernel extends DynamoKernel {
   @Local private int[] localSumDiscount = new int[6 * range.getLocalSize(0)];
   @Local private int[] localCountOrder = new int[6 * range.getLocalSize(0)];
 
-  public DatabaseFilterKernel(DynamoJob job, Range range, LineItemRow[] lines) {
+  public DatabaseFilterKernel(DynamoJob job, Range range, int[] colQuantity, int[] colExtendedPrice, int[] colDiscount,
+                              int[] colTax, int[] colReturnFlag, int[] colLineStatus, int[] colShippingDate) {
     super(job, range);
-    this.lines = lines;
+    this.colQuantity = colQuantity;
+    this.colExtendedPrice = colExtendedPrice;
+    this.colDiscount = colDiscount;
+    this.colTax = colTax;
+    this.colReturnFlag = colReturnFlag;
+    this.colLineStatus = colLineStatus;
+    this.colShippingDate = colShippingDate;
   }
 
   @Override
@@ -68,18 +81,18 @@ public class DatabaseFilterKernel extends DynamoKernel {
 
 
     // VERY CRUDE APPROXIMATION - Should not use floats, etc.!
-    if (lines[globalId].colShippingDate <= 19980902) {
-      int groupByIndex = lines[globalId].colReturnFlag * 2 + lines[globalId].colLineStatus;
+    if (colShippingDate[globalId] <= 19980902) {
+      int groupByIndex = colReturnFlag[globalId] * 2 + colLineStatus[globalId];
       // FIXME: This can overflow, results should rather be long[],
       //        but Aparapi only has atomicAdd(int[], ...)!
-      localSumQty[6 * localId + groupByIndex] = lines[globalId].colQuantity;
-      localSumBasePrice[6 * localId + groupByIndex] = lines[globalId].colExtendedPrice;
+      localSumQty[6 * localId + groupByIndex] = colQuantity[globalId];
+      localSumBasePrice[6 * localId + groupByIndex] = colExtendedPrice[globalId];
       localSumDiscPrice[6 * localId + groupByIndex] = (int)(
-              (lines[globalId].colExtendedPrice / 100.0 * (1.0 - lines[globalId].colDiscount / 100.0)) * 100.0);
+              (colExtendedPrice[globalId] / 100.0 * (1.0 - colDiscount[globalId] / 100.0)) * 100.0);
       localSumCharge[6 * localId + groupByIndex] = (int)(
-              (lines[globalId].colExtendedPrice / 100.0 * (1.0 - lines[globalId].colDiscount / 100.0)
-                      * (1.0 + lines[globalId].colTax / 100.0)) * 100.0);
-      localSumDiscount[6 * localId + groupByIndex] = lines[globalId].colDiscount;
+              (colExtendedPrice[globalId] / 100.0 * (1.0 - colDiscount[globalId] / 100.0)
+                      * (1.0 + colTax[globalId] / 100.0)) * 100.0);
+      localSumDiscount[6 * localId + groupByIndex] = colDiscount[globalId];
       localCountOrder[6 * localId + groupByIndex] = 1;
     }
 

@@ -26,8 +26,7 @@ public class DatabaseFilterJob extends DynamoJob{
       useFile = true;
     }
 
-    LineItemRow[] lines;
-    int size;
+    final int size;
 
     if (useFile) {
       System.out.println("Counting lines...");
@@ -38,37 +37,42 @@ public class DatabaseFilterJob extends DynamoJob{
         }
         size = count.getLineNumber();
       }
+    } else {
+      size = Integer.parseInt(sizeOrTpchLineItemFile);
+    }
 
+    int[] colQuantity = new int[size];
+    int[] colExtendedPrice = new int[size];
+    int[] colDiscount = new int[size];
+    int[] colTax = new int[size];
+    int[] colReturnFlag = new int[size];
+    int[] colLineStatus = new int[size];
+    int[] colShippingDate = new int[size];
+
+    if (useFile) {
       System.out.println("Reading " + size + " lines...");
-      lines = new LineItemRow[size];
       try (FileReader input = new FileReader(sizeOrTpchLineItemFile);
            BufferedReader br = new BufferedReader(input)) {
-
-        int r = 0;
+        int i = 0;
         for (String line = br.readLine(); line != null; line = br.readLine()) {
           String[] lineParts = line.split("\\|");
-          int colQuantity = Integer.parseInt(lineParts[4]);
-          int colExtendedPrice = (int) (Float.parseFloat(lineParts[5]) * 100);
-          int colDiscount = (int) (Float.parseFloat(lineParts[6]) * 100);
-          int colTax = (int) (Float.parseFloat(lineParts[7]) * 100);
-          int colReturnFlag = lineParts[8].equals("A") ? 0 :
+          colQuantity[i] = Integer.parseInt(lineParts[4]);
+          colExtendedPrice[i] = (int) (Float.parseFloat(lineParts[5]) * 100);
+          colDiscount[i] = (int) (Float.parseFloat(lineParts[6]) * 100);
+          colTax[i] = (int) (Float.parseFloat(lineParts[7]) * 100);
+          colReturnFlag[i] = lineParts[8].equals("A") ? 0 :
                   lineParts[8].equals("N") ? 1 :
                           lineParts[8].equals("R") ? 2 :
                                   -1;
-          int colLineStatus = lineParts[9].equals("F") ? 0 :
+          colLineStatus[i] = lineParts[9].equals("F") ? 0 :
                   lineParts[9].equals("O") ? 1 :
                           -1;
-          int colShippingDate = Integer.parseInt(lineParts[10].replace("-", ""));
-
-          lines[r++] = new LineItemRow(colQuantity, colExtendedPrice, colDiscount, colTax,
-                  colReturnFlag, colLineStatus, colShippingDate);
+          colShippingDate[i] = Integer.parseInt(lineParts[10].replace("-", ""));
+          i++;
         }
       }
     } else {
-      size = Integer.parseInt(sizeOrTpchLineItemFile);
-
       System.out.println("Generating " + size + " lines...");
-      lines = new LineItemRow[size];
 
       int NUM_THREADS = Runtime.getRuntime().availableProcessors();
       IntStream.range(0, NUM_THREADS).parallel().forEach(ps -> {
@@ -76,24 +80,21 @@ public class DatabaseFilterJob extends DynamoJob{
         SimpleDateFormat yyyymmddDateFormat = new SimpleDateFormat("yyyyMMdd");
 
         for (int i = ps; i < size; i += NUM_THREADS) {
-          int colQuantity = 1 + random.nextInt(50); // [1, 50]
-          int colDiscount = random.nextInt(11); // [0, 10]
-          int colTax = random.nextInt(9); // [0, 8]
+          colQuantity[i] = 1 + random.nextInt(50); // [1, 50]
+          colDiscount[i] = random.nextInt(11); // [0, 10]
+          colTax[i] = random.nextInt(9); // [0, 8]
           int unitPrice = 90000 + random.nextInt(100001); // [90000,190000], aprox.
-          int colExtendedPrice = unitPrice * colQuantity;
+          colExtendedPrice[i] = unitPrice * colQuantity[i];
           Calendar c = Calendar.getInstance();
           c.set(1992, Calendar.JANUARY, 1);
           c.add(Calendar.DAY_OF_MONTH, random.nextInt(2526)); // [19920101, 19981131], aprox.
-          int colShippingDate = Integer.parseInt(yyyymmddDateFormat.format(c.getTime()));
+          colShippingDate[i] = Integer.parseInt(yyyymmddDateFormat.format(c.getTime()));
           c.add(Calendar.DAY_OF_MONTH, 1 + random.nextInt(30)); // + [1, 30]
           int returnDate = Integer.parseInt(yyyymmddDateFormat.format(c.getTime()));
-          int colReturnFlag = (returnDate <= 19950617)
+          colReturnFlag[i] = (returnDate <= 19950617)
                   ? (random.nextInt(2) * 2) /* R or A */
                   : 1 /* N */;
-          int colLineStatus = (colShippingDate <= 19950617) ? 0 /* F */ : 1 /* O */;
-
-          lines[i] = new LineItemRow(colQuantity, colExtendedPrice, colDiscount, colTax,
-                  colReturnFlag, colLineStatus, colShippingDate);
+          colLineStatus[i] = (colShippingDate[i] <= 19950617) ? 0 /* F */ : 1 /* O */;
 
         }
       });
@@ -103,10 +104,18 @@ public class DatabaseFilterJob extends DynamoJob{
 
     int tileHeight = size/tiles;
     for(int tile=0; tile<tiles; tile++){
-      LineItemRow[] linesSplit = Arrays.copyOfRange(lines, tile*tileHeight, (tile+1)*tileHeight);
+      int splitStart = tile*tileHeight, splitEnd = (tile+1)*tileHeight;
+      int[] colQuantitySplit = Arrays.copyOfRange(colQuantity, splitStart, splitEnd);
+      int[] colExtendedPriceSplit = Arrays.copyOfRange(colExtendedPrice, splitStart, splitEnd);
+      int[] colDiscountSplit = Arrays.copyOfRange(colDiscount, splitStart, splitEnd);
+      int[] colTaxSplit = Arrays.copyOfRange(colTax, splitStart, splitEnd);
+      int[] colReturnFlagSplit = Arrays.copyOfRange(colReturnFlag, splitStart, splitEnd);
+      int[] colLineStatusSplit = Arrays.copyOfRange(colLineStatus, splitStart, splitEnd);
+      int[] colShippingDateSplit = Arrays.copyOfRange(colShippingDate, splitStart, splitEnd);
 
-      Range range = Range.create(linesSplit.length);
-      DatabaseFilterKernel kernel = new DatabaseFilterKernel(this, range, linesSplit);
+      Range range = Range.create(splitEnd - splitStart, 256);
+      DatabaseFilterKernel kernel = new DatabaseFilterKernel(this, range, colQuantitySplit, colExtendedPriceSplit,
+              colDiscountSplit, colTaxSplit, colReturnFlagSplit, colLineStatusSplit, colShippingDateSplit);
       kernel.setDevicePreference(preference);
       kernel.setExplicit(true);
       // IMPORTANT: The initial values for the kernel data should *not* be uploaded (put) here,
