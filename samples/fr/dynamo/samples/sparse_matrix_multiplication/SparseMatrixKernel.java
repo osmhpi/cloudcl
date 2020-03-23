@@ -6,23 +6,18 @@ import fr.dynamo.threading.DynamoKernel;
 
 public class SparseMatrixKernel extends DynamoKernel{
 
-  final float[] a;
-  final float[] b;
+  private final float[] a;
+  private final float[] b;
   public int[] overallSum;
 
-  final int sizeN;
-  final int sizeM;
-  final int sizeP;
+  private final int sizeM;
 
-  public SparseMatrixKernel(DynamoJob job, Range range, float[] a, float[] b,
-    int sizeN, int sizeM, int sizeP) {
+  public SparseMatrixKernel(DynamoJob job, Range range, float[] a, float[] b, int sizeM) {
     super(job, range);
     this.a = a;
     this.b = b;
     this.overallSum = new int[] { 0 };
-    this.sizeN = sizeN;
     this.sizeM = sizeM;
-    this.sizeP = sizeP;
   }
 
   @Override

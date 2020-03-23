@@ -1,7 +1,7 @@
 package fr.dynamo.samples.nbody_oo;
 
 public final class Body {
-  float x, y, z, m, vx, vy, vz;
+  private float x, y, z, m, vx, vy, vz;
 
   public Body(float _x, float _y, float _z, float _m) {
      x = _x;

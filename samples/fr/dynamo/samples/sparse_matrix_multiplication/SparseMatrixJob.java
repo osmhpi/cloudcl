@@ -34,7 +34,7 @@ public class SparseMatrixJob extends DynamoJob{
       float[] aSplit = Arrays.copyOfRange(a, tile*tileHeight*sizeM, (tile+1)*tileHeight*sizeM);
 
       Range range = Range.create2D(tileHeight, sizeP, 100, 1);
-      SparseMatrixKernel kernel = new SparseMatrixKernel(this, range, aSplit, b, sizeN, sizeM, sizeP);
+      SparseMatrixKernel kernel = new SparseMatrixKernel(this, range, aSplit, b, sizeM);
       kernel.setDevicePreference(preference);
       kernel.setExplicit(true);
       // IMPORTANT: The initial values for the kernel data should *not* be uploaded (put) here,
