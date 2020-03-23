@@ -77,7 +77,7 @@ public class DatabaseFilterJob extends DynamoJob{
       int NUM_THREADS = Runtime.getRuntime().availableProcessors();
       IntStream.range(0, NUM_THREADS).parallel().forEach(ps -> {
         Random random = new Random(12345 + ps);
-        SimpleDateFormat yyyymmddDateFormat = new SimpleDateFormat("yyyyMMdd");
+        Calendar c = Calendar.getInstance();
 
         for (int i = ps; i < size; i += NUM_THREADS) {
           colQuantity[i] = 1 + random.nextInt(50); // [1, 50]
@@ -85,12 +85,11 @@ public class DatabaseFilterJob extends DynamoJob{
           colTax[i] = random.nextInt(9); // [0, 8]
           int unitPrice = 90000 + random.nextInt(100001); // [90000,190000], aprox.
           colExtendedPrice[i] = unitPrice * colQuantity[i];
-          Calendar c = Calendar.getInstance();
           c.set(1992, Calendar.JANUARY, 1);
           c.add(Calendar.DAY_OF_MONTH, random.nextInt(2526)); // [19920101, 19981131], aprox.
-          colShippingDate[i] = Integer.parseInt(yyyymmddDateFormat.format(c.getTime()));
+          colShippingDate[i] = calendarToYYYYMMDDInteger(c);
           c.add(Calendar.DAY_OF_MONTH, 1 + random.nextInt(30)); // + [1, 30]
-          int returnDate = Integer.parseInt(yyyymmddDateFormat.format(c.getTime()));
+          int returnDate = calendarToYYYYMMDDInteger(c);
           colReturnFlag[i] = (returnDate <= 19950617)
                   ? (random.nextInt(2) * 2) /* R or A */
                   : 1 /* N */;
@@ -124,6 +123,10 @@ public class DatabaseFilterJob extends DynamoJob{
       //kernel.put(...);
       addKernel(kernel);
     }
+  }
+
+  private static int calendarToYYYYMMDDInteger(Calendar c) {
+    return c.get(Calendar.YEAR) * 10000 + (c.get(Calendar.MONTH) + 1) * 100 + c.get(Calendar.DAY_OF_MONTH);
   }
 
 }
