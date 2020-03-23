@@ -25,11 +25,16 @@ public class DatabaseFilterMain {
 
     ThreadFinishedNotifyable finishedNotifyable = thread -> {
       DatabaseFilterKernel kernel = (DatabaseFilterKernel) thread.getKernel();
-      kernel.get(kernel.resultSumQty);
-      kernel.get(kernel.resultSumBasePrice);
-      kernel.get(kernel.resultSumDiscPrice);
-      kernel.get(kernel.resultSumCharge);
-      kernel.get(kernel.resultSumDiscount);
+      kernel.get(kernel.resultSumQtyHi);
+      kernel.get(kernel.resultSumQtyLo);
+      kernel.get(kernel.resultSumBasePriceHi);
+      kernel.get(kernel.resultSumBasePriceLo);
+      kernel.get(kernel.resultSumDiscPriceHi);
+      kernel.get(kernel.resultSumDiscPriceLo);
+      kernel.get(kernel.resultSumChargeHi);
+      kernel.get(kernel.resultSumChargeLo);
+      kernel.get(kernel.resultSumDiscountHi);
+      kernel.get(kernel.resultSumDiscountLo);
       kernel.get(kernel.resultCountOrder);
     };
 
@@ -38,31 +43,31 @@ public class DatabaseFilterMain {
 
     job.awaitTermination(1, TimeUnit.DAYS);
 
-    int[] overallResultSumQty = new int[6];
-    int[] overallResultSumBasePrice = new int[6];
-    int[] overallResultSumDiscPrice = new int[6];
-    int[] overallResultSumCharge = new int[6];
-    int[] overallResultSumDiscount = new int[6];
-    int[] overallResultCountOrder = new int[6];
+    long[] overallSumQty = new long[6];
+    long[] overallSumBasePrice = new long[6];
+    long[] overallSumDiscPrice = new long[6];
+    long[] overallSumCharge = new long[6];
+    long[] overallSumDiscount = new long[6];
+    int[] overallCountOrder = new int[6];
     for(DynamoKernel k:job.getFinishedKernels()){
       DatabaseFilterKernel kernel = (DatabaseFilterKernel)k;
       for (int i = 0; i < 6; i++) {
-        overallResultSumQty[i] += kernel.resultSumQty[i];
-        overallResultSumBasePrice[i] += kernel.resultSumBasePrice[i];
-        overallResultSumDiscPrice[i] += kernel.resultSumDiscPrice[i];
-        overallResultSumCharge[i] += kernel.resultSumCharge[i];
-        overallResultSumDiscount[i] += kernel.resultSumDiscount[i];
-        overallResultCountOrder[i] += kernel.resultCountOrder[i];
+        overallSumQty[i] += (((long) kernel.resultSumQtyHi[i]) << 32) | (kernel.resultSumQtyLo[i] & 0xffffffffL);
+        overallSumBasePrice[i] += (((long) kernel.resultSumBasePriceHi[i]) << 32) | (kernel.resultSumBasePriceLo[i] & 0xffffffffL);
+        overallSumDiscPrice[i] += (((long) kernel.resultSumDiscPriceHi[i]) << 32) | (kernel.resultSumDiscPriceLo[i] & 0xffffffffL);
+        overallSumCharge[i] += (((long) kernel.resultSumChargeHi[i]) << 32) | (kernel.resultSumChargeLo[i] & 0xffffffffL);
+        overallSumDiscount[i] += (((long) kernel.resultSumDiscountHi[i]) << 32) | (kernel.resultSumDiscountLo[i] & 0xffffffffL);
+        overallCountOrder[i] += kernel.resultCountOrder[i];
       }
     }
 
     // TODO: Summarize stats (averages), etc.
-    System.out.println("overallResultSumQty: " + Arrays.toString(overallResultSumQty));
-    System.out.println("overallResultSumBasePrice: " + Arrays.toString(overallResultSumBasePrice));
-    System.out.println("overallResultSumDiscPrice: " + Arrays.toString(overallResultSumDiscPrice));
-    System.out.println("overallResultSumCharge: " + Arrays.toString(overallResultSumCharge));
-    System.out.println("overallResultSumDiscount: " + Arrays.toString(overallResultSumDiscount));
-    System.out.println("overallResultCountOrder: " + Arrays.toString(overallResultCountOrder));
+    System.out.println("overallSumQty: " + Arrays.toString(overallSumQty));
+    System.out.println("overallSumBasePrice: " + Arrays.toString(overallSumBasePrice));
+    System.out.println("overallSumDiscPrice: " + Arrays.toString(overallSumDiscPrice));
+    System.out.println("overallSumCharge: " + Arrays.toString(overallSumCharge));
+    System.out.println("overallSumDiscount: " + Arrays.toString(overallSumDiscount));
+    System.out.println("overallCountOrder: " + Arrays.toString(overallCountOrder));
 
     PerformanceCache.getInstance().printStatistics(job);
     Logger.instance().info(job);

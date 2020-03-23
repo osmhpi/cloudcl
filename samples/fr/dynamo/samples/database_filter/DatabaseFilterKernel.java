@@ -40,11 +40,16 @@ public class DatabaseFilterKernel extends DynamoKernel {
     l_linestatus;
   */
   // Each of those arrays is indexed by (l_returnflag, l_linestatus)
-  public int[] resultSumQty = new int[6];
-  public int[] resultSumBasePrice = new int[6];
-  public int[] resultSumDiscPrice = new int[6];
-  public int[] resultSumCharge = new int[6];
-  public int[] resultSumDiscount = new int[6];
+  public int[] resultSumQtyHi = new int[6];
+  public int[] resultSumQtyLo = new int[6];
+  public int[] resultSumBasePriceHi = new int[6];
+  public int[] resultSumBasePriceLo = new int[6];
+  public int[] resultSumDiscPriceHi = new int[6];
+  public int[] resultSumDiscPriceLo = new int[6];
+  public int[] resultSumChargeHi = new int[6];
+  public int[] resultSumChargeLo = new int[6];
+  public int[] resultSumDiscountHi = new int[6];
+  public int[] resultSumDiscountLo = new int[6];
   public int[] resultCountOrder = new int[6];
 
   @Local private int[] localSumQty = new int[6 * range.getLocalSize(0)];
@@ -70,6 +75,7 @@ public class DatabaseFilterKernel extends DynamoKernel {
   public void run() {
     int globalId = getGlobalId(), localId = getLocalId(), localSize = getLocalSize();
 
+    // Initialize workgroup local arrays
     for (int g = 0; g < 6; g++) {
       localSumQty[6 * localId + g] = 0;
       localSumBasePrice[6 * localId + g] = 0;
@@ -80,11 +86,9 @@ public class DatabaseFilterKernel extends DynamoKernel {
     }
 
 
-    // VERY CRUDE APPROXIMATION - Should not use floats, etc.!
+    // Aggregate results in the workgroup local array (work items work independently)
     if (colShippingDate[globalId] <= 19980902) {
       int groupByIndex = colReturnFlag[globalId] * 2 + colLineStatus[globalId];
-      // FIXME: This can overflow, results should rather be long[],
-      //        but Aparapi only has atomicAdd(int[], ...)!
       localSumQty[6 * localId + groupByIndex] = colQuantity[globalId];
       localSumBasePrice[6 * localId + groupByIndex] = colExtendedPrice[globalId];
       localSumDiscPrice[6 * localId + groupByIndex] = (int)(
@@ -96,6 +100,7 @@ public class DatabaseFilterKernel extends DynamoKernel {
       localCountOrder[6 * localId + groupByIndex] = 1;
     }
 
+    // Reduce the results in the workgroup local arrays in parallel
     for (int i = localSize / 2; i > 0; i >>= 1) {
       localBarrier();
 
@@ -113,15 +118,34 @@ public class DatabaseFilterKernel extends DynamoKernel {
       }
     }
 
-    // Group leader stores final reduced sum of group to result buffer
+    // The group leader aggregates the final reduced sums to the result buffer
     if (localId == 0) {
       for (int g = 0; g < 6; g++) {
-        atomicAdd(resultSumQty, g, localSumQty[g]);
-        atomicAdd(resultSumBasePrice, g, localSumBasePrice[g]);
-        atomicAdd(resultSumDiscPrice, g, localSumDiscPrice[g]);
-        atomicAdd(resultSumCharge, g, localSumCharge[g]);
-        atomicAdd(resultSumDiscount, g, localSumDiscount[g]);
-        atomicAdd(resultCountOrder, g, localCountOrder[g]);
+        int r;
+
+        // NB: Aparapi hasn't atomicAdd(long[], int, long), so we need to
+        // simulate this inefficiently with two separate atomicAdds
+        r = atomicAdd(resultSumQtyLo, g, localSumQty[g]);
+        if (r < 0 && r + localSumQty[g] >= 0)
+          atomicAdd(resultSumQtyHi, g, 1);
+
+        r = atomicAdd(resultSumBasePriceLo, g, localSumBasePrice[g]);
+        if (r < 0 && r + localSumBasePrice[g] >= 0)
+          atomicAdd(resultSumBasePriceHi, g, 1);
+
+        r = atomicAdd(resultSumDiscPriceLo, g, localSumDiscPrice[g]);
+        if (r < 0 && r + localSumDiscPrice[g] >= 0)
+          atomicAdd(resultSumDiscPriceHi, g, 1);
+
+        r = atomicAdd(resultSumChargeLo, g, localSumCharge[g]);
+        if (r < 0 && r + localSumCharge[g] >= 0)
+          atomicAdd(resultSumChargeHi, g, 1);
+
+        r = atomicAdd(resultSumDiscountLo, g, localSumDiscount[g]);
+        if (r < 0 && r + localSumDiscount[g] >= 0)
+          atomicAdd(resultSumDiscountHi, g, 1);
+
+        atomicAdd(resultCountOrder, g, localCountOrder[g]); // This one can't overflow
       }
     }
   }
