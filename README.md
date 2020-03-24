@@ -43,3 +43,5 @@ Build dOpenCL:
 ```
 gradle build
 ```
+
+NOTE: The dOpenCL build process will automatically run the unit tests, which require a working OpenCL enviornment. If you are building CloudCL for use in an OpenCL-incabable environment, you can safely skip the tests with `gradle build -x test`.
