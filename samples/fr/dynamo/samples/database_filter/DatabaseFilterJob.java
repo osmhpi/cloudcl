@@ -78,7 +78,8 @@ public class DatabaseFilterJob extends DynamoJob{
         Random random = new Random(12345 + ps);
         Calendar c = Calendar.getInstance();
 
-        for (int i = ps; i < size; i += NUM_THREADS) {
+      for (int i = ps * (size / NUM_THREADS) + Math.min(ps, size % NUM_THREADS);
+           i < (ps + 1) * (size / NUM_THREADS) + Math.min(ps + 1, size % NUM_THREADS); i++) {
           colQuantity[i] = 1 + random.nextInt(50); // [1, 50]
           colDiscount[i] = random.nextInt(11); // [0, 10]
           colTax[i] = random.nextInt(9); // [0, 8]

@@ -21,10 +21,12 @@ public class SparseMatrixJob extends DynamoJob{
     int NUM_THREADS = Runtime.getRuntime().availableProcessors();
     IntStream.range(0, NUM_THREADS).parallel().forEach(ps -> {
       Random random = new Random(1000 + ps);
-      for (int i = ps; i < a.length; i += NUM_THREADS) {
+      for (int i = ps * (a.length / NUM_THREADS) + Math.min(ps, a.length % NUM_THREADS);
+           i < (ps + 1) * (a.length / NUM_THREADS) + Math.min(ps + 1, a.length % NUM_THREADS); i++) {
         a[i] = random.nextFloat() >= sparsity ? (random.nextFloat() * 2 - 1) : 0;
       }
-      for (int i = ps; i < b.length; i += NUM_THREADS) {
+      for (int i = ps * (b.length / NUM_THREADS) + Math.min(ps, b.length % NUM_THREADS);
+           i < (ps + 1) * (b.length / NUM_THREADS) + Math.min(ps + 1, b.length % NUM_THREADS); i++) {
         b[i] = random.nextFloat() >= sparsity ? (random.nextFloat() * 2 - 1) : 0;
       }
     });
