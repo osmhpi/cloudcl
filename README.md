@@ -1,5 +1,7 @@
 # CloudCL
 
+[![Build Status](https://travis-ci.org/joanbm/cloudcl.svg?branch=master)](https://travis-ci.org/joanbm/cloudcl)
+
 CloudCL is an idea originating from a master's thesis that tries to solve the problem of computing a great workload on multiple machines within a network in order to receive a speedup. Most prominent existing solutions have one or multiple of the following shortcomings:
 
 * Complicated distribution code (e.g. MPI) in addition to accelerator-specific code (e.g. OpenCL, CUDA)
