@@ -1,0 +1,54 @@
+---
+language: minimal
+matrix:
+  include:
+    # Ubuntu 18.04
+    - os: linux
+      dist: bionic
+    # Ubuntu 16.04
+    - os: linux
+      dist: xenial
+env:
+  # https://stackoverflow.com/a/21841688
+  - TERM=dumb
+before_install:
+  - |
+    # Install CloudCL deps. + OpenCL environment + dOpenCL deps. + utils
+    sudo apt-get -y install \
+        g++ openjdk-8-jdk-headless openjdk-8-jre-headless gradle \
+        opencl-headers ocl-icd-opencl-dev \
+        cmake make g++ libboost-dev libboost-program-options-dev libboost-system-dev libboost-thread-dev \
+        git
+    # Travis loves to install another Java version that causes conflicts with the
+    # one we want, even though we asked for the minimal Ubuntu image
+    sudo update-java-alternatives --set java-1.8.0-openjdk
+    # Rely on POCL to provide a generic OpenCL implementation that can run the tests
+    # Unfortunately however,it is not available on Ubuntu 16.04, only on Ubuntu 18.04
+    if [[ "$(lsb_release -rs)" == "18.04" ]]; then
+      sudo apt-get -y install pocl-opencl-icd
+    fi
+script:
+  - |
+    # Download + build dOpenCL (not actually used/tested, but necessary for compilation)
+    git clone --recursive https://github.com/joanbm/dopencl
+    cd dopencl
+    ./install_local.sh
+    source /etc/profile.d/dopenclenv.sh
+    cd ..
+    
+    # Build Aparapi
+    cd aparapi
+    gradle build
+    cd ..
+    export LD_LIBRARY_PATH="$(pwd)/aparapi/com.amd.aparapi.jni/dist"
+    
+    # Build CloudCL and run the unit tests a few examples
+    if [[ "$(lsb_release -rs)" == "18.04" ]]; then
+      gradle build
+      java -cp "build/libs/*:build/libs/lib/*" \
+        fr.dynamo.samples.mandelbrot.MandelbrotMain 1000 1000 10 1
+      java -cp "build/libs/*:build/libs/lib/*" \
+        fr.dynamo.samples.matrix_multiplication.MatrixMain 99 10
+    else
+      gradle build -x test
+    fi
