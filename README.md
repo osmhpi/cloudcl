@@ -8,7 +8,11 @@ CloudCL is an idea originating from a master's thesis that tries to solve the pr
 * It is complicated to use all available resources (CPUs *and* GPUs)
 * Maintaining a compute cluster is complex and expensive
 
-CloudCL tries to work around these problems in the following way:
+You can read more about CloudCL in our paper:
+
+* [Plauth, Max, Florian Rösler, and Andreas Polze. "CloudCL: Distributed Heterogeneous Computing on Cloud Scale." 2017 Fifth International Symposium on Computing and Networking (CANDAR). IEEE, 2017.](https://ieeexplore.ieee.org/document/8345455)
+
+In summary, CloudCL tries to work around these problems in the following way:
 
 ## Utilizing CPUs and GPUs
 
