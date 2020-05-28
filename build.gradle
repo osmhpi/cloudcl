@@ -37,10 +37,10 @@ test {
 }
 
 dependencies {
-	compile group: 'com.amazonaws', name: 'aws-java-sdk-ec2', version: '1.11.34'
-	compile group: 'log4j', name: 'log4j', version: '1.2.17'
-	compile files('aparapi/com.amd.aparapi/dist/aparapi.jar')
-	testCompile group: 'junit', name: 'junit', version: '4.12'
+	implementation group: 'com.amazonaws', name: 'aws-java-sdk-ec2', version: '1.11.34'
+	implementation group: 'log4j', name: 'log4j', version: '1.2.17'
+	implementation files('aparapi/com.amd.aparapi/dist/aparapi.jar')
+	testImplementation group: 'junit', name: 'junit', version: '4.12'
 }
 
 uploadArchives {
@@ -54,13 +54,13 @@ uploadArchives {
 jar {
     manifest {
         attributes 'Implementation-Title': 'DynamOpenCL',
-                   'Implementation-Version': version
+                   'Implementation-Version': archiveVersion
     }
 }
 
 task copyRuntimeLibs(type: Copy) {
 	into new File(project.buildDir, "/libs/lib/")
 	
-	from configurations.runtime
+	from configurations.runtimeClasspath
 
 }
