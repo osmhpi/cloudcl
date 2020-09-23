@@ -36,6 +36,9 @@ test {
   }
 }
 
+/* TODO: This file needs to be updated for Gradle 7
+   (see commit e31d9489daa87603ffa8e438514d259de383f2d9 for fixes)
+   but fixing it breaks the older Gradle versions in Ubuntu 16.04 and 18.04. */
 dependencies {
 	compile group: 'com.amazonaws', name: 'aws-java-sdk-ec2', version: '1.11.34'
 	compile group: 'log4j', name: 'log4j', version: '1.2.17'

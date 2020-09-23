@@ -15,12 +15,12 @@ public class PerformanceBasedDeviceScheduler extends AbstractDeviceScheduler {
 
   @Override
   public List<KernelDevicePairing> scheduleDevices(List<DynamoKernel> kernels, List<OpenCLDevice> unusedDevices) {
-    List<KernelDevicePairing> pairings = new ArrayList<KernelDevicePairing>();
+    List<KernelDevicePairing> pairings = new ArrayList<>();
 
 
     for(DynamoKernel kernel:kernels){
       PerformanceMeasurement measurement = PerformanceCache.getInstance().getPerformanceMeasurement(kernel.getJob());
-      List<String> rankedDeviceNames = new ArrayList<String>();
+      List<String> rankedDeviceNames = new ArrayList<>();
       for(Entry<String, Long> entry : measurement.getDeviceRanking()){
         rankedDeviceNames.add(entry.getKey());
       }

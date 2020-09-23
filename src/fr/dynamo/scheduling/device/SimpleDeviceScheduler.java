@@ -13,7 +13,7 @@ public class SimpleDeviceScheduler extends AbstractDeviceScheduler{
 
   @Override
   public List<KernelDevicePairing> scheduleDevices(List<DynamoKernel> kernels, List<OpenCLDevice> unusedDevices) {
-    List<KernelDevicePairing> pairings = new ArrayList<KernelDevicePairing>();
+    List<KernelDevicePairing> pairings = new ArrayList<>();
         
     for(DynamoKernel kernel:kernels){
       DevicePreference preference = kernel.getDevicePreference();

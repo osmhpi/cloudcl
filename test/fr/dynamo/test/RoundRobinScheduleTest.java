@@ -16,8 +16,8 @@ import fr.dynamo.threading.DynamoKernel;
 
 public class RoundRobinScheduleTest {
 
-  JobScheduler scheduler = new RoundRobinJobScheduler();
-  List<DynamoJob> jobs = new ArrayList<DynamoJob>();
+  final JobScheduler scheduler = new RoundRobinJobScheduler();
+  final List<DynamoJob> jobs = new ArrayList<>();
 
   @Before
   public void prepare(){
@@ -64,11 +64,10 @@ public class RoundRobinScheduleTest {
 
   @Test
   public void testAdjacentRounds() {
-    List<DynamoKernel> kernels = null;
 
     for(int n=0; n<2; n++){
       for(int i = 0;i<4;i++){
-        kernels = scheduler.schedule(jobs);
+        List<DynamoKernel> kernels = scheduler.schedule(jobs);
         assertEquals("Test_" + i, kernels.get(0).getJob().getName());
       }
     }

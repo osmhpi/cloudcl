@@ -6,11 +6,11 @@ import fr.dynamo.threading.DynamoKernel;
 
 public class MatrixKernel extends DynamoKernel{
 
-  final float[] a;
-  final float[] b;
+  private final float[] a;
+  private final float[] b;
   public final float[] result;
 
-  final int size;
+  private final int size;
 
   public MatrixKernel(DynamoJob job, Range range, float[] a, float[] b, float[] result, int size) {
     super(job, range);

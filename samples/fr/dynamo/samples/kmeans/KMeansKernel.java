@@ -6,11 +6,11 @@ import fr.dynamo.threading.DynamoKernel;
 
 public class KMeansKernel extends DynamoKernel{
 
-  public double[] coordinatesX;
-  public double[] coordinatesY;
-  public double[] centroidsX;
-  public double[] centroidsY;
-  public int[] relatedClusterIndex;
+  public final double[] coordinatesX;
+  public final double[] coordinatesY;
+  public final double[] centroidsX;
+  public final double[] centroidsY;
+  public final int[] relatedClusterIndex;
   private final int centroidsCount_$constant$;
 
   public KMeansKernel(DynamoJob job, Range range, double[] coordinatesX, double[] coordinatesY, int[] relatedClusterIndex, double[] centroidsX, double[] centroidsY){

@@ -11,9 +11,9 @@ import com.amd.aparapi.internal.opencl.OpenCLPlatform;
 
 import fr.dynamo.logging.Logger;
 
-public class NodeList extends OpenCLJNI{
+public class NodeList extends OpenCLJNI implements NodeListBase {
 
-  private Set<DynamoInstance> nodes = new HashSet<DynamoInstance>();
+  private final Set<DynamoInstance> nodes = new HashSet<>();
 
   private static NodeList instance;
 
@@ -35,6 +35,7 @@ public class NodeList extends OpenCLJNI{
     return instance;
   }
 
+  @Override
   public void addNode(DynamoInstance node){
     if(node.getPublicIp() == null){
       Logger.instance().warn("Instance cant't be added because of missing public IP: " + node.toString());
@@ -46,10 +47,11 @@ public class NodeList extends OpenCLJNI{
       nodes.add(node);
       List<OpenCLDevice> devices = addNode(OpenCLPlatform.getUncachedOpenCLPlatforms().get(0), node.getPublicIp());
 
-      node.setDevices(new HashSet<OpenCLDevice>(devices));
+      node.setDevices(new HashSet<>(devices));
     }
   }
 
+  @Override
   public void removeNode(DynamoInstance node){
     synchronized(nodes){
       nodes.remove(node);
@@ -57,31 +59,30 @@ public class NodeList extends OpenCLJNI{
     }
   }
 
+  @Override
   public Set<DynamoInstance> getNodes(){
     synchronized(nodes){
       return nodes;
     }
   }
 
+  @Override
   public Set<OpenCLDevice> getCloudDevices(){
-    Set<OpenCLDevice> devices = new HashSet<OpenCLDevice>();
+    Set<OpenCLDevice> devices = new HashSet<>();
     synchronized(nodes){
       for(DynamoInstance instance:nodes){
-        for (OpenCLDevice device : instance.getDevices()) {
-          devices.add(device);
-        }
+        devices.addAll(instance.getDevices());
       }
     }
     return devices;
   }
 
+  @Override
   public Set<OpenCLDevice> getAllDevices(){
-    Set<OpenCLDevice> devices = new HashSet<OpenCLDevice>();
+    Set<OpenCLDevice> devices = new HashSet<>();
     synchronized(nodes){
       for (OpenCLPlatform platform : OpenCLPlatform.getUncachedOpenCLPlatforms()) {
-        for (OpenCLDevice device : platform.getOpenCLDevices()) {
-          devices.add(device);
-        }
+        devices.addAll(platform.getOpenCLDevices());
       }
     }
     return devices;

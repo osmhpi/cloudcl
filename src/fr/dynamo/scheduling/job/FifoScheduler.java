@@ -11,7 +11,7 @@ import fr.dynamo.threading.DynamoKernel;
 
 public class FifoScheduler implements JobScheduler{
 
-  private class JobComparator implements Comparator<DynamoJob>{
+  private static class JobComparator implements Comparator<DynamoJob>{
 
     @Override
     public int compare(DynamoJob o1, DynamoJob o2) {
@@ -22,9 +22,9 @@ public class FifoScheduler implements JobScheduler{
 
   @Override
   public List<DynamoKernel> schedule(List<DynamoJob> jobs) {
-    List<DynamoKernel> kernels =  new ArrayList<DynamoKernel>();
+    List<DynamoKernel> kernels = new ArrayList<>();
 
-    PriorityQueue<DynamoJob> orderedJobs = new PriorityQueue<DynamoJob>(11, new JobComparator());
+    PriorityQueue<DynamoJob> orderedJobs = new PriorityQueue<>(11, new JobComparator());
 
     for(DynamoJob job:orderedJobs){
       kernels.addAll(job.getKernelsToRun());

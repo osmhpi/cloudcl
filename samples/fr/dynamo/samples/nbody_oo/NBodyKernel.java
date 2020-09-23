@@ -10,7 +10,6 @@ public class NBodyKernel extends DynamoKernel{
 
   protected final float delT = .005f;
   protected final float espSqr = 1.0f;
-  protected final float mass = 5f;
 
   public final Body[] bodies;
   public final int bodyCount;

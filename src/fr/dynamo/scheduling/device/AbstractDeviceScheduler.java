@@ -18,7 +18,7 @@ public abstract class AbstractDeviceScheduler {
   public abstract List<KernelDevicePairing> scheduleDevices(List<DynamoKernel> kernels, List<OpenCLDevice> unusedDevices);
 
   public static List<OpenCLDevice> getUnusedDevices(List<DynamoThread> threads){
-    List<OpenCLDevice> unusedDevices = new ArrayList<OpenCLDevice>();
+    List<OpenCLDevice> unusedDevices = new ArrayList<>();
     List<OpenCLDevice> devices = getDevices();
     Set<Long> usedDeviceIds = getUsedDeviceIds(threads);
     for(OpenCLDevice device:devices){
@@ -30,7 +30,7 @@ public abstract class AbstractDeviceScheduler {
   }
 
   public static Set<Long> getUsedDeviceIds(List<DynamoThread> threads){
-    Set<Long> usedDeviceIds = new HashSet<Long>();
+    Set<Long> usedDeviceIds = new HashSet<>();
     for(DynamoThread t:threads){
       usedDeviceIds.add(t.getDevice().getDeviceId());
     }

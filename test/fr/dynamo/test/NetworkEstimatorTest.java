@@ -18,8 +18,8 @@ import fr.dynamo.threading.DynamoKernel;
 public class NetworkEstimatorTest {
 
   DynamoKernel kernel;
-  int[] x = new int[1000000];
-  int[][][] z = new int[100][1000][10];
+  final int[] x = new int[1000000];
+  final int[][][] z = new int[100][1000][10];
 
   @Before
   public void prepare(){

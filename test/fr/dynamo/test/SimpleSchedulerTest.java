@@ -22,15 +22,15 @@ import fr.dynamo.threading.DynamoKernel;
 
 public class SimpleSchedulerTest {
 
-  AbstractDeviceScheduler scheduler = new SimpleDeviceScheduler();
-  OpenCLPlatform platform = new OpenCLPlatform();
+  final AbstractDeviceScheduler scheduler = new SimpleDeviceScheduler();
+  final OpenCLPlatform platform = new OpenCLPlatform();
 
-  List<OpenCLDevice> unusedDevices = new ArrayList<OpenCLDevice>();
+  final List<OpenCLDevice> unusedDevices = new ArrayList<>();
   
-  OpenCLDevice cpu1 = new OpenCLDevice(platform, 0, TYPE.CPU);
-  OpenCLDevice cpu2 = new OpenCLDevice(platform, 1, TYPE.CPU);
-  OpenCLDevice gpu1 = new OpenCLDevice(platform, 2, TYPE.GPU);
-  OpenCLDevice gpu2 = new OpenCLDevice(platform, 3, TYPE.GPU);
+  final OpenCLDevice cpu1 = new OpenCLDevice(platform, 0, TYPE.CPU);
+  final OpenCLDevice cpu2 = new OpenCLDevice(platform, 1, TYPE.CPU);
+  final OpenCLDevice gpu1 = new OpenCLDevice(platform, 2, TYPE.GPU);
+  final OpenCLDevice gpu2 = new OpenCLDevice(platform, 3, TYPE.GPU);
 
   {
     cpu1.setName("CPU1");
@@ -46,7 +46,7 @@ public class SimpleSchedulerTest {
     gpu2.setMaxComputeUnits(2);
   }
 
-  private DynamoKernel kernel = new DynamoKernel(new DynamoJob("Test"), Range.create(0)) {
+  private final DynamoKernel kernel = new DynamoKernel(new DynamoJob("Test"), Range.create(0)) {
     @Override
     public void run() {
     }
@@ -65,12 +65,12 @@ public class SimpleSchedulerTest {
 
   @Test
   public void testExclusivePreferences() {
-    List<KernelDevicePairing> pairings = null;
-    List<DynamoKernel> kernels = new ArrayList<DynamoKernel>();
+    List<KernelDevicePairing> pairings;
+    List<DynamoKernel> kernels = new ArrayList<>();
     kernels.add(kernel);
     
     kernel.setDevicePreference(DevicePreference.CPU_ONLY);
-     pairings = scheduler.scheduleDevices(kernels, unusedDevices);
+    pairings = scheduler.scheduleDevices(kernels, unusedDevices);
     assertEquals(TYPE.CPU, pairings.get(0).device.getType());
 
     kernel.setDevicePreference(DevicePreference.CPU_ONLY);
@@ -97,8 +97,8 @@ public class SimpleSchedulerTest {
   @Test
   public void testCpuPreferences() {
     
-    List<KernelDevicePairing> pairings = null;
-    List<DynamoKernel> kernels = new ArrayList<DynamoKernel>();
+    List<KernelDevicePairing> pairings;
+    List<DynamoKernel> kernels = new ArrayList<>();
     kernels.add(kernel);
     
     kernel.setDevicePreference(DevicePreference.CPU_PREFERRED);
@@ -121,8 +121,8 @@ public class SimpleSchedulerTest {
 
   @Test
   public void testGpuPreferences() {
-    List<KernelDevicePairing> pairings = null;
-    List<DynamoKernel> kernels = new ArrayList<DynamoKernel>();
+    List<KernelDevicePairing> pairings;
+    List<DynamoKernel> kernels = new ArrayList<>();
     kernels.add(kernel);
     
     kernel.setDevicePreference(DevicePreference.GPU_PREFERRED);

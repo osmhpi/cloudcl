@@ -8,9 +8,8 @@ import com.amd.aparapi.Range;
 
 import fr.dynamo.execution.DynamoExecutor;
 import fr.dynamo.threading.DynamoJob;
-//import static org.junit.Assert.assertEquals;
 import fr.dynamo.threading.DynamoKernel;
-import junit.framework.Assert;
+import org.junit.Assert;
 
 
 public class DynamoExecutorTest {

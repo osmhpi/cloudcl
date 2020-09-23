@@ -6,12 +6,12 @@ import fr.dynamo.threading.DynamoKernel;
 
 public class MandelbrotKernel extends DynamoKernel{
 
-  final int fullWidth;
-  final int fullHeight;
-  final int width;
-  final int maxIterations;
-  final int offsetX;
-  final boolean[] result;
+  private final int fullWidth;
+  private final int fullHeight;
+  private final int width;
+  private final int maxIterations;
+  private final int offsetX;
+  public final boolean[] result;
 
   public MandelbrotKernel(DynamoJob job, Range range, int fullWidth, int fullHeight, int width, int offsetX, int maxIterations){
     super(job, range);

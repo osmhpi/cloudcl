@@ -12,9 +12,9 @@ import fr.dynamo.logging.Logger;
 
 public class DynamoThread extends Thread{
 
-  private DynamoKernel kernel;
-  private OpenCLDevice device;
-  private ThreadFinishedNotifyable notifyable;
+  private final DynamoKernel kernel;
+  private final OpenCLDevice device;
+  private final ThreadFinishedNotifyable notifyable;
   private long transferredDataSize;
   private boolean failed;
 
@@ -30,7 +30,7 @@ public class DynamoThread extends Thread{
     failed = false;
     try{
       getKernel().getJob().submitThread(this);
-      LinkedHashSet<Device> preferences = new LinkedHashSet<Device>();
+      LinkedHashSet<Device> preferences = new LinkedHashSet<>();
       preferences.add(device);
       KernelManager.instance().setPreferredDevices(kernel, preferences);
 
@@ -52,9 +52,9 @@ public class DynamoThread extends Thread{
 
       Logger.instance().info(getKernel().getJob().getName() + ": execution of Thread " + this.getId() + " on " + device.getName() + " " + " finished after " + kernel.getExecutionTime() + " ms");
       kernel.setRemainingTries(0);
-      dispose();
     }finally{
       notifyable.notifyListener(this);
+      dispose();
     }
   }
 

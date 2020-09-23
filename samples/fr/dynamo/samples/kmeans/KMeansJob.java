@@ -13,8 +13,8 @@ import fr.dynamo.threading.DynamoJob;
 import fr.dynamo.threading.DynamoKernel;
 
 public class KMeansJob extends DynamoJob{
-  public double[] centroidCoordinatesX;
-  public double[] centroidCoordinatesY;
+  public final double[] centroidCoordinatesX;
+  public final double[] centroidCoordinatesY;
 
   public KMeansJob(int clusterCount, int pointCount, int iterations, DevicePreference preference, ThreadFinishedNotifyable callback) throws InterruptedException {
     super("KMeans", callback);
@@ -64,7 +64,7 @@ public class KMeansJob extends DynamoJob{
     kernel.get(kernel.centroidsX);
     kernel.get(kernel.centroidsY);
 
-    HashMap<Integer, Centroid> centroids = new HashMap<Integer, Centroid>();
+    HashMap<Integer, Centroid> centroids = new HashMap<>();
     for(int i=0;i<clusters_x.length;i++){
       centroids.put(i, new Centroid(clusters_x[i], clusters_y[i]));
     }

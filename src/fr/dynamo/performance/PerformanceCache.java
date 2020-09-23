@@ -13,7 +13,7 @@ public class PerformanceCache {
 
   private static PerformanceCache instance;
 
-  private Map<String, PerformanceMeasurement> kernelPerformances = new HashMap<String, PerformanceMeasurement>();
+  private final Map<String, PerformanceMeasurement> kernelPerformances = new HashMap<>();
 
   private PerformanceCache(){}
 

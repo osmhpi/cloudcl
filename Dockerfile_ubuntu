@@ -1,0 +1,39 @@
+FROM dopencl_ubuntu
+
+# Install dependencies
+RUN apt-get update \
+ && apt-get install --yes --no-install-recommends \
+        # Build fails with Java 11, use Java 8 instead
+        openjdk-8-jdk-headless openjdk-8-jre-headless gradle \
+        # For the native part (JNI bindings)
+        g++ opencl-c-headers ocl-icd-opencl-dev \
+ && rm -rf /var/lib/apt/lists/*
+
+# Copy source files in
+COPY . /tmp/cloudcl
+
+# Build Aparapi
+WORKDIR /tmp/cloudcl/aparapi
+# NOTE: dOpenCL environment needed to build the modified Aparapi (header files)
+RUN bash -c ". /etc/profile.d/dopenclenv.sh && gradle build"
+ENV LD_LIBRARY_PATH="/tmp/cloudcl/aparapi/com.amd.aparapi.jni/dist"
+
+# Build dOpenCL
+WORKDIR /tmp/cloudcl
+# NOTE: Skip the tests because they need a working OpenCL (or dOpenCL) device,
+# which is hard to provide at the time of the Docker build
+RUN gradle build -x test
+
+# Run some of the samples on the given dOpenCL worker nodes
+ENV DCL_NODES dopencl_worker1,dopencl_worker2
+
+RUN printf '#!/bin/sh\n\
+. /etc/profile.d/dopenclenv.sh\n\
+echo "$DCL_NODES" | tr "," "\n" > dcl.nodes\n\
+LD_PRELOAD=/opt/dopencl/lib/libdOpenCL.so java -cp "build/libs/*:build/libs/lib/*" \
+  fr.dynamo.samples.mandelbrot.MandelbrotMain 1000 1000 10 1\n\
+LD_PRELOAD=/opt/dopencl/lib/libdOpenCL.so java -cp "build/libs/*:build/libs/lib/*" \
+  fr.dynamo.samples.matrix_multiplication.MatrixMain 99 10\n\
+' > launchscript.sh && chmod +x launchscript.sh
+
+CMD ["./launchscript.sh"]

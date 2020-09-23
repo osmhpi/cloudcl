@@ -21,7 +21,7 @@ import fr.dynamo.threading.DynamoThread;
 
 public class DynamoExecutor implements ThreadFinishedNotifyable{
 
-  private Set<DynamoJob> jobs = Collections.synchronizedSet(new HashSet<DynamoJob>());
+  private final Set<DynamoJob> jobs = Collections.synchronizedSet(new HashSet<>());
   private JobScheduler jobScheduler = new RoundRobinJobScheduler();
   private AbstractDeviceScheduler deviceScheduler = new SimpleDeviceScheduler();
   private static DynamoExecutor instance;
@@ -56,7 +56,7 @@ public class DynamoExecutor implements ThreadFinishedNotifyable{
 
   private synchronized List<DynamoThread> buildThreads(){
     Logger.instance().debug("Building Threads called.");
-    List<DynamoThread> newThreads = new ArrayList<DynamoThread>();
+    List<DynamoThread> newThreads = new ArrayList<>();
     List<OpenCLDevice> unusedDevices = AbstractDeviceScheduler.getUnusedDevices(allThreads());
     if(unusedDevices.size() == 0){
       Logger.instance().info("No Devices available at this time. Waiting for another task to finish.");
@@ -78,7 +78,7 @@ public class DynamoExecutor implements ThreadFinishedNotifyable{
   }
 
   private synchronized List<DynamoJob> getUnfinishedJobs(){
-    List<DynamoJob> unfinishedJobs = new ArrayList<DynamoJob>();
+    List<DynamoJob> unfinishedJobs = new ArrayList<>();
     for(DynamoJob job:jobs){
       if(!job.isTerminated() && job.getKernelsToRun().size() > 0){
         unfinishedJobs.add(job);
@@ -88,7 +88,7 @@ public class DynamoExecutor implements ThreadFinishedNotifyable{
   }
 
   private synchronized List<DynamoThread> allThreads(){
-    List<DynamoThread> threads = new ArrayList<DynamoThread>();
+    List<DynamoThread> threads = new ArrayList<>();
     for(DynamoJob job:jobs){
       threads.addAll(job.getThreads());
     }
